@@ -12,7 +12,25 @@
 #include <algorithms.h>
 
 const char *get_password_store_path(){
-  return "/home/hrad/.password-store/";
+  int homelen;
+  char *path;
+
+  #ifdef __unix__
+    char *pa = ".password-store";
+
+    homelen = strlen(getenv("HOME"));
+    path = malloc(sizeof(char) * (homelen + strlen(pa) + 8));
+
+    sprintf(path, "%s/%s/", getenv("HOME"), pa);
+  #elif defined(_WIN32) || defined (WIN32)
+    char *pa = "Clavis_Passwords";
+
+    homelen = strlen(getenv("HOMEPATH"));
+    path = malloc(sizeof(char) * (homelen + strlen(pa) + 8));
+
+    sprintf(path, "%s/%s/", getenv("HOMEPATH"), pa);
+  #endif
+  return path;
 }
 
 char **file_io_folder_get_file_list(const char *folder, int nfiles){
