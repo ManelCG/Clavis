@@ -31,6 +31,7 @@ const char *get_password_store_path(){
 
     sprintf(path, "%s/%s/", getenv("HOMEPATH"), pa);
   #endif
+    printf("Path: %s\n", path);
   return path;
 }
 
@@ -39,12 +40,16 @@ int mkdir_handler(const char *path){
   if (mkdir(path, S_IRWXU) != 0){
     if (errno != EEXIST){
       return -1;
+    } else {
+      return EEXIST;
     }
   }
   #elif defined(_WIN32) || defined (WIN32)
   if (mkdir(path) != 0){
     if (errno != EEXIST){
       return -1;
+    } else {
+      return EEXIST;
     }
   }
   #endif
