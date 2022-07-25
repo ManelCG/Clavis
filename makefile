@@ -1,4 +1,4 @@
-CLAVIS_VERSION = "0.1.0 Development"
+CLAVIS_VERSION = "0.1.0"
 
 SDIR = src
 
@@ -60,7 +60,6 @@ archlinux: $(OBJ) $(OBJ_GUI)
 	mkdir -p $(BDIR)/usr/bin/
 	mkdir -p $(ODIR)
 	$(CC) -o $(BDIR)/usr/bin/clavis $^ $(CFLAGS) $(LIBS)
-	cp -r opencl/ $(BDIR)/usr/lib/clavis/
 	cp -r assets/ $(BDIR)/usr/lib/clavis/
 	cp assets/clavis.desktop $(BDIR)/usr/share/applications/
 	cp assets/app_icon/256.png $(BDIR)/usr/share/pixmaps/clavis.png
