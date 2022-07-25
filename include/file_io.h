@@ -9,4 +9,6 @@ char **file_io_folder_get_file_list(const char *folder, int nfiles);
 
 const char *get_password_store_path();
 
+int mkdir_handler(const char *path);
+
 #endif //_FILE_IO_H_

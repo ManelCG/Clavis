@@ -3,6 +3,8 @@
 #include <clavis_popup.h>
 #include <clavis_normal.h>
 
+#include <file_io.h>
+
 #include <clavis_constants.h>
 
 #include <stdio.h>
@@ -16,7 +18,14 @@ void draw_main_window(GtkWidget *widget, gpointer data){
 }
 
 int main(int argc, char *argv[]){
-  chdir("/home/hrad/.password-store/");
+  const char *papath = get_password_store_path();
+  if (chdir(papath) != 0){
+    mkdir_handler(papath);
+
+    chdir(papath);
+  }
+  free((char *) papath);
+
   int clavis_mode = CLAVIS_NORMAL_MODE;
   int opt;
   while ((opt = getopt(argc, argv, ":p")) != -1){

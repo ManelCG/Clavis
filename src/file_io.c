@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 
 #include <file_io.h>
 #include <algorithms.h>
@@ -31,6 +32,24 @@ const char *get_password_store_path(){
     sprintf(path, "%s/%s/", getenv("HOMEPATH"), pa);
   #endif
   return path;
+}
+
+int mkdir_handler(const char *path){
+  #ifdef __unix__
+  if (mkdir(path, S_IRWXU) != 0){
+    if (errno != EEXIST){
+      return -1;
+    }
+  }
+  #elif defined(_WIN32) || defined (WIN32)
+  if (mkdir(path) != 0){
+    if (errno != EEXIST){
+      return -1;
+    }
+  }
+  #endif
+
+  return 0;
 }
 
 char **file_io_folder_get_file_list(const char *folder, int nfiles){
