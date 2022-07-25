@@ -44,26 +44,26 @@ debug: $(OBJ)
 	mkdir -p $(ODIR)
 	$(CC) -o $(BDIR)/clavis $^ $(CFLAGS) $(LIBS)
 
-# install: $(OBJ)
-# 	mkdir -p $(CLAVIS_DIR)
-# 	mkdir -p $(BDIR)
-# 	mkdir -p $(ODIR)
-# 	$(CC) -o $(BDIR)/clavis $^ $(CFLAGS) $(LIBS)
-# 	ln -sf $(BDIR)/clavis /usr/bin/clavis
-# 	cp assets/clavis.desktop /usr/share/applications/
-# 	# cp assets/app_icon/256.png /usr/share/pixmaps/clavis.png
+install: $(OBJ)
+	mkdir -p $(CLAVIS_DIR)
+	mkdir -p $(BDIR)
+	mkdir -p $(ODIR)
+	$(CC) -o $(BDIR)/clavis $^ $(CFLAGS) $(LIBS)
+	ln -sf $(BDIR)/clavis /usr/bin/clavis
+	cp assets/clavis.desktop /usr/share/applications/
+	cp assets/app_icon/256.png /usr/share/pixmaps/clavis.png
 
-# archlinux: $(OBJ) $(OBJ_GUI)
-# 	mkdir -p $(BDIR)/usr/lib/clavis
-# 	mkdir -p $(BDIR)/usr/share/applications
-# 	mkdir -p $(BDIR)/usr/share/pixmaps
-# 	mkdir -p $(BDIR)/usr/bin/
-# 	mkdir -p $(ODIR)
-# 	$(CC) -o $(BDIR)/usr/bin/clavis $^ $(CFLAGS) $(LIBS)
-# 	cp -r opencl/ $(BDIR)/usr/lib/clavis/
-# 	cp -r assets/ $(BDIR)/usr/lib/clavis/
-# 	cp assets/clavis.desktop $(BDIR)/usr/share/applications/
-# 	cp assets/app_icon/256.png $(BDIR)/usr/share/pixmaps/clavis.png
+archlinux: $(OBJ) $(OBJ_GUI)
+	mkdir -p $(BDIR)/usr/lib/clavis
+	mkdir -p $(BDIR)/usr/share/applications
+	mkdir -p $(BDIR)/usr/share/pixmaps
+	mkdir -p $(BDIR)/usr/bin/
+	mkdir -p $(ODIR)
+	$(CC) -o $(BDIR)/usr/bin/clavis $^ $(CFLAGS) $(LIBS)
+	cp -r opencl/ $(BDIR)/usr/lib/clavis/
+	cp -r assets/ $(BDIR)/usr/lib/clavis/
+	cp assets/clavis.desktop $(BDIR)/usr/share/applications/
+	cp assets/app_icon/256.png $(BDIR)/usr/share/pixmaps/clavis.png
 
 .PHONY: clean
 clean:
