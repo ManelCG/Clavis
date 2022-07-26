@@ -81,6 +81,7 @@ const char *file_io_decrypt_password(const char *file){
     int p[2];
     if (pipe(p) != 0){
       perror("Could not pipe");
+      exit(-1);
     }
 
     pid = fork();
@@ -135,7 +136,7 @@ const char *file_io_decrypt_password(const char *file){
 
 
   #elif defined(_WIN32) || defined (WIN32)
-    printf("Decryption is WIP\n");
+    printf("Decryption in Windows is still WIP\n");
   #endif
 }
 

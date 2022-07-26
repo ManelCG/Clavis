@@ -7,6 +7,8 @@
 #include <clavis_popup.h>
 #include <clavis_normal.h>
 
+#include <sys/wait.h>
+
 #define GUI_TEMPLATES_BUTTON_WIDTH 85
 
 #ifdef MAKE_INSTALL
@@ -32,6 +34,57 @@ void gui_templates_window_set_clavis_icon(GtkWindow *window){
 
 
 //HANDLERS
+void copy_entry_to_clipboard_handler(GtkWidget *widget, gpointer data){
+  GtkWidget *entry = (GtkWidget *) data;
+  const char *pw = gtk_entry_get_text(GTK_ENTRY(entry));
+  if (strlen(pw) != 0){
+    #ifdef __unix__
+      int pid = fork();
+      int p[2];
+      if (pipe(p) < 0){
+        perror("Could not pipe");
+        exit(-1);
+      }
+      if (pid < 0){
+        perror("Could not fork");
+        exit(pid);
+      }
+      if (pid == 0){  //Child
+        close(0);
+        dup(p[0]);
+        close(p[0]);
+        close(p[1]);
+
+        execlp("xclip", "xclip", NULL);
+        printf("Post execlp ERROR\n");
+        exit(-1);
+      }
+      //Parent
+      close(p[0]);
+      write(p[1], pw, strlen(pw));
+      write(p[1], "\n", 1);
+      close(p[1]);
+      write(1, pw, strlen(pw));
+    #elif defined(_WIN32) || defined (WIN32)
+      printf("Clipboard in Windows is still WIP!\n");
+    #endif
+  }
+}
+void type_entry_with_keyboard_handler(GtkWidget *widget, gpointer data){
+  GtkWidget *entry = (GtkWidget *) data;
+  const char *pw = gtk_entry_get_text(GTK_ENTRY(entry));
+  if (strlen(pw) != 0){
+    #ifdef __unix__
+
+    #elif defined(_WIN32) || defined (WIN32)
+      printf("Autotyping in Windows is still WIP!\n");
+    #endif
+  }
+}
+void toggle_visibility_handler(GtkWidget *widget, gpointer data){
+  GtkWidget *entry = (GtkWidget *) data;
+  gtk_entry_set_visibility(GTK_ENTRY(entry), gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
+}
 void password_decrypt_handler(GtkWidget *widget, gpointer data){
   printf("Decrypting\n");
 }
@@ -360,10 +413,6 @@ GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate 
   _Bool has_folders = false;
 
   GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-  GtkWidget *password_label = gtk_label_new("Decrypted password:");
-  GtkWidget *password_output = gtk_entry_new();
-  gtk_editable_set_editable(GTK_EDITABLE(password_output), false);
-
 
   for (int i = 0; i < nfiles; i++){
     GtkWidget *folder_button = gtk_button_new_with_label(file_list[i]);

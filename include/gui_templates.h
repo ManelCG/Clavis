@@ -17,5 +17,8 @@ void button_reload_handler(GtkWidget *widget, gpointer data);
 void entry_filter_keyrelease_handler(GtkWidget *widget, GdkEventKey *event, gpointer data);
 void entry_filter_changed_handler(GtkWidget *widget, gpointer data);
 void password_decrypt_handler(GtkWidget *widget, gpointer data);
+void toggle_visibility_handler(GtkWidget *widget, gpointer data);
+void copy_entry_to_clipboard_handler(GtkWidget *w, gpointer);
+void type_entry_with_keyboard_handler(GtkWidget *w, gpointer);
 
 #endif //_GUI_TEMPLATES_H_
