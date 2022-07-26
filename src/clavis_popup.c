@@ -78,6 +78,7 @@ int clavis_popup_main(int argc, char *argv[]){
   gtk_init(&argc, &argv);
   GtkWidget *window_root = gtk_window_new(GTK_WINDOW_POPUP);
   gtk_window_set_title(GTK_WINDOW(window_root), "Clavis");
+  gui_templates_window_set_clavis_icon(GTK_WINDOW(window_root));
   gtk_widget_set_name(window_root, CLAVIS_POPUP_MODE_NAME);
   g_signal_connect(window_root, "destroy", G_CALLBACK(gtk_main_quit), (gpointer) window_root);
   gtk_window_set_position(GTK_WINDOW(window_root), GTK_WIN_POS_CENTER);

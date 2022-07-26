@@ -35,6 +35,43 @@ const char *get_password_store_path(){
   return path;
 }
 
+_Bool file_io_rm_rf(const char *path){
+  _Bool removed = false;
+  if (file_io_string_is_file(path)){
+    if (remove(path) == 0){
+      removed = true;
+    }
+  } else if (file_io_string_is_folder(path)){
+    if (rmdir(path) != 0){
+      int nfiles = file_io_folder_get_file_n(path);
+      char **files = file_io_folder_get_file_list(path, nfiles);
+
+      for (int i = 0; i < nfiles; i++){
+        char filepath[strlen(path) + strlen(files[i]) + 8];
+        sprintf(filepath, "%s/%s", path, files[i]);
+        if (file_io_string_is_file(filepath)){
+          if (remove(filepath) == 0){
+            removed = true;
+          }
+        } else if (file_io_string_is_folder(filepath)){
+          if (file_io_rm_rf(filepath)){
+            removed = true;
+          }
+        }
+
+        free(files[i]);
+      }
+
+      free(files);
+      rmdir(path);
+    } else {
+      removed = true;
+    }
+  }
+
+  return removed;
+}
+
 int mkdir_handler(const char *path){
   #ifdef __unix__
   if (mkdir(path, S_IRWXU) != 0){

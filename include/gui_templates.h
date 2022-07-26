@@ -7,6 +7,7 @@
 
 GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate *fs, _Bool editmode);
 void draw_main_window_handler(GtkWidget *window, folderstate *fs);
+void gui_templates_window_set_clavis_icon(GtkWindow *window);
 void gui_templates_clear_container(GtkWidget *widget);
 void gui_templates_get_string(char **dest, const char *name);
 void button_newfolder_handler(GtkWidget *, gpointer);
