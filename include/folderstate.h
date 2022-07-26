@@ -7,6 +7,9 @@ folderstate *folderstate_new(const char *folder);
 void folderstate_destroy(folderstate *fs);
 void folderstate_reload(folderstate *fs);
 
+void folderstate_set_filter(folderstate *fs, const char *f);
+const char *folderstate_get_filter(folderstate *fs);
+
 int folderstate_get_nfiles(folderstate *);
 int folderstate_get_state(folderstate *);
 const char *folderstate_get_path(folderstate *);

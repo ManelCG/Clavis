@@ -11,6 +11,7 @@ typedef struct folderstate{
   int nfiles;
   char **files;
   int state;
+  const char *filter;
 } folderstate;
 
 
@@ -24,19 +25,33 @@ void folderstate_empty_list(folderstate *fs){
 
 folderstate *folderstate_new(const char *folder){
   folderstate *fs = malloc(sizeof(folderstate));
+  fs->filter = NULL;
+  folderstate_set_filter(fs, "");
   fs->path = (char *) folder;
-  fs->nfiles = file_io_folder_get_file_n(folder);
-  fs->files = file_io_folder_get_file_list(folder, fs->nfiles);
+  fs->nfiles = file_io_folder_get_file_n(folder, fs->filter);
+  fs->files = file_io_folder_get_file_list(folder, fs->nfiles, fs->filter);
   fs->state = 0;
 
   return fs;
 }
 
+void folderstate_set_filter(folderstate *fs, const char *filter){
+  if (fs->filter != NULL){
+    free((char *) fs->filter);
+  }
+  char *newfilter = malloc(sizeof(char) * (strlen(filter) +1));
+  strcpy(newfilter, filter);
+  fs->filter =  newfilter;
+}
+const char *folderstate_get_filter(folderstate *fs){
+  return fs->filter;
+}
+
 void folderstate_reload(folderstate *fs){
   folderstate_empty_list(fs);
 
-  fs->nfiles = file_io_folder_get_file_n(fs->path);
-  fs->files = file_io_folder_get_file_list(fs->path, fs->nfiles);
+  fs->nfiles = file_io_folder_get_file_n(fs->path, fs->filter);
+  fs->files = file_io_folder_get_file_list(fs->path, fs->nfiles, fs->filter);
   fs->state = 0;
 }
 
@@ -76,6 +91,7 @@ int folderstate_chdir(folderstate *fs, const char *folder){
     fs->path = (char *) newdir;
   }
 
+  folderstate_set_filter(fs, "");
   folderstate_reload(fs);
 
   return 0;

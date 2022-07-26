@@ -14,5 +14,7 @@ void button_newfolder_handler(GtkWidget *, gpointer);
 void button_goup_handler(GtkWidget *widget, gpointer data);
 void gui_templates_show_about_window(GtkWidget *, gpointer);
 void button_reload_handler(GtkWidget *widget, gpointer data);
+void entry_filter_keyrelease_handler(GtkWidget *widget, GdkEventKey *event, gpointer data);
+void entry_filter_changed_handler(GtkWidget *widget, gpointer data);
 
 #endif //_GUI_TEMPLATES_H_

@@ -150,6 +150,16 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
 
 
   //Folder vbox
+  entry_filter = gtk_search_entry_new();
+  gtk_widget_set_tooltip_text(entry_filter, "Filter files");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_filter), "Filter files");
+  gtk_widget_set_can_focus(entry_filter, true);
+  const char *filter_text = folderstate_get_filter(fs);
+  if (filter_text != NULL){
+    gtk_entry_set_text(GTK_ENTRY(entry_filter), filter_text);
+  }
+  g_signal_connect(entry_filter, "key-release-event", G_CALLBACK(entry_filter_keyrelease_handler), (gpointer) fs);
+  g_signal_connect(entry_filter, "changed", G_CALLBACK(entry_filter_changed_handler), (gpointer) fs);
 
   folder_scrollbox = gtk_scrolled_window_new(NULL, NULL);
   gui_templates_get_folder_scrollbox(folder_scrollbox, fs, true);
@@ -159,6 +169,10 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   gtk_box_pack_start(GTK_BOX(folder_vbox), topbar_hbox, false, false, 0);
   {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
    gtk_box_pack_start(GTK_BOX(folder_vbox), separator, false, false, 0);}
+  gtk_box_pack_start(GTK_BOX(folder_vbox), entry_filter, false, false, 0);
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+   gtk_box_pack_start(GTK_BOX(folder_vbox), separator, false, false, 0);}
+
   gtk_box_pack_start(GTK_BOX(folder_vbox), folder_scrollbox, true, true, 0);
 
   //Main hbox
@@ -172,7 +186,6 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   gtk_box_pack_start(GTK_BOX(main_vbox), menu_menubar, false, false, 0);
   gtk_box_pack_start(GTK_BOX(main_vbox), main_hbox, true, true, 0);
   gtk_box_pack_end(GTK_BOX(main_vbox), bottom_hbox, false, false, 10);
-
 
   gtk_container_add(GTK_CONTAINER(window), main_vbox);
   gtk_widget_show_all(window);

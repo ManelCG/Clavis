@@ -32,6 +32,28 @@ void gui_templates_window_set_clavis_icon(GtkWindow *window){
 
 
 //HANDLERS
+void entry_filter_keyrelease_handler(GtkWidget *widget, GdkEventKey *event, gpointer data){
+  if (strcmp(gdk_keyval_name (event->keyval), "Return") == 0){
+    folderstate *fs = (folderstate *) data;
+    folderstate_set_filter(fs, gtk_entry_get_text(GTK_ENTRY(widget)));
+    folderstate_reload(fs);
+
+
+    GtkWidget *parent = gtk_widget_get_toplevel(widget);
+    draw_main_window_handler(parent, fs);
+  }
+}
+void entry_filter_changed_handler(GtkWidget *widget, gpointer data){
+  if (strcmp(gtk_entry_get_text(GTK_ENTRY(widget)), "") == 0){
+    folderstate *fs = (folderstate *) data;
+    folderstate_set_filter(fs, "");
+    folderstate_reload(fs);
+
+
+    GtkWidget *parent = gtk_widget_get_toplevel(widget);
+    draw_main_window_handler(parent, fs);
+  }
+}
 void button_newfolder_handler(GtkWidget *widget, gpointer data){
   folderstate *fs = (folderstate *) data;
 
@@ -41,6 +63,20 @@ void button_newfolder_handler(GtkWidget *widget, gpointer data){
 
   GtkWidget *entry = gtk_entry_new();
   gtk_box_pack_end(GTK_BOX(dialog_box), entry, false, false, 0);
+
+  GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+
+  GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Create");
+  { GtkWidget *icon = gtk_image_new_from_icon_name("folder-new", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+
+  GtkAccelGroup *accel_group = gtk_accel_group_new();
+  gtk_window_add_accel_group(GTK_WINDOW(dialog), accel_group);
+  gtk_widget_add_accelerator(dialog_button_ok, "clicked", accel_group, GDK_KEY_Return, 0, GTK_ACCEL_VISIBLE);
+  gtk_widget_add_accelerator(dialog_button_cancel, "clicked", accel_group, GDK_KEY_Escape, 0, GTK_ACCEL_VISIBLE);
 
   gtk_widget_show_all(dialog);
 
@@ -58,6 +94,21 @@ void button_newfolder_handler(GtkWidget *widget, gpointer data){
       sprintf(dialog_prompt, "%s already exists. Replace?", path);
       GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
       gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+
+      GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+      { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+      gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+
+      GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Replace");
+      { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+      gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+
+      GtkAccelGroup *accel_group = gtk_accel_group_new();
+      gtk_window_add_accel_group(GTK_WINDOW(dialog), accel_group);
+      gtk_widget_add_accelerator(dialog_button_ok, "clicked", accel_group, GDK_KEY_Return, 0, GTK_ACCEL_VISIBLE);
+      gtk_widget_add_accelerator(dialog_button_cancel, "clicked", accel_group, GDK_KEY_Escape, 0, GTK_ACCEL_VISIBLE);
+
       int response = gtk_dialog_run(GTK_DIALOG(dialog));
 
       if (response == GTK_RESPONSE_OK){
@@ -91,7 +142,8 @@ void button_newfolder_handler(GtkWidget *widget, gpointer data){
 
 void button_rename_handler(GtkWidget *widget, gpointer data){
   folderstate *fs = (folderstate *) data;
-  const char *oldpath = gtk_widget_get_name(widget);
+  const char *name = gtk_widget_get_name(widget);
+  const char *oldpath = folderstate_file_get_full_path_from_string(fs, name);
 
   char dialog_prompt[strlen(oldpath) + 128];
   sprintf(dialog_prompt, "Rename %s:\n", oldpath);
@@ -100,14 +152,29 @@ void button_rename_handler(GtkWidget *widget, gpointer data){
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
   GtkWidget *entry = gtk_entry_new();
+  gtk_entry_set_text(GTK_ENTRY(entry), name);
   gtk_box_pack_end(GTK_BOX(dialog_box), entry, false, false, 0);
+
+  GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+
+  GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Rename");
+  { GtkWidget *icon = gtk_image_new_from_icon_name("document-edit", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+
+  GtkAccelGroup *accel_group = gtk_accel_group_new();
+  gtk_window_add_accel_group(GTK_WINDOW(dialog), accel_group);
+  gtk_widget_add_accelerator(dialog_button_ok, "clicked", accel_group, GDK_KEY_Return, 0, GTK_ACCEL_VISIBLE);
+  gtk_widget_add_accelerator(dialog_button_cancel, "clicked", accel_group, GDK_KEY_Escape, 0, GTK_ACCEL_VISIBLE);
 
   gtk_widget_show_all(dialog);
 
   int response = gtk_dialog_run(GTK_DIALOG(dialog));
   const char *text = gtk_entry_get_text(GTK_ENTRY(entry));
 
-  if (response == GTK_RESPONSE_OK && strcmp(text, "") != 0){
+  if (response == GTK_RESPONSE_OK && strcmp(text, "") != 0 && strcmp(text, name) != 0){
     const char *path = folderstate_file_get_full_path_from_string(fs, text);
     _Bool should_rename = true;
 
@@ -117,6 +184,21 @@ void button_rename_handler(GtkWidget *widget, gpointer data){
       sprintf(dialog_prompt, "%s already exists. Replace?", path);
       GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
       gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+
+      GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+      { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+      gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+
+      GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Replace");
+      { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+      gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+
+      GtkAccelGroup *accel_group = gtk_accel_group_new();
+      gtk_window_add_accel_group(GTK_WINDOW(dialog), accel_group);
+      gtk_widget_add_accelerator(dialog_button_ok, "clicked", accel_group, GDK_KEY_Return, 0, GTK_ACCEL_VISIBLE);
+      gtk_widget_add_accelerator(dialog_button_cancel, "clicked", accel_group, GDK_KEY_Escape, 0, GTK_ACCEL_VISIBLE);
+
       int response = gtk_dialog_run(GTK_DIALOG(dialog));
 
       if (response == GTK_RESPONSE_OK){
@@ -148,38 +230,50 @@ void button_rename_handler(GtkWidget *widget, gpointer data){
   destroy(dialog, dialog);
 }
 void button_delete_handler(GtkWidget *widget, gpointer data){
-  const char *path = gtk_widget_get_name(widget);
-  _Bool deleted = false;
   folderstate *fs = (folderstate *) data;
+  const char *name = gtk_widget_get_name(widget);
+  const char *path = folderstate_file_get_full_path_from_string(fs, name);
+
+  _Bool deleted = false;
 
   if (file_io_string_is_folder(path)){
-    if (file_io_folder_get_file_n(path) == 0){
-      if (rmdir(path) == 0){
+    char dialog_prompt[strlen(path) + 128];
+    sprintf(dialog_prompt, "Folder %s contains %d files. Remove anyways?", path, file_io_folder_get_file_n(path, ""));
+    GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
+    gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+
+    GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+    { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+    gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+
+    GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Delete");
+    // { GtkWidget *icon = gtk_image_new_from_icon_name("edit-delete", GTK_ICON_SIZE_MENU);
+    // gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+    GtkStyleContext *context = gtk_widget_get_style_context(dialog_button_ok);
+    gtk_style_context_add_class(context, "destructive-action");
+
+    GtkAccelGroup *accel_group = gtk_accel_group_new();
+    gtk_window_add_accel_group(GTK_WINDOW(dialog), accel_group);
+    gtk_widget_add_accelerator(dialog_button_cancel, "clicked", accel_group, GDK_KEY_Escape, 0, GTK_ACCEL_VISIBLE);
+
+    int response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+    if (response == GTK_RESPONSE_OK){
+      if (!file_io_rm_rf(path)){
+        char dialog_prompt[strlen(path) + 128];
+        sprintf(dialog_prompt, "Error. Could not remove %s", path);
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, dialog_prompt);
+        gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+        gtk_dialog_run(GTK_DIALOG(dialog));
+      } else {
         deleted = true;
       }
-    } else {
-      char dialog_prompt[strlen(path) + 128];
-      sprintf(dialog_prompt, "Folder %s contains %d files. Remove anyways?", path, file_io_folder_get_file_n(path));
-      GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
-      gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
-      int response = gtk_dialog_run(GTK_DIALOG(dialog));
-
-      if (response == GTK_RESPONSE_OK){
-        if (!file_io_rm_rf(path)){
-          char dialog_prompt[strlen(path) + 128];
-          sprintf(dialog_prompt, "Error. Could not remove %s", path);
-          GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, dialog_prompt);
-          gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
-          gtk_dialog_run(GTK_DIALOG(dialog));
-        } else {
-          deleted = true;
-        }
-      }
-      destroy(dialog, dialog);
     }
+    destroy(dialog, dialog);
   } else if (file_io_string_is_file(path)){
     char dialog_prompt[strlen(path) + 128];
-    sprintf(dialog_prompt, "Remove '%s'? This cannot be undone!", path);
+    sprintf(dialog_prompt, "Remove file '%s'? This cannot be undone!", path);
     GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
     gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
     int response = gtk_dialog_run(GTK_DIALOG(dialog));
@@ -299,14 +393,14 @@ GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate 
       gtk_widget_set_tooltip_text(button_rename, "Rename file");
       { GtkWidget *icon = gtk_image_new_from_icon_name("document-edit", GTK_ICON_SIZE_MENU);
       gtk_button_set_image(GTK_BUTTON(button_rename), icon); }
-      gtk_widget_set_name(button_rename, file_fullpath);
+      gtk_widget_set_name(button_rename, file_list[i]);
       g_signal_connect(button_rename, "pressed", G_CALLBACK(button_rename_handler), (gpointer) fs);
 
       GtkWidget *button_delete = gtk_button_new();
       gtk_widget_set_tooltip_text(button_delete, "Delete");
       { GtkWidget *icon = gtk_image_new_from_icon_name("edit-delete", GTK_ICON_SIZE_MENU);
       gtk_button_set_image(GTK_BUTTON(button_delete), icon); }
-      gtk_widget_set_name(button_delete, file_fullpath);
+      gtk_widget_set_name(button_delete, file_list[i]);
       g_signal_connect(button_delete, "pressed", G_CALLBACK(button_delete_handler), (gpointer) fs);
 
       GtkWidget *button_hbox;

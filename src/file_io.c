@@ -43,8 +43,8 @@ _Bool file_io_rm_rf(const char *path){
     }
   } else if (file_io_string_is_folder(path)){
     if (rmdir(path) != 0){
-      int nfiles = file_io_folder_get_file_n(path);
-      char **files = file_io_folder_get_file_list(path, nfiles);
+      int nfiles = file_io_folder_get_file_n(path, "");
+      char **files = file_io_folder_get_file_list(path, nfiles, "");
 
       for (int i = 0; i < nfiles; i++){
         char filepath[strlen(path) + strlen(files[i]) + 8];
@@ -94,7 +94,7 @@ int mkdir_handler(const char *path){
   return 0;
 }
 
-char **file_io_folder_get_file_list(const char *folder, int nfiles){
+char **file_io_folder_get_file_list(const char *folder, int nfiles, const char *filter){
   char **file_vector = malloc(sizeof(char *) * nfiles);
 
   DIR *d;
@@ -111,9 +111,11 @@ char **file_io_folder_get_file_list(const char *folder, int nfiles){
         sprintf(fullpath, "%s/%s", folder, dir->d_name);
 
         if (file_io_string_is_folder(fullpath)){
-          file_vector[findex] = malloc(sizeof(char) * (strlen(dir->d_name) + 8));
-          strcpy(file_vector[findex], dir->d_name);
-          findex++;
+          if (filter == NULL || strcmp(filter, "") == 0 || strstr(dir->d_name, filter) != NULL){
+            file_vector[findex] = malloc(sizeof(char) * (strlen(dir->d_name) + 8));
+            strcpy(file_vector[findex], dir->d_name);
+            findex++;
+          }
         }
 
       }
@@ -132,9 +134,11 @@ char **file_io_folder_get_file_list(const char *folder, int nfiles){
         sprintf(fullpath, "%s/%s", folder, dir->d_name);
 
         if (file_io_string_is_file(fullpath)){
-          file_vector[findex] = malloc(sizeof(char) * (strlen(dir->d_name) + 8));
-          strcpy(file_vector[findex], dir->d_name);
-          findex++;
+          if (filter == NULL || strcmp(filter, "") == 0 || strstr(dir->d_name, filter) != NULL){
+            file_vector[findex] = malloc(sizeof(char) * (strlen(dir->d_name) + 8));
+            strcpy(file_vector[findex], dir->d_name);
+            findex++;
+          }
         }
 
       }
@@ -147,7 +151,7 @@ char **file_io_folder_get_file_list(const char *folder, int nfiles){
   return file_vector;
 }
 
-int file_io_folder_get_file_n(const char *folder){
+int file_io_folder_get_file_n(const char *folder, const char *filter){
   int nfiles = 0;
 
   DIR *d;
@@ -157,7 +161,9 @@ int file_io_folder_get_file_n(const char *folder){
   if (d){
     while ((dir = readdir(d)) != NULL){
       if (dir->d_name[0] != '.'){
-        nfiles ++;
+        if (filter == NULL || strcmp(filter, "") == 0 || strstr(dir->d_name, filter) != NULL){
+          nfiles ++;
+        }
       }
     }
 
