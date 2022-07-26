@@ -1,6 +1,8 @@
 #include <gui_templates.h>
 #include <stdbool.h>
 #include <file_io.h>
+#include <unistd.h>
+#include <stdio.h>
 
 #include <clavis_constants.h>
 
@@ -39,12 +41,12 @@ void copy_entry_to_clipboard_handler(GtkWidget *widget, gpointer data){
   const char *pw = gtk_entry_get_text(GTK_ENTRY(entry));
   if (strlen(pw) != 0){
     #ifdef __unix__
-      int pid = fork();
       int p[2];
       if (pipe(p) < 0){
         perror("Could not pipe");
         exit(-1);
       }
+      int pid = fork();
       if (pid < 0){
         perror("Could not fork");
         exit(pid);
@@ -55,16 +57,15 @@ void copy_entry_to_clipboard_handler(GtkWidget *widget, gpointer data){
         close(p[0]);
         close(p[1]);
 
-        execlp("xclip", "xclip", NULL);
+        execlp("xclip", "xclip", "-sel", "clip", NULL);
         printf("Post execlp ERROR\n");
         exit(-1);
       }
       //Parent
       close(p[0]);
       write(p[1], pw, strlen(pw));
-      write(p[1], "\n", 1);
       close(p[1]);
-      write(1, pw, strlen(pw));
+
     #elif defined(_WIN32) || defined (WIN32)
       printf("Clipboard in Windows is still WIP!\n");
     #endif
@@ -75,6 +76,31 @@ void type_entry_with_keyboard_handler(GtkWidget *widget, gpointer data){
   const char *pw = gtk_entry_get_text(GTK_ENTRY(entry));
   if (strlen(pw) != 0){
     #ifdef __unix__
+      int p[2];
+      if (pipe(p) < 0){
+        perror("Could not pipe");
+        exit(-1);
+      }
+      int pid = fork();
+      if (pid < 0){
+        perror("Could not fork");
+        exit(pid);
+      }
+      if (pid == 0){  //Child
+        close(0);
+        dup(p[0]);
+        close(p[0]);
+        close(p[1]);
+
+        execlp("xdotool", "xdotool", "type", "--clearmodifiers", "--file", "-", NULL);
+        printf("Post execlp ERROR\n");
+        exit(-1);
+      }
+      //Parent
+      gtk_main_quit();
+      close(p[0]);
+      write(p[1], pw, strlen(pw));
+      close(p[1]);
 
     #elif defined(_WIN32) || defined (WIN32)
       printf("Autotyping in Windows is still WIP!\n");
