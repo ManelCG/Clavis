@@ -164,8 +164,20 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   g_signal_connect(entry_filter, "changed", G_CALLBACK(entry_filter_changed_handler), (gpointer) fs);
 
   //Password output entry
+  GtkWidget *password_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   password_output = gtk_entry_new();
+  gtk_entry_set_visibility(GTK_ENTRY(password_output), false);
   gtk_editable_set_editable(GTK_EDITABLE(password_output), false);
+  gtk_entry_set_placeholder_text(GTK_ENTRY(password_output), "Password output");
+  GtkWidget *button_copy = gtk_button_new();
+  { GtkWidget *icon = gtk_image_new_from_icon_name("edit-copy", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(button_copy), icon); }
+  g_signal_connect(button_copy, "pressed", G_CALLBACK(copy_entry_to_clipboard_handler), (gpointer) password_output);
+  GtkWidget *toggle_visibility = gtk_check_button_new_with_label("Display password");
+  g_signal_connect(toggle_visibility, "toggled", G_CALLBACK(toggle_visibility_handler), (gpointer) password_output);
+  gtk_box_pack_start(GTK_BOX(password_hbox), password_output, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(password_hbox), button_copy, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(password_hbox), toggle_visibility, false, false, 0);
 
   folder_scrollbox = gtk_scrolled_window_new(NULL, NULL);
   gui_templates_get_folder_scrollbox(folder_scrollbox, fs, true, password_output);
@@ -187,7 +199,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
    gtk_box_pack_start(GTK_BOX(folder_vbox), separator, false, false, 0);}
   GtkWidget *password_label = gtk_label_new("Decrypted password:");
   gtk_box_pack_start(GTK_BOX(folder_vbox), password_label, false, false, 0);
-  gtk_box_pack_start(GTK_BOX(folder_vbox), password_output, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(folder_vbox), password_hbox, false, false, 0);
 
 
   //Main hbox
