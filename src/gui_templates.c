@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <file_io.h>
 
+#include <clavis_constants.h>
+
 #include <clavis_popup.h>
 #include <clavis_normal.h>
 
@@ -22,9 +24,43 @@ void destroy(GtkWidget *w, gpointer data){
   gtk_widget_destroy(window);
 }
 
-
-
 //HANDLERS
+void button_newfolder_handler(GtkWidget *widget, gpointer data){
+  folderstate *fs = (folderstate *) data;
+
+  GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "New folder name:");
+  GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+
+  GtkWidget *entry = gtk_entry_new();
+  gtk_box_pack_end(GTK_BOX(dialog_box), entry, false, false, 0);
+
+  gtk_widget_show_all(dialog);
+
+  int response = gtk_dialog_run(GTK_DIALOG(dialog));
+  const char *text = gtk_entry_get_text(GTK_ENTRY(entry));
+
+  if (response == GTK_RESPONSE_OK && strcmp(text, "") != 0){
+    const char *path = folderstate_file_get_full_path_from_string(fs, text);
+    mkdir_handler(path);
+
+    folderstate_reload(fs);
+
+    GtkWidget *parent = gtk_widget_get_toplevel(widget);
+    draw_main_window_handler(parent, fs);
+  }
+
+  destroy(dialog, dialog);
+}
+
+void draw_main_window_handler(GtkWidget *window, folderstate *fs){
+  const char *widgetname = gtk_widget_get_name(window);
+  if (strcmp(widgetname, CLAVIS_NORMAL_MODE_NAME) == 0){
+    clavis_normal_draw_main_window(window, (gpointer) fs);
+  } else if (strcmp(widgetname, CLAVIS_POPUP_MODE_NAME) == 0){
+    clavis_popup_draw_main_window(window, (gpointer) fs);
+  }
+}
+
 void folder_button_handler(GtkWidget *widget, gpointer data){
   folderstate *fs = (folderstate *) data;
   const char *pressed = gtk_button_get_label(GTK_BUTTON(widget));
@@ -35,13 +71,9 @@ void folder_button_handler(GtkWidget *widget, gpointer data){
 
   if (file_io_string_is_folder(pressed_fullpath)){
     folderstate_chdir(fs, pressed);
-    GtkWidget *parent = gtk_widget_get_toplevel(widget);
 
-    if (strcmp(gtk_widget_get_name(parent), "Clavis Popup") == 0){
-      clavis_popup_draw_main_window(parent, (gpointer) fs);
-    } else if (strcmp(gtk_widget_get_name(parent), "Clavis Normal") == 0){
-      clavis_normal_draw_main_window(parent, (gpointer) fs);
-    }
+    GtkWidget *parent = gtk_widget_get_toplevel(widget);
+    draw_main_window_handler(parent, fs);
   } else if (file_io_string_is_file(pressed_fullpath)){
     printf("File!\n");
   } else {

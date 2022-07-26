@@ -6,6 +6,7 @@
 
 #include <gui_templates.h>
 #include <folderstate.h>
+#include <clavis_constants.h>
 
 void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   gui_templates_clear_container(window);
@@ -104,7 +105,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   folder_label = gtk_label_new(folder_label_text);
 
   button_newfolder = gtk_button_new();
-  // g_signal_connect(button_newfolder, "clicked", G_CALLBACK(button_goup_handler), (gpointer) fs);
+  g_signal_connect(button_newfolder, "clicked", G_CALLBACK(button_newfolder_handler), (gpointer) fs);
   { GtkWidget *icon = gtk_image_new_from_icon_name("folder-new", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_newfolder), icon); }
 
@@ -174,7 +175,7 @@ int clavis_normal_main(int argc, char *argv[]){
   gtk_init(&argc, &argv);
   GtkWidget *window_root = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(window_root), "Clavis");
-  gtk_widget_set_name(window_root, "Clavis Normal");
+  gtk_widget_set_name(window_root, CLAVIS_NORMAL_MODE_NAME);
   g_signal_connect(window_root, "destroy", G_CALLBACK(gtk_main_quit), (gpointer) window_root);
   gtk_window_set_position(GTK_WINDOW(window_root), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(window_root), 0);

@@ -5,6 +5,7 @@ typedef struct folderstate folderstate;
 
 folderstate *folderstate_new(const char *folder);
 void folderstate_destroy(folderstate *fs);
+void folderstate_reload(folderstate *fs);
 
 int folderstate_get_nfiles(folderstate *);
 int folderstate_get_state(folderstate *);

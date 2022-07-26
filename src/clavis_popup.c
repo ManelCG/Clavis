@@ -7,6 +7,7 @@
 #include <folderstate.h>
 
 #include <gui_templates.h>
+#include <clavis_constants.h>
 
 void clavis_popup_draw_main_window(GtkWidget *window, gpointer data){
   gui_templates_clear_container(window);
@@ -77,7 +78,7 @@ int clavis_popup_main(int argc, char *argv[]){
   gtk_init(&argc, &argv);
   GtkWidget *window_root = gtk_window_new(GTK_WINDOW_POPUP);
   gtk_window_set_title(GTK_WINDOW(window_root), "Clavis");
-  gtk_widget_set_name(window_root, "Clavis Popup");
+  gtk_widget_set_name(window_root, CLAVIS_POPUP_MODE_NAME);
   g_signal_connect(window_root, "destroy", G_CALLBACK(gtk_main_quit), (gpointer) window_root);
   gtk_window_set_position(GTK_WINDOW(window_root), GTK_WIN_POS_CENTER);
   gtk_widget_set_can_focus(window_root, true);

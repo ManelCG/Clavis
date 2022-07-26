@@ -32,6 +32,15 @@ folderstate *folderstate_new(const char *folder){
   return fs;
 }
 
+void folderstate_reload(folderstate *fs){
+  folderstate_empty_list(fs);
+
+  fs->nfiles = file_io_folder_get_file_n(fs->path);
+  fs->files = file_io_folder_get_file_list(fs->path, fs->nfiles);
+  fs->state = 0;
+}
+
+
 int folderstate_chdir(folderstate *fs, const char *folder){
   if (strcmp(folder, "..") == 0){
     int nslashes = 0;
@@ -67,11 +76,7 @@ int folderstate_chdir(folderstate *fs, const char *folder){
     fs->path = (char *) newdir;
   }
 
-  folderstate_empty_list(fs);
-
-  fs->nfiles = file_io_folder_get_file_n(fs->path);
-  fs->files = file_io_folder_get_file_list(fs->path, fs->nfiles);
-  fs->state = 0;
+  folderstate_reload(fs);
 
   return 0;
 }
