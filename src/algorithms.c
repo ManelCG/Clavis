@@ -2,22 +2,20 @@
 #include <string.h>
 
 _Bool quicksort_stringlist(char **arr, int low, int high){
-  void swap(char **p1, char **p2){
-    char *t = *p1;
-    *p1 = *p2;
-    *p2 = t;
-  }
-
   int partition(char **arr, int low, int high){
     char *pivot = arr[high];
     int i = low-1;
     for (int j = low; j <= high-1; j++){
       if (strcmp(arr[j], pivot) < 0){
         i++;
-        swap(&arr[i], &arr[j]);
+        {char *t = arr[i];
+         arr[i] = arr[j];
+         arr[j] = t;}
       }
     }
-    swap(&arr[i+1], &arr[high]);
+    {char *t = arr[i+1];
+     arr[i+1] = arr[high];
+     arr[high] = t;}
     return i+1;
   }
 

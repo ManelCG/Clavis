@@ -32,6 +32,9 @@ void gui_templates_window_set_clavis_icon(GtkWindow *window){
 
 
 //HANDLERS
+void password_decrypt_handler(GtkWidget *widget, gpointer data){
+  printf("Decrypting\n");
+}
 void entry_filter_keyrelease_handler(GtkWidget *widget, GdkEventKey *event, gpointer data){
   if (strcmp(gdk_keyval_name (event->keyval), "Return") == 0){
     folderstate *fs = (folderstate *) data;
@@ -323,13 +326,18 @@ void folder_button_handler(GtkWidget *widget, gpointer data){
 
     GtkWidget *parent = gtk_widget_get_toplevel(widget);
     draw_main_window_handler(parent, fs);
-  } else if (file_io_string_is_file(pressed_fullpath)){
-    printf("File!\n");
-  } else {
-    fprintf(stderr, "Error: No such file or directory: '%s'\n", pressed);
   }
 
   free(pressed_fullpath);
+}
+void file_button_handler(GtkWidget *widget, gpointer data){
+  GtkWidget *label = (GtkWidget *) data;
+  const char *name = gtk_widget_get_name(widget);
+  if (file_io_string_is_file(name)){
+    const char *pass = file_io_decrypt_password(name);
+    gtk_entry_set_text(GTK_ENTRY(label), pass);
+    free((char *) pass);
+  }
 }
 
 void button_goup_handler(GtkWidget *widget, gpointer data){
@@ -344,7 +352,7 @@ void button_goup_handler(GtkWidget *widget, gpointer data){
   }
 }
 
-GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate *fs, _Bool editmode){
+GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate *fs, _Bool editmode, GtkWidget *output_widget){
   int nfiles = folderstate_get_nfiles(fs);
   const char **file_list = folderstate_get_files(fs);
   _Bool files_section = false;
@@ -352,10 +360,17 @@ GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate 
   _Bool has_folders = false;
 
   GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+  GtkWidget *password_label = gtk_label_new("Decrypted password:");
+  GtkWidget *password_output = gtk_entry_new();
+  gtk_editable_set_editable(GTK_EDITABLE(password_output), false);
+
+
   for (int i = 0; i < nfiles; i++){
     GtkWidget *folder_button = gtk_button_new_with_label(file_list[i]);
     gtk_button_set_alignment(GTK_BUTTON(folder_button), 0, 0.5);
+    gtk_widget_set_name(folder_button, folderstate_file_get_full_path_from_string(fs, file_list[i]));
     g_signal_connect(folder_button, "pressed", G_CALLBACK(folder_button_handler), (gpointer) fs);
+    g_signal_connect(folder_button, "pressed", G_CALLBACK(file_button_handler), (gpointer) output_widget);
 
     const char *file_fullpath = folderstate_file_get_full_path_from_string(fs, file_list[i]);
     if (file_io_string_is_folder(file_fullpath)){

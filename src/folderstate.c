@@ -24,7 +24,7 @@ void folderstate_empty_list(folderstate *fs){
 
 
 folderstate *folderstate_new(const char *folder){
-  folderstate *fs = malloc(sizeof(folderstate));
+  folderstate *fs = calloc(sizeof(folderstate), 1);
   fs->filter = NULL;
   folderstate_set_filter(fs, "");
   fs->path = (char *) folder;
@@ -39,8 +39,9 @@ void folderstate_set_filter(folderstate *fs, const char *filter){
   if (fs->filter != NULL){
     free((char *) fs->filter);
   }
-  char *newfilter = malloc(sizeof(char) * (strlen(filter) +1));
+  char *newfilter = calloc(sizeof(char) * (strlen(filter) +8), 1);
   strcpy(newfilter, filter);
+  newfilter[strlen(newfilter)] = '\0';
   fs->filter =  newfilter;
 }
 const char *folderstate_get_filter(folderstate *fs){
@@ -93,7 +94,6 @@ int folderstate_chdir(folderstate *fs, const char *folder){
 
   folderstate_set_filter(fs, "");
   folderstate_reload(fs);
-
   return 0;
 }
 
@@ -114,7 +114,7 @@ const char *folderstate_get_path(folderstate *fs){
 }
 
 const char *folderstate_file_get_full_path_from_string(folderstate *fs, const char *s){
-  char *fullpath = malloc(sizeof(char) * (strlen(s) + strlen(fs->path) + 8));
+  char *fullpath = calloc(sizeof(char) * (strlen(s) + strlen(fs->path) + 8), 1);
   strcpy(fullpath, fs->path);
   strcat(fullpath, "/");
   strcat(fullpath, s);
@@ -125,7 +125,7 @@ const char *folderstate_file_get_full_path_from_string(folderstate *fs, const ch
 const char *folderstate_file_get_full_path_from_index(folderstate *fs, int index){
   char *s = fs->files[index];
 
-  char *fullpath = malloc(sizeof(char) * (strlen(s) + strlen(fs->path) + 8));
+  char *fullpath = calloc(sizeof(char) * (strlen(s) + strlen(fs->path) + 8), 1);
   strcpy(fullpath, fs->path);
   strcat(fullpath, "/");
   strcat(fullpath, s);
@@ -137,10 +137,10 @@ const char *folderstate_file_get_full_path_from_index(folderstate *fs, int index
 const char *folderstate_get_path_shortname(folderstate *fs){
   char *path;
   if (strcmp(fs->path, ".") == 0){
-    path = malloc(sizeof(char) * 32);
+    path = calloc(sizeof(char) * 32, 1);
     strcpy(path, "Password Store");
   } else {
-    path = malloc(sizeof(char) * strlen(fs->path));
+    path = calloc(sizeof(char) * (strlen(fs->path)+8), 1);
     int nslashes = 0;
     int last_slash_token = 0;
     for (int i = 0; i < strlen(fs->path); i++){

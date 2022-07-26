@@ -5,7 +5,7 @@
 #include <folderstate.h>
 #include <stdbool.h>
 
-GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate *fs, _Bool editmode);
+GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate *fs, _Bool editmode, GtkWidget *);
 void draw_main_window_handler(GtkWidget *window, folderstate *fs);
 void gui_templates_window_set_clavis_icon(GtkWindow *window);
 void gui_templates_clear_container(GtkWidget *widget);
@@ -16,5 +16,6 @@ void gui_templates_show_about_window(GtkWidget *, gpointer);
 void button_reload_handler(GtkWidget *widget, gpointer data);
 void entry_filter_keyrelease_handler(GtkWidget *widget, GdkEventKey *event, gpointer data);
 void entry_filter_changed_handler(GtkWidget *widget, gpointer data);
+void password_decrypt_handler(GtkWidget *widget, gpointer data);
 
 #endif //_GUI_TEMPLATES_H_

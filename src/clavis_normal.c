@@ -44,6 +44,8 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   GtkWidget *button_close;
   GtkWidget *folder_label;
 
+  GtkWidget *password_output;
+
   // --- MENU BAR ---
   GtkWidget *menu_menubar;
 
@@ -161,8 +163,12 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   g_signal_connect(entry_filter, "key-release-event", G_CALLBACK(entry_filter_keyrelease_handler), (gpointer) fs);
   g_signal_connect(entry_filter, "changed", G_CALLBACK(entry_filter_changed_handler), (gpointer) fs);
 
+  //Password output entry
+  password_output = gtk_entry_new();
+  gtk_editable_set_editable(GTK_EDITABLE(password_output), false);
+
   folder_scrollbox = gtk_scrolled_window_new(NULL, NULL);
-  gui_templates_get_folder_scrollbox(folder_scrollbox, fs, true);
+  gui_templates_get_folder_scrollbox(folder_scrollbox, fs, true, password_output);
 
   folder_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 
@@ -175,11 +181,20 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
 
   gtk_box_pack_start(GTK_BOX(folder_vbox), folder_scrollbox, true, true, 0);
 
+
+  //Password label and output + separator
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+   gtk_box_pack_start(GTK_BOX(folder_vbox), separator, false, false, 0);}
+  GtkWidget *password_label = gtk_label_new("Decrypted password:");
+  gtk_box_pack_start(GTK_BOX(folder_vbox), password_label, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(folder_vbox), password_output, false, false, 0);
+
+
   //Main hbox
   main_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   gtk_box_pack_start(GTK_BOX(main_hbox), folder_vbox, true, true, 10);
-  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
-   gtk_box_pack_start(GTK_BOX(main_hbox), separator, false, false, 0);}
+  // {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
+  //  gtk_box_pack_start(GTK_BOX(main_hbox), separator, false, false, 0);}
 
   //Main vbox
   main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);

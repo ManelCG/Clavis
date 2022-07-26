@@ -8,4 +8,6 @@
 #define CLAVIS_NORMAL_MODE_NAME "Clavis Normal"
 #define CLAVIS_POPUP_MODE_NAME "Clavis Popup"
 
+#define DEFAULT_PASSWORD_SIZE 64
+
 #endif //_CLAVIS_CONSTANTS_

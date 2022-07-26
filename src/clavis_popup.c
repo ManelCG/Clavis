@@ -59,8 +59,12 @@ void clavis_popup_draw_main_window(GtkWidget *window, gpointer data){
   gtk_editable_set_editable(GTK_EDITABLE(entry_filter), true);
   gtk_entry_set_placeholder_text(GTK_ENTRY(entry_filter), "Filter");
 
+  //Password output
+  GtkWidget *password_output = gtk_entry_new();
+  gtk_editable_set_editable(GTK_EDITABLE(password_output), false);
+
   folder_scrollbox = gtk_scrolled_window_new(NULL, NULL);
-  gui_templates_get_folder_scrollbox(folder_scrollbox, fs, false);
+  gui_templates_get_folder_scrollbox(folder_scrollbox, fs, false, password_output);
 
   main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
   gtk_box_pack_start(GTK_BOX(main_vbox), entry_filter, false, false, 0);

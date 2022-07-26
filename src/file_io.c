@@ -9,8 +9,11 @@
 #include <stdio.h>
 #include <errno.h>
 
+#include <sys/wait.h>
+
 #include <file_io.h>
 #include <algorithms.h>
+#include <clavis_constants.h>
 
 const char *get_password_store_path(){
   int homelen;
@@ -72,6 +75,70 @@ _Bool file_io_rm_rf(const char *path){
   return removed;
 }
 
+const char *file_io_decrypt_password(const char *file){
+  #ifdef __unix__
+    int pid;
+    int p[2];
+    if (pipe(p) != 0){
+      perror("Could not pipe");
+    }
+
+    pid = fork();
+    if (pid < 0){
+      perror("Could not fork");
+      exit(pid);
+    }
+
+    if (pid == 0){  //Child
+      close(1);
+      dup(p[1]);
+      close(p[0]);
+      close(p[1]);
+
+      char password_path[strlen(file) + 32];
+      strcpy(password_path, file);
+      if (strcmp(&password_path[strlen(password_path)-4], ".gpg") == 0){
+        password_path[strlen(password_path)-4] = '\0';
+      }
+      execlp("pass", "pass", password_path, NULL);
+    }
+    close(p[1]);
+    wait(NULL);
+
+    //Parent
+    size_t passlen = DEFAULT_PASSWORD_SIZE;
+    int index = 0;
+    char *decrypted_password = malloc(sizeof(char) * passlen);
+    char c;
+
+    while (read(p[0], &c, sizeof(c))){
+      if (c != '\0' && c != '\n'){
+        if (index == passlen){
+          passlen *= 2;
+          decrypted_password = realloc(decrypted_password, passlen);
+        }
+
+        decrypted_password[index] = c;
+        index++;
+      } else {
+        break;
+      }
+    }
+
+    if (index == passlen){
+      passlen += 2;
+      decrypted_password = realloc(decrypted_password, passlen);
+    }
+    decrypted_password[index] = '\0';
+
+    return decrypted_password;
+
+
+  #elif defined(_WIN32) || defined (WIN32)
+    printf("Decryption is WIP\n");
+  #endif
+}
+
 int mkdir_handler(const char *path){
   #ifdef __unix__
   if (mkdir(path, S_IRWXU) != 0){
@@ -95,7 +162,7 @@ int mkdir_handler(const char *path){
 }
 
 char **file_io_folder_get_file_list(const char *folder, int nfiles, const char *filter){
-  char **file_vector = malloc(sizeof(char *) * nfiles);
+  char **file_vector = calloc(sizeof(char *) * nfiles, 1);
 
   DIR *d;
   struct dirent *dir;
@@ -112,18 +179,19 @@ char **file_io_folder_get_file_list(const char *folder, int nfiles, const char *
 
         if (file_io_string_is_folder(fullpath)){
           if (filter == NULL || strcmp(filter, "") == 0 || strstr(dir->d_name, filter) != NULL){
-            file_vector[findex] = malloc(sizeof(char) * (strlen(dir->d_name) + 8));
+            file_vector[findex] = calloc(sizeof(char) * (strlen(dir->d_name) + 8), 1);
             strcpy(file_vector[findex], dir->d_name);
             findex++;
           }
         }
-
       }
     }
     closedir(d);
   }
 
-  quicksort_stringlist(file_vector, 0, findex-1);
+  if (findex > 1){
+    quicksort_stringlist(file_vector, 0, findex-1);
+  }
   findex_2 = findex;
 
   d = opendir(folder);
@@ -135,18 +203,19 @@ char **file_io_folder_get_file_list(const char *folder, int nfiles, const char *
 
         if (file_io_string_is_file(fullpath)){
           if (filter == NULL || strcmp(filter, "") == 0 || strstr(dir->d_name, filter) != NULL){
-            file_vector[findex] = malloc(sizeof(char) * (strlen(dir->d_name) + 8));
+            file_vector[findex] = calloc(sizeof(char) * (strlen(dir->d_name) + 8), 1);
             strcpy(file_vector[findex], dir->d_name);
             findex++;
           }
         }
-
       }
     }
     closedir(d);
   }
 
-  quicksort_stringlist(file_vector, findex_2, findex-1);
+  if (findex - findex_2 > 1){
+    quicksort_stringlist(file_vector, findex_2, findex-1);
+  }
 
   return file_vector;
 }
