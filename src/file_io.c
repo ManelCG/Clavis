@@ -175,7 +175,7 @@ char **file_io_folder_get_file_list(const char *folder, int nfiles, const char *
   if (d){
     while ((dir = readdir(d)) != NULL){
       if (dir->d_name[0] != '.'){
-        char fullpath[strlen(folder) + strlen(dir->d_name + 8)];
+        char fullpath[strlen(folder) + strlen(dir->d_name) +8];
         sprintf(fullpath, "%s/%s", folder, dir->d_name);
 
         if (file_io_string_is_folder(fullpath)){
@@ -199,7 +199,7 @@ char **file_io_folder_get_file_list(const char *folder, int nfiles, const char *
   if (d){
     while ((dir = readdir(d)) != NULL){
       if (dir->d_name[0] != '.'){
-        char fullpath[strlen(folder) + strlen(dir->d_name + 8)];
+        char fullpath[strlen(folder) + strlen(dir->d_name) +8];
         sprintf(fullpath, "%s/%s", folder, dir->d_name);
 
         if (file_io_string_is_file(fullpath)){
