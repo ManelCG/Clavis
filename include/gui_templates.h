@@ -12,5 +12,6 @@ void gui_templates_get_string(char **dest, const char *name);
 void button_newfolder_handler(GtkWidget *, gpointer);
 void button_goup_handler(GtkWidget *widget, gpointer data);
 void gui_templates_show_about_window(GtkWidget *, gpointer);
+void button_reload_handler(GtkWidget *widget, gpointer data);
 
 #endif //_GUI_TEMPLATES_H_

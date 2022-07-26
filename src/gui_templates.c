@@ -52,6 +52,14 @@ void button_newfolder_handler(GtkWidget *widget, gpointer data){
   destroy(dialog, dialog);
 }
 
+void button_reload_handler(GtkWidget *widget, gpointer data){
+  folderstate *fs = (folderstate *) data;
+
+  folderstate_reload(fs);
+  GtkWidget *parent = gtk_widget_get_toplevel(widget);
+  draw_main_window_handler(parent, fs);
+}
+
 void draw_main_window_handler(GtkWidget *window, folderstate *fs){
   const char *widgetname = gtk_widget_get_name(window);
   if (strcmp(widgetname, CLAVIS_NORMAL_MODE_NAME) == 0){

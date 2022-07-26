@@ -39,6 +39,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
 
   GtkWidget *button_goup;
   GtkWidget *button_newfolder;
+  GtkWidget *button_reload;
   GtkWidget *button_newpassword;
   GtkWidget *button_close;
   GtkWidget *folder_label;
@@ -109,6 +110,11 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   { GtkWidget *icon = gtk_image_new_from_icon_name("folder-new", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_newfolder), icon); }
 
+  button_reload = gtk_button_new();
+  g_signal_connect(button_reload, "clicked", G_CALLBACK(button_reload_handler), (gpointer) fs);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(button_reload), icon); }
+
   button_newpassword = gtk_button_new();
   // g_signal_connect(button_newpassword, "clicked", G_CALLBACK(button_goup_handler), (gpointer) fs);
   { GtkWidget *icon = gtk_image_new_from_icon_name("list-add", GTK_ICON_SIZE_MENU);
@@ -129,6 +135,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   gtk_box_pack_start(GTK_BOX(topbar_hbox), button_newfolder, false, false, 0);
   gtk_box_pack_start(GTK_BOX(topbar_hbox), button_goup, false, false, 0);
   gtk_box_pack_start(GTK_BOX(topbar_hbox), button_newpassword, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(topbar_hbox), button_reload, false, false, 0);
   gtk_box_pack_start(GTK_BOX(topbar_hbox), folder_label, true, false, 0);
 
 
