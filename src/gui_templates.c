@@ -444,11 +444,11 @@ GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate 
     GtkWidget *folder_button = gtk_button_new_with_label(file_list[i]);
     gtk_button_set_alignment(GTK_BUTTON(folder_button), 0, 0.5);
     gtk_widget_set_name(folder_button, folderstate_file_get_full_path_from_string(fs, file_list[i]));
-    g_signal_connect(folder_button, "pressed", G_CALLBACK(folder_button_handler), (gpointer) fs);
-    g_signal_connect(folder_button, "pressed", G_CALLBACK(file_button_handler), (gpointer) output_widget);
 
     const char *file_fullpath = folderstate_file_get_full_path_from_string(fs, file_list[i]);
     if (file_io_string_is_folder(file_fullpath)){
+      g_signal_connect(folder_button, "activate", G_CALLBACK(folder_button_handler), (gpointer) fs);
+      g_signal_connect(folder_button, "pressed", G_CALLBACK(folder_button_handler), (gpointer) fs);
       has_folders = true;
       ////Make button blue
       //GtkStyleContext *context = gtk_widget_get_style_context(folder_button);
@@ -458,6 +458,8 @@ GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate 
       { GtkWidget *icon = gtk_image_new_from_icon_name("folder", GTK_ICON_SIZE_MENU);
       gtk_button_set_image(GTK_BUTTON(folder_button), icon); }
     } else if (file_io_string_is_file(file_fullpath)){
+      g_signal_connect(folder_button, "activate", G_CALLBACK(file_button_handler), (gpointer) output_widget);
+      g_signal_connect(folder_button, "pressed", G_CALLBACK(file_button_handler), (gpointer) output_widget);
       files_section = true;
       //Add folder icon to button
       if (strlen(file_fullpath) > 4 && strcmp(&file_fullpath[strlen(file_fullpath)-4], ".gpg") == 0){
