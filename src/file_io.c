@@ -75,6 +75,46 @@ _Bool file_io_rm_rf(const char *path){
   return removed;
 }
 
+int file_io_encrypt_password(const char *password, const char *path){
+  #ifdef __unix__
+    int pid;
+    int p[2];
+    if (pipe(p) != 0){
+      perror("Could not pipe");
+      return -1;
+    }
+
+    pid = fork();
+    if (pid < 0){
+      perror("Could not fork");
+      return pid;
+    }
+
+    if (pid == 0){  //Child
+      close(0);
+      dup(p[0]);
+      close(p[0]);
+      close(p[1]);
+
+      execlp("pass", "pass", "add", path, NULL);
+      exit(-1);
+    }
+
+    close(p[0]);
+    write(p[1], password, strlen(password));
+    write(p[1], "\n", 1);
+    write(p[1], password, strlen(password));
+    write(p[1], "\n", 1);
+    close(p[1]);
+
+    wait(NULL);
+
+    return 0;
+  #elif defined(_WIN32) || defined (WIN32)
+    printf("Password encryption is still WIP for Windows.\n");
+  #endif
+}
+
 const char *file_io_decrypt_password(const char *file){
   #ifdef __unix__
     int pid;

@@ -118,7 +118,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   gtk_button_set_image(GTK_BUTTON(button_reload), icon); }
 
   button_newpassword = gtk_button_new();
-  // g_signal_connect(button_newpassword, "clicked", G_CALLBACK(button_goup_handler), (gpointer) fs);
+  g_signal_connect(button_newpassword, "clicked", G_CALLBACK(button_newpassword_handler), (gpointer) fs);
   { GtkWidget *icon = gtk_image_new_from_icon_name("list-add", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_newpassword), icon); }
 

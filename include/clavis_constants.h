@@ -8,6 +8,15 @@
 #define CLAVIS_NORMAL_MODE_NAME "Clavis Normal"
 #define CLAVIS_POPUP_MODE_NAME "Clavis Popup"
 
-#define DEFAULT_PASSWORD_SIZE 64
+//Password info
+#define DEFAULT_PASSWORD_SIZE 25
+
+//Password generation data
+#define CLAVIS_PASSGEN_NUMERALS "0123456789"
+#define CLAVIS_PASSGEN_VOWELS_LOWERCASE "aeiou"
+#define CLAVIS_PASSGEN_VOWELS_UPPERCASE "AEIOU"
+#define CLAVIS_PASSGEN_CONSONANTS_LOWERCASE "bcdfghjklmnpqrstvwxyz"
+#define CLAVIS_PASSGEN_CONSONANTS_UPPERCASE "BCDFGHJKLMNPQRSTVWXYZ"
+#define CLAVIS_PASSGEN_SYMBOLS "!|\"@#$~%&/{([)]=}?\\<>+*,;.:-_"
 
 #endif //_CLAVIS_CONSTANTS_

@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include <clavis_constants.h>
+#include <clavis_passgen.h>
 
 #include <clavis_popup.h>
 #include <clavis_normal.h>
@@ -135,6 +136,192 @@ void entry_filter_changed_handler(GtkWidget *widget, gpointer data){
     GtkWidget *parent = gtk_widget_get_toplevel(widget);
     draw_main_window_handler(parent, fs);
   }
+}
+void passgen_button_handler(GtkWidget *widget, gpointer data){
+  passgen_generate_new_password((passgen *) data);
+}
+void toggle_numerals_handler(GtkWidget *widget, gpointer data){
+  passgen *pg = (passgen *) data;
+  passgen_set_numerals(pg, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
+}
+void toggle_symbols_handler(GtkWidget *widget, gpointer data){
+  passgen *pg = (passgen *) data;
+  passgen_set_symbols(pg, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
+}
+void toggle_pronunceable_handler(GtkWidget *widget, gpointer data){
+  passgen *pg = (passgen *) data;
+  passgen_set_pronunceable(pg, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
+}
+void toggle_uppercase_handler(GtkWidget *widget, gpointer data){
+  passgen *pg = (passgen *) data;
+  passgen_set_uppercase(pg, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
+}
+void toggle_lowercase_handler(GtkWidget *widget, gpointer data){
+  passgen *pg = (passgen *) data;
+  passgen_set_lowercase(pg, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
+}
+void set_passlen_handler(GtkWidget *widget, gpointer data){
+  passgen *pg = (passgen *) data;
+  passgen_set_len(pg, atoi(gtk_entry_get_text(GTK_ENTRY(widget))));
+}
+void button_newpassword_handler(GtkWidget *widget, gpointer data){
+  folderstate *fs = (folderstate *) data;
+  passgen *pg = passgen_new();
+
+  GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Add new password:");
+  gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+  GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+  GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Add password");
+  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+
+  //Boxes
+  GtkWidget *main_hbox;
+
+  GtkWidget *left_vbox;
+  GtkWidget *right_vbox;
+
+  GtkWidget *passlen_hbox;
+  GtkWidget *hbox_of_vbox;
+  GtkWidget *gen_left_vbox;
+  GtkWidget *gen_right_vbox;
+
+  GtkWidget *password_hbox;
+  GtkWidget *saveto_vbox;
+
+  //Widgets
+  GtkWidget *entry_password;
+
+  GtkWidget *toggle_visibility;
+  GtkWidget *button_generate;
+
+  GtkWidget *entry_passlen;
+  GtkWidget *check_numerals;
+  GtkWidget *check_symbols;
+  GtkWidget *check_pron;
+  GtkWidget *check_upper;
+  GtkWidget *check_lower;
+
+  GtkWidget *label_saveto;
+  GtkWidget *entry_passname;
+
+  //Password hbox
+  entry_password = gtk_entry_new();
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password), "Password");
+  passgen_set_output_entry(pg, entry_password);
+
+  button_generate = gtk_button_new();
+  { GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(button_generate), icon); }
+  gtk_widget_set_tooltip_text(button_generate, "Generate password with options");
+  g_signal_connect(button_generate, "clicked", G_CALLBACK(passgen_button_handler), (gpointer) pg);
+
+  password_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  gtk_box_pack_start(GTK_BOX(password_hbox), entry_password, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(password_hbox), button_generate, false, false, 0);
+
+  //Saveto hbox
+  label_saveto = gtk_label_new("Set password name:");
+  entry_passname = gtk_entry_new();
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_passname), "New password name");
+  saveto_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(saveto_vbox), label_saveto, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(saveto_vbox), entry_passname, false, false, 0);
+
+  gtk_entry_set_text(GTK_ENTRY(entry_passname), "new_password");
+
+
+  //Main left vbox
+  GtkWidget *new_pass_label = gtk_label_new("New password:");
+  left_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+  gtk_box_pack_start(GTK_BOX(left_vbox), new_pass_label, false, false, 5);
+  gtk_box_pack_start(GTK_BOX(left_vbox), password_hbox, false, false, 0);
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(left_vbox), separator, false, false, 5);}
+  gtk_box_pack_start(GTK_BOX(left_vbox), saveto_vbox, false, false, 0);
+
+  //Main right vbox
+  GtkWidget *label_passlen = gtk_label_new("Password length:");
+  entry_passlen = gtk_entry_new();
+  check_numerals = gtk_check_button_new_with_label("Numerals");
+  check_symbols = gtk_check_button_new_with_label("Symbols");
+  check_pron = gtk_check_button_new_with_label("Pronounceable");
+  check_upper = gtk_check_button_new_with_label("Uppercase");
+  check_lower = gtk_check_button_new_with_label("Lowercase");
+
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_passlen), "Password length");
+  char buffer[128];
+  sprintf(buffer, "%d", passgen_get_len(pg));
+  gtk_entry_set_text(GTK_ENTRY(entry_passlen), buffer);
+
+  g_signal_connect(entry_passlen, "changed", G_CALLBACK(set_passlen_handler), (gpointer) pg);
+  g_signal_connect(check_numerals, "toggled", G_CALLBACK(toggle_numerals_handler), (gpointer) pg);
+  g_signal_connect(check_symbols, "toggled", G_CALLBACK(toggle_symbols_handler), (gpointer) pg);
+  g_signal_connect(check_pron, "toggled", G_CALLBACK(toggle_pronunceable_handler), (gpointer) pg);
+  g_signal_connect(check_upper, "toggled", G_CALLBACK(toggle_uppercase_handler), (gpointer) pg);
+  g_signal_connect(check_lower, "toggled", G_CALLBACK(toggle_lowercase_handler), (gpointer) pg);
+
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_numerals), passgen_get_numerals(pg));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_symbols), passgen_get_symbols(pg));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_pron), passgen_get_pronunceable(pg));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_upper), passgen_get_uppercase(pg));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_lower), passgen_get_lowercase(pg));
+
+  passlen_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  gtk_box_pack_start(GTK_BOX(passlen_hbox), label_passlen, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(passlen_hbox), entry_passlen, true, true, 0);
+
+  gen_left_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(gen_left_vbox), check_lower, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(gen_left_vbox), check_numerals, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(gen_left_vbox), check_pron, false, false, 0);
+
+  gen_right_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(gen_right_vbox), check_upper, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(gen_right_vbox), check_symbols, false, false, 0);
+
+  hbox_of_vbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  gtk_box_pack_start(GTK_BOX(hbox_of_vbox), gen_left_vbox, false, false, 0);
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
+  gtk_box_pack_start(GTK_BOX(hbox_of_vbox), separator, false, false, 15);}
+  gtk_box_pack_start(GTK_BOX(hbox_of_vbox), gen_right_vbox, false, false, 0);
+
+  GtkWidget *label_autogen = gtk_label_new("Password generator:");
+  right_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+  gtk_box_pack_start(GTK_BOX(right_vbox), label_autogen, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(right_vbox), passlen_hbox, false, false, 0);
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(right_vbox), separator, false, false, 15);}
+  gtk_box_pack_start(GTK_BOX(right_vbox), hbox_of_vbox, false, false, 0);
+
+  //Main hbox
+  main_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  gtk_box_pack_start(GTK_BOX(main_hbox), left_vbox, false, false, 0);
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
+  gtk_box_pack_start(GTK_BOX(main_hbox), separator, false, false, 15);}
+  gtk_box_pack_start(GTK_BOX(main_hbox), right_vbox, false, false, 0);
+
+
+  gtk_box_pack_start(GTK_BOX(dialog_box), main_hbox, false, false, 0);
+  gtk_widget_show_all(dialog);
+  int response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+  if (response == GTK_RESPONSE_OK){
+    const char *password = gtk_entry_get_text(GTK_ENTRY(entry_password));
+    const char *name = folderstate_file_get_full_path_from_string(fs, gtk_entry_get_text(GTK_ENTRY(entry_passname)));
+    file_io_encrypt_password(password, name);
+  }
+
+  destroy(dialog, dialog);
+
+  folderstate_reload(fs);
+  GtkWidget *parent = gtk_widget_get_toplevel(widget);
+  draw_main_window_handler(parent, fs);
+
 }
 void button_newfolder_handler(GtkWidget *widget, gpointer data){
   folderstate *fs = (folderstate *) data;
@@ -358,6 +545,18 @@ void button_delete_handler(GtkWidget *widget, gpointer data){
     sprintf(dialog_prompt, "Remove file '%s'? This cannot be undone!", path);
     GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
     gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+
+    GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+    { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+    gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+
+    GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Delete");
+    // { GtkWidget *icon = gtk_image_new_from_icon_name("edit-delete", GTK_ICON_SIZE_MENU);
+    // gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+    GtkStyleContext *context = gtk_widget_get_style_context(dialog_button_ok);
+    gtk_style_context_add_class(context, "destructive-action");
+
     int response = gtk_dialog_run(GTK_DIALOG(dialog));
 
     if (response == GTK_RESPONSE_OK){
