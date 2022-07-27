@@ -32,7 +32,7 @@ int main(int argc, char *argv[]){
     switch(opt){
       case 'p':
         clavis_mode = CLAVIS_POPUP_MODE;
-        return clavis_popup_main(argc-1, &argv[1]);
+        return clavis_popup_main(argc, argv);
         break;
       case '?':
         printf("Unknown option.\n");
@@ -41,6 +41,6 @@ int main(int argc, char *argv[]){
   }
 
   if (clavis_mode == CLAVIS_NORMAL_MODE){
-    return clavis_normal_main(argc-1, &argv[1]);
+    return clavis_normal_main(argc, argv);
   }
 }
