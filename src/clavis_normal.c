@@ -174,7 +174,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   #ifdef __unix__
   entry_filter = gtk_search_entry_new();
   #elif defined(_WIN32) || defined (WIN32)
-  entry_filter = gtk__entry_new();
+  entry_filter = gtk_entry_new();
   #endif
   gtk_widget_set_tooltip_text(entry_filter, "Filter files");
   gtk_entry_set_placeholder_text(GTK_ENTRY(entry_filter), "Filter files");
