@@ -13,6 +13,9 @@ debug: BDIR = debug
 release: CC = $(CCCMD) -O2 -DCLAVIS_VERSION=\"$(CLAVIS_VERSION)\"
 release: BDIR = build
 
+windows: CC = $(CCCMD) -O2 -DCLAVIS_VERSION=\"$(CLAVIS_VERSION)\"
+windows: BDIR = build
+
 install: CC = $(CCCMD) -O2	-DMAKE_INSTALL -DCLAVIS_VERSION=\"$(CLAVIS_VERSION)\"
 install: CLAVIS_DIR = /usr/lib/clavis
 install: BDIR = $(CLAVIS_DIR)/bin
@@ -38,6 +41,12 @@ release: $(OBJ)
 	mkdir -p $(BDIR)
 	mkdir -p $(ODIR)
 	$(CC) -o $(BDIR)/clavis $^ $(CFLAGS) $(LIBS)
+
+windows: $(OBJ)
+	mkdir -p $(BDIR)
+	mkdir -p $(ODIR)
+	$(CC) -o $(BDIR)/clavis $^ $(CFLAGS) $(LIBS)
+	ldd build/clavis.exe | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" build/
 
 debug: $(OBJ)
 	mkdir -p $(BDIR)
