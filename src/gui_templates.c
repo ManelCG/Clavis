@@ -217,7 +217,11 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
   gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password), "Password");
   passgen_set_output_entry(pg, entry_password);
 
+  #ifdef __unix__
   button_generate = gtk_button_new();
+  #elif defined(_WIN32) || defined (WIN32)
+  button_generate = gtk_button_new_with_label("Generate");
+  #endif
   { GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_generate), icon); }
   gtk_widget_set_tooltip_text(button_generate, "Generate password with options");
@@ -683,14 +687,22 @@ GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate 
     if (editmode){
       GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
 
+      #ifdef __unix__
       GtkWidget *button_rename = gtk_button_new();
+      #elif defined(_WIN32) || defined (WIN32)
+      GtkWidget *button_rename = gtk_button_new_with_label("Rename");
+      #endif
       gtk_widget_set_tooltip_text(button_rename, "Rename file");
       { GtkWidget *icon = gtk_image_new_from_icon_name("document-edit", GTK_ICON_SIZE_MENU);
       gtk_button_set_image(GTK_BUTTON(button_rename), icon); }
       gtk_widget_set_name(button_rename, file_list[i]);
       g_signal_connect(button_rename, "pressed", G_CALLBACK(button_rename_handler), (gpointer) fs);
 
+      #ifdef __unix__
       GtkWidget *button_delete = gtk_button_new();
+      #elif defined(_WIN32) || defined (WIN32)
+      GtkWidget *button_delete = gtk_button_new_with_label("Delete");
+      #endif
       gtk_widget_set_tooltip_text(button_delete, "Delete");
       { GtkWidget *icon = gtk_image_new_from_icon_name("edit-delete", GTK_ICON_SIZE_MENU);
       gtk_button_set_image(GTK_BUTTON(button_delete), icon); }

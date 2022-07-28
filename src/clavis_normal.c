@@ -107,25 +107,42 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   //topbar hbox (info, buttons)
   folder_label = gtk_label_new(folder_label_text);
 
+  #ifdef __unix__
   button_newfolder = gtk_button_new();
-  g_signal_connect(button_newfolder, "clicked", G_CALLBACK(button_newfolder_handler), (gpointer) fs);
   { GtkWidget *icon = gtk_image_new_from_icon_name("folder-new", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_newfolder), icon); }
+  #elif defined(_WIN32) || defined (WIN32)
+  button_newfolder = gtk_button_new_with_label("New folder");
+  #endif
+  g_signal_connect(button_newfolder, "clicked", G_CALLBACK(button_newfolder_handler), (gpointer) fs);
 
+
+  #ifdef __unix__
   button_reload = gtk_button_new();
-  g_signal_connect(button_reload, "clicked", G_CALLBACK(button_reload_handler), (gpointer) fs);
   { GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_reload), icon); }
+  #elif defined(_WIN32) || defined (WIN32)
+  button_reload = gtk_button_new_with_label("Refresh");
+  #endif
+  g_signal_connect(button_reload, "clicked", G_CALLBACK(button_reload_handler), (gpointer) fs);
 
+  #ifdef __unix__
   button_newpassword = gtk_button_new();
-  g_signal_connect(button_newpassword, "clicked", G_CALLBACK(button_newpassword_handler), (gpointer) fs);
   { GtkWidget *icon = gtk_image_new_from_icon_name("list-add", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_newpassword), icon); }
+  #elif defined(_WIN32) || defined (WIN32)
+  button_newpassword = gtk_button_new("Add new password");
+  #endif
+  g_signal_connect(button_newpassword, "clicked", G_CALLBACK(button_newpassword_handler), (gpointer) fs);
 
+  #ifdef __unix__
   button_goup = gtk_button_new();
-  g_signal_connect(button_goup, "clicked", G_CALLBACK(button_goup_handler), (gpointer) fs);
   { GtkWidget *icon = gtk_image_new_from_icon_name("go-up", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_goup), icon); }
+  #elif defined(_WIN32) || defined (WIN32)
+  button_goup = gtk_button_new_with_label("Go up");
+  #endif
+  g_signal_connect(button_goup, "clicked", G_CALLBACK(button_goup_handler), (gpointer) fs);
   if (strcmp(folderstate_get_path(fs), ".") == 0){
     gtk_widget_set_can_focus(button_goup, false);
     gtk_widget_set_sensitive(button_goup, false);
@@ -169,7 +186,11 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   gtk_entry_set_visibility(GTK_ENTRY(password_output), false);
   gtk_editable_set_editable(GTK_EDITABLE(password_output), false);
   gtk_entry_set_placeholder_text(GTK_ENTRY(password_output), "Password output");
+  #ifdef __unix__
   GtkWidget *button_copy = gtk_button_new();
+  #elif defined(_WIN32) || defined (WIN32)
+  GtkWidget *button_copy = gtk_button_new_with_label("Copy");
+  #endif
   { GtkWidget *icon = gtk_image_new_from_icon_name("edit-copy", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_copy), icon); }
   g_signal_connect(button_copy, "pressed", G_CALLBACK(copy_entry_to_clipboard_handler), (gpointer) password_output);

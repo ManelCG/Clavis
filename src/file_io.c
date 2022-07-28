@@ -35,7 +35,7 @@ const char *get_password_store_path(){
     homelen = strlen(getenv("HOMEPATH"));
     path = malloc(sizeof(char) * (homelen + strlen(pa) + 8));
 
-    sprintf(path, "%s/%s/", getenv("HOMEPATH"), pa);
+    sprintf(path, "%s\\%s\\", getenv("HOMEPATH"), pa);
   #endif
     printf("Path: %s\n", path);
   return path;
