@@ -131,7 +131,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   { GtkWidget *icon = gtk_image_new_from_icon_name("list-add", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_newpassword), icon); }
   #elif defined(_WIN32) || defined (WIN32)
-  button_newpassword = gtk_button_new("Add new password");
+  button_newpassword = gtk_button_new_with_label("Add new password");
   #endif
   g_signal_connect(button_newpassword, "clicked", G_CALLBACK(button_newpassword_handler), (gpointer) fs);
 
@@ -155,7 +155,9 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   gtk_box_pack_start(GTK_BOX(topbar_hbox), button_goup, false, false, 0);
   gtk_box_pack_start(GTK_BOX(topbar_hbox), button_newpassword, false, false, 0);
   gtk_box_pack_start(GTK_BOX(topbar_hbox), button_reload, false, false, 0);
+  #ifdef __unix__
   gtk_box_pack_start(GTK_BOX(topbar_hbox), folder_label, true, false, 0);
+  #endif
 
 
   //Bottom hbox (buttons)
@@ -169,7 +171,11 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
 
 
   //Folder vbox
+  #ifdef __unix__
   entry_filter = gtk_search_entry_new();
+  #elif defined(_WIN32) || defined (WIN32)
+  entry_filter = gtk__entry_new();
+  #endif
   gtk_widget_set_tooltip_text(entry_filter, "Filter files");
   gtk_entry_set_placeholder_text(GTK_ENTRY(entry_filter), "Filter files");
   gtk_widget_set_can_focus(entry_filter, true);
@@ -208,6 +214,9 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   gtk_box_pack_start(GTK_BOX(folder_vbox), topbar_hbox, false, false, 0);
   {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
    gtk_box_pack_start(GTK_BOX(folder_vbox), separator, false, false, 0);}
+  #if defined(_WIN32) || defined (WIN32)
+  gtk_box_pack_start(GTK_BOX(folder_vbox), folder_label, false, false, 0);
+  #endif
   gtk_box_pack_start(GTK_BOX(folder_vbox), entry_filter, false, false, 0);
   {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
    gtk_box_pack_start(GTK_BOX(folder_vbox), separator, false, false, 0);}
