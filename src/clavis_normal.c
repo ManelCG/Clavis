@@ -128,12 +128,12 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
 
   #ifdef __unix__
   button_newpassword = gtk_button_new();
-  gtk_widget_set_name(button_newpassword, CLAVIS_BUTTON_NEWPASSWORD_NAME);
   { GtkWidget *icon = gtk_image_new_from_icon_name("list-add", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_newpassword), icon); }
   #elif defined(_WIN32) || defined (WIN32)
   button_newpassword = gtk_button_new_with_label("Add new password");
   #endif
+  gtk_widget_set_name(button_newpassword, CLAVIS_BUTTON_NEWPASSWORD_NAME);
   g_signal_connect(button_newpassword, "clicked", G_CALLBACK(button_newpassword_handler), (gpointer) fs);
 
   #ifdef __unix__
