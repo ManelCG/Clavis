@@ -10,7 +10,10 @@
 #include <clavis_popup.h>
 #include <clavis_normal.h>
 
+#ifdef __unix__
 #include <sys/wait.h>
+#elif defined(_WIN32) || defined (WIN32)
+#endif
 
 #define GUI_TEMPLATES_BUTTON_WIDTH 85
 
