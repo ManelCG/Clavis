@@ -9,7 +9,10 @@
 #include <stdio.h>
 #include <errno.h>
 
+#ifdef __unix__
 #include <sys/wait.h>
+#elif defined(_WIN32) || defined (WIN32)
+#endif
 
 #include <file_io.h>
 #include <algorithms.h>
