@@ -19,4 +19,6 @@
 #define CLAVIS_PASSGEN_CONSONANTS_UPPERCASE "BCDFGHJKLMNPQRSTVWXYZ"
 #define CLAVIS_PASSGEN_SYMBOLS "!|\"@#$~%&/{([)]=}?\\<>+*,;.:-_"
 
+#define CLAVIS_BUTTON_NEWPASSWORD_NAME "Button Newpassword"
+
 #endif //_CLAVIS_CONSTANTS_

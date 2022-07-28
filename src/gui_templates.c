@@ -171,7 +171,12 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
   folderstate *fs = (folderstate *) data;
   passgen *pg = passgen_new();
 
-  GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Add new password:");
+  GtkWidget *dialog;
+  if (strcmp(gtk_widget_get_name(widget), CLAVIS_BUTTON_NEWPASSWORD_NAME) == 0){
+    dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Add new password:");
+  } else {
+    dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Edit existing password:");
+  }
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
@@ -217,6 +222,10 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
   gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password), "Password");
   passgen_set_output_entry(pg, entry_password);
 
+  toggle_visibility = gtk_check_button_new_with_label("Display password");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle_visibility), true);
+  g_signal_connect(toggle_visibility, "toggled", G_CALLBACK(toggle_visibility_handler), (gpointer) entry_password);
+
   #ifdef __unix__
   button_generate = gtk_button_new();
   #elif defined(_WIN32) || defined (WIN32)
@@ -234,12 +243,25 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
   //Saveto hbox
   label_saveto = gtk_label_new("Set password name:");
   entry_passname = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_passname), "New password name");
+  if (strcmp(gtk_widget_get_name(widget), CLAVIS_BUTTON_NEWPASSWORD_NAME) == 0){
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_passname), "New password name");
+    gtk_entry_set_text(GTK_ENTRY(entry_passname), "new_password");
+  } else {
+    char buffer[strlen(gtk_widget_get_name(widget))];
+    strcpy(buffer, gtk_widget_get_name(widget));
+    if (strlen(buffer) > 4 && strcmp(&buffer[strlen(buffer)-4], ".gpg") == 0){
+      buffer[strlen(buffer)-4] = '\0';
+    }
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_passname), "Password name");
+    gtk_entry_set_text(GTK_ENTRY(entry_passname), buffer);
+    gtk_widget_set_can_focus(entry_passname, false);
+    gtk_widget_set_sensitive(entry_passname, false);
+  }
+
   saveto_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
   gtk_box_pack_start(GTK_BOX(saveto_vbox), label_saveto, false, false, 0);
   gtk_box_pack_start(GTK_BOX(saveto_vbox), entry_passname, false, false, 0);
 
-  gtk_entry_set_text(GTK_ENTRY(entry_passname), "new_password");
 
 
   //Main left vbox
@@ -247,6 +269,7 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
   left_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
   gtk_box_pack_start(GTK_BOX(left_vbox), new_pass_label, false, false, 5);
   gtk_box_pack_start(GTK_BOX(left_vbox), password_hbox, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(left_vbox), toggle_visibility, false, false, 5);
   {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
   gtk_box_pack_start(GTK_BOX(left_vbox), separator, false, false, 5);}
   gtk_box_pack_start(GTK_BOX(left_vbox), saveto_vbox, false, false, 0);
@@ -717,7 +740,10 @@ GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate 
 
       if (file_io_string_is_file(file_fullpath)){
         GtkWidget *button_edit = gtk_button_new();
+        gtk_widget_set_name(button_edit, file_list[i]);
         gtk_widget_set_tooltip_text(button_edit, "Edit password");
+        g_signal_connect(button_edit, "pressed", G_CALLBACK(button_newpassword_handler), (gpointer) fs);
+        g_signal_connect(button_edit, "activate", G_CALLBACK(button_newpassword_handler), (gpointer) fs);
         { GtkWidget *icon = gtk_image_new_from_icon_name("format-text-direction-ltr", GTK_ICON_SIZE_MENU);
         gtk_button_set_image(GTK_BUTTON(button_edit), icon); }
         gtk_box_pack_start(GTK_BOX(button_hbox), button_edit, false, false, 0);
