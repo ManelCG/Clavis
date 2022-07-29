@@ -739,13 +739,17 @@ GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate 
       gtk_box_pack_start(GTK_BOX(button_hbox), separator, false, false, 5);
 
       if (file_io_string_is_file(file_fullpath)){
+        #ifdef __unix__
         GtkWidget *button_edit = gtk_button_new();
+        { GtkWidget *icon = gtk_image_new_from_icon_name("format-text-direction-ltr", GTK_ICON_SIZE_MENU);
+        gtk_button_set_image(GTK_BUTTON(button_edit), icon); }
+        #elif defined(_WIN32) || defined (WIN32)
+        GtkWidget *button_edit = gtk_button_new_with_label("Edit");
+        #endif
         gtk_widget_set_name(button_edit, file_list[i]);
         gtk_widget_set_tooltip_text(button_edit, "Edit password");
         g_signal_connect(button_edit, "pressed", G_CALLBACK(button_newpassword_handler), (gpointer) fs);
         g_signal_connect(button_edit, "activate", G_CALLBACK(button_newpassword_handler), (gpointer) fs);
-        { GtkWidget *icon = gtk_image_new_from_icon_name("format-text-direction-ltr", GTK_ICON_SIZE_MENU);
-        gtk_button_set_image(GTK_BUTTON(button_edit), icon); }
         gtk_box_pack_start(GTK_BOX(button_hbox), button_edit, false, false, 0);
       }
 
