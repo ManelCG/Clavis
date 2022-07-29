@@ -830,7 +830,37 @@ void gui_templates_fill_combo_box_with_gpg_keys(GtkWidget *combo){
 }
 
 void gui_templates_import_key_handler(){
-  printf("Import new key\n");
+  GtkWidget *dialog = gtk_file_chooser_dialog_new("Open File", NULL, GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, NULL);
+  int response = gtk_dialog_run(GTK_DIALOG(dialog));
+  if (response == GTK_RESPONSE_ACCEPT){
+    char *filename;
+    GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
+    filename = gtk_file_chooser_get_filename (chooser);
+
+    int p_sync[2];
+    if (pipe(p_sync) < 0){
+      perror("Could not pipe");
+    }
+    int pid = fork();
+    if (pid < 0){
+      perror("Could not fork");
+    }
+
+    if (pid == 0){  //Child
+      close(p_sync[0]);
+      execlp("gpg", "gpg", "--import", filename, NULL);
+      exit(-1);
+    }
+    wait(NULL);
+    close(p_sync[1]);
+    char c;
+    while(read(p_sync[0], &c, 1)){
+    }
+    close(p_sync[0]);
+    g_free(filename);
+  }
+
+  gtk_widget_destroy(dialog);
 }
 int gui_templates_create_key_handler(){
   GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Configure your new GPG key:");
@@ -876,29 +906,6 @@ int gui_templates_create_key_handler(){
   GtkWidget *entry_password_1;
   GtkWidget *entry_password_2;
   GtkWidget *check_password_visibility;
-
-  //Key types
-  // "RSA and DSA (default)"
-  // "DSA and ElGamal"
-
-  //key size
-  //1024
-  //2048
-  //3072
-  //4096
-
-  //Expiration
-  //n + {days, weeks, months, years}
-  //n = ndays
-  //nw; nm; ny
-  //0 = no
-
-  //y
-
-  //Name
-  //Email
-  //comment
-  //O
 
   //Pack
   //KEY TYPE VBOX
@@ -1010,6 +1017,54 @@ int gui_templates_create_key_handler(){
     return -1;
   }
 
+  if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_keylen))) < 3){
+    destroy(dialog, dialog);
+    GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Key length must be a 3+ digit number");
+    gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
+
+    GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
+    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+    gtk_dialog_run(GTK_DIALOG(dialog_failure));
+    destroy(dialog_failure, dialog_failure);
+    return -1;
+  }
+
+  if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_name))) <=4){
+    destroy(dialog, dialog);
+    GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Name must be at least 4 letters long.");
+    gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
+
+    GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
+    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+    gtk_dialog_run(GTK_DIALOG(dialog_failure));
+    destroy(dialog_failure, dialog_failure);
+    return -1;
+  }
+
+  if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_email))) <=3){
+    destroy(dialog, dialog);
+    GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Please enter valid email.");
+    gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
+
+    GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
+    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+    gtk_dialog_run(GTK_DIALOG(dialog_failure));
+    destroy(dialog_failure, dialog_failure);
+    return -1;
+  }
+
+  if (strcmp(gtk_entry_get_text(GTK_ENTRY(entry_password_1)), gtk_entry_get_text(GTK_ENTRY(entry_password_2))) != 0){
+    destroy(dialog, dialog);
+    GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Your passwords do not match!");
+    gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
+
+    GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
+    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+    gtk_dialog_run(GTK_DIALOG(dialog_failure));
+    destroy(dialog_failure, dialog_failure);
+    return -1;
+  }
+
   int p[2];
   if (pipe(p) != 0){
     perror("Could not pipe");
@@ -1071,16 +1126,30 @@ int gui_templates_create_key_handler(){
 
   strcat(buffer, "\nPassphrase: ");
   strcat(buffer, gtk_entry_get_text(GTK_ENTRY(entry_password_1)));
-
   strcat(buffer, "\n%commit");
 
   write(p[1], buffer, strlen(buffer));
-
   close(p[1]);
+
+  wait(NULL);
 
   destroy(dialog, dialog);
   wait(NULL);
   return 0;
+}
+
+void button_refresh_keys_handler_1(GtkWidget *widget, gpointer data){
+  GtkWidget *combo = (GtkWidget *) data;
+  gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
+  while (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)) != -1){
+    gtk_combo_box_text_remove(GTK_COMBO_BOX_TEXT(combo), 0);
+    gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
+  }
+
+  gui_templates_fill_combo_box_with_gpg_keys(combo);
+}
+void button_refresh_keys_handler_2(GtkWidget *widget, gpointer data){
+
 }
 
 int gui_templates_initialize_password_store(){
@@ -1103,12 +1172,14 @@ int gui_templates_initialize_password_store(){
   //Boxes
   GtkWidget *main_vbox;
   GtkWidget *new_key_hbox;
+  GtkWidget *combo_hbox;
 
   //widgets
   GtkWidget *key_combo_box;
 
   GtkWidget *button_import;
   GtkWidget *button_create;
+  GtkWidget *button_refresh;
 
   button_import = gtk_button_new_with_label("Import key");
   { GtkWidget *icon = gtk_image_new_from_icon_name("insert-object", GTK_ICON_SIZE_MENU);
@@ -1125,13 +1196,26 @@ int gui_templates_initialize_password_store(){
   key_combo_box = gtk_combo_box_text_new();
   gui_templates_fill_combo_box_with_gpg_keys(key_combo_box);
 
+  button_refresh = gtk_button_new();
+  { GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(button_refresh), icon); }
+  g_signal_connect(button_refresh, "pressed", G_CALLBACK(button_refresh_keys_handler_1), (gpointer) key_combo_box);
+  g_signal_connect(button_refresh, "pressed", G_CALLBACK(button_refresh_keys_handler_2), (gpointer) dialog);
+  g_signal_connect(button_refresh, "activate", G_CALLBACK(button_refresh_keys_handler_1), (gpointer) key_combo_box);
+  g_signal_connect(button_refresh, "activate", G_CALLBACK(button_refresh_keys_handler_2), (gpointer) dialog);
+
+
+  combo_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  gtk_box_pack_start(GTK_BOX(combo_hbox), key_combo_box, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(combo_hbox), button_refresh, false, false, 0);
+
   new_key_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   gtk_box_pack_start(GTK_BOX(new_key_hbox), button_import, true, true, 0);
   gtk_box_pack_start(GTK_BOX(new_key_hbox), button_create, true, true, 0);
 
 
   main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-  gtk_box_pack_start(GTK_BOX(main_vbox), key_combo_box, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(main_vbox), combo_hbox, false, false, 0);
   gtk_box_pack_start(GTK_BOX(main_vbox), new_key_hbox, false, false, 0);
 
   gtk_box_pack_start(GTK_BOX(dialog_box), main_vbox, true, true, 0);
