@@ -80,6 +80,7 @@ void type_entry_with_keyboard_handler(GtkWidget *widget, gpointer data){
   const char *pw = gtk_entry_get_text(GTK_ENTRY(entry));
   if (strlen(pw) != 0){
     #ifdef __unix__
+      gtk_main_quit();
       int p[2];
       if (pipe(p) < 0){
         perror("Could not pipe");
@@ -101,7 +102,6 @@ void type_entry_with_keyboard_handler(GtkWidget *widget, gpointer data){
         exit(-1);
       }
       //Parent
-      gtk_main_quit();
       close(p[0]);
       write(p[1], pw, strlen(pw));
       close(p[1]);
