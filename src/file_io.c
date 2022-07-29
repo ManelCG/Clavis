@@ -299,13 +299,17 @@ int file_io_folder_get_file_n(const char *folder, const char *filter){
 
 _Bool file_io_string_is_folder(const char *s){
   struct stat pstat;
-  stat(s, &pstat);
+  if (stat(s, &pstat) != 0){
+    return false;
+  }
   return S_ISDIR(pstat.st_mode);
 }
 
 _Bool file_io_string_is_file(const char *s){
   struct stat pstat;
-  stat(s, &pstat);
+  if (stat(s, &pstat) != 0){
+    return false;
+  }
   return S_ISREG(pstat.st_mode);
 }
 
