@@ -267,12 +267,13 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
   //Main left vbox
   GtkWidget *new_pass_label = gtk_label_new("New password:");
   left_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+
+  gtk_box_pack_start(GTK_BOX(left_vbox), saveto_vbox, false, false, 0);
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(left_vbox), separator, false, false, 5);}
   gtk_box_pack_start(GTK_BOX(left_vbox), new_pass_label, false, false, 5);
   gtk_box_pack_start(GTK_BOX(left_vbox), password_hbox, false, false, 0);
   gtk_box_pack_start(GTK_BOX(left_vbox), toggle_visibility, false, false, 5);
-  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-  gtk_box_pack_start(GTK_BOX(left_vbox), separator, false, false, 5);}
-  gtk_box_pack_start(GTK_BOX(left_vbox), saveto_vbox, false, false, 0);
 
   //Main right vbox
   GtkWidget *label_passlen = gtk_label_new("Password length:");
