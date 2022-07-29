@@ -21,5 +21,6 @@ void toggle_visibility_handler(GtkWidget *widget, gpointer data);
 void copy_entry_to_clipboard_handler(GtkWidget *w, gpointer);
 void type_entry_with_keyboard_handler(GtkWidget *w, gpointer);
 void button_newpassword_handler(GtkWidget *w, gpointer);
+int gui_templates_initialize_password_store();
 
 #endif //_GUI_TEMPLATES_H_

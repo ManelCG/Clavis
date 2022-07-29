@@ -37,7 +37,6 @@ const char *get_password_store_path(){
 
     sprintf(path, "%s\\%s\\", getenv("HOMEPATH"), pa);
   #endif
-    printf("Path: %s\n", path);
   return path;
 }
 
@@ -297,3 +296,127 @@ _Bool file_io_string_is_file(const char *s){
   stat(s, &pstat);
   return S_ISREG(pstat.st_mode);
 }
+
+#ifdef __unix__
+const char **file_io_get_gpg_keys(_Bool secret){
+  //gpg --list-keys | grep -E "<*>" | awk '{print $NF}'
+  //gpg --list-secret-keys | grep -E "<*>" | awk '{print $NF}'
+  int pid;
+  int pipe_gpg_grep[2];
+  if (pipe(pipe_gpg_grep) != 0){
+    perror("Couldnt pipe");
+    exit(-1);
+  }
+  if ((pid = fork()) < 0){
+    perror("Couldnt fork");
+    exit(pid);
+  }
+
+  if (pid == 0){  //Child gpg
+    close(1);
+    dup(pipe_gpg_grep[1]);
+    close(pipe_gpg_grep[1]);
+    close(pipe_gpg_grep[0]);
+
+
+    if (secret){
+      execlp("gpg", "gpg", "--list-secret-keys", NULL);
+    } else {
+      execlp("gpg", "gpg", "--list-keys", NULL);
+    }
+  }
+  //MAIN
+
+  int pipe_grep_awk[2];
+  if (pipe(pipe_grep_awk) < 0){
+    perror("Couldnt pipe");
+    exit(-1);
+  }
+  if ((pid = fork()) < 0){
+    perror("Couldnt fork");
+    exit(pid);
+  }
+
+  if (pid == 0){  //Child grep
+    close(0);
+    dup(pipe_gpg_grep[0]);
+    close(pipe_gpg_grep[0]);
+    close(pipe_gpg_grep[1]);
+
+    close(1);
+    dup(pipe_grep_awk[1]);
+    close(pipe_grep_awk[1]);
+    close(pipe_grep_awk[0]);
+
+    execlp("grep", "grep", "-E", "<*>", NULL);
+  }
+  //MAIN
+  close(pipe_gpg_grep[0]);
+  close(pipe_gpg_grep[1]);
+
+  int pipe_awk_main[2];
+  if (pipe(pipe_awk_main) < 0){
+    perror("Couldnt pipe");
+    exit(-1);
+  }
+
+  if ((pid = fork()) < 0){
+    perror("Couldnt fork");
+    exit(pid);
+  }
+
+  if (pid == 0){  //Child awk
+    close(0);
+    dup(pipe_grep_awk[0]);
+    close(pipe_grep_awk[0]);
+    close(pipe_grep_awk[1]);
+
+    close(1);
+    dup(pipe_awk_main[1]);
+    close(pipe_awk_main[1]);
+    close(pipe_awk_main[0]);
+
+    execlp("awk", "awk", "{print $NF}", NULL);
+  }
+  //MAIN
+  close(pipe_grep_awk[0]);
+  close(pipe_grep_awk[1]);
+  close(pipe_awk_main[1]);
+
+  wait(NULL);
+
+  //Save output
+  int pindex = 0;
+  int windex = 0;
+  int plen = DEFAULT_GPG_NAME_LEN;
+  char **keys = malloc(sizeof(char *));
+  keys[pindex] = malloc(sizeof(char) * plen);
+
+  char c;
+  while (read(pipe_awk_main[0], &c, 1)){
+    if (c == '\n'){
+      keys[pindex][windex] = '\0';
+      pindex++;
+      windex = 0;
+      plen = DEFAULT_GPG_NAME_LEN;
+      keys = realloc(keys, sizeof(char *) * (pindex+1));
+      keys[pindex] = malloc(sizeof(char) * plen);
+    } else if (c != '<' && c != '>'){
+      keys[pindex][windex] = c;
+      windex++;
+      if (windex > plen-8){
+        plen *= 2;
+        keys[pindex] = realloc(keys[pindex], sizeof(char) * plen);
+      }
+    }
+  }
+  close(pipe_awk_main[0]);
+
+  printf("We have %d keys\n", pindex);
+  for (int i = 0; i < pindex; i++){
+    printf("%s\n", keys[i]);
+  }
+
+
+}
+#endif

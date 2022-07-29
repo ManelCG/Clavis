@@ -778,6 +778,11 @@ void gui_templates_clear_container(GtkWidget *window){
   g_list_free(children);
 }
 
+int gui_templates_initialize_password_store(){
+
+
+}
+
 void gui_templates_show_about_window(GtkWidget *w, gpointer data){
   GtkWindow *window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
   // gui_templates_window_set_sempiternum_icon(window);

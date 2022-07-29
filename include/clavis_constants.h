@@ -10,6 +10,7 @@
 
 //Password info
 #define DEFAULT_PASSWORD_SIZE 25
+#define DEFAULT_GPG_NAME_LEN 32
 
 //Password generation data
 #define CLAVIS_PASSGEN_NUMERALS "0123456789"

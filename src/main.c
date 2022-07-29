@@ -6,6 +6,7 @@
 #include <file_io.h>
 
 #include <clavis_constants.h>
+#include <gui_templates.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -25,6 +26,24 @@ int main(int argc, char *argv[]){
     chdir(papath);
   }
   free((char *) papath);
+
+  printf("PUBLIC:\n");
+  file_io_get_gpg_keys(false);
+  printf("PRIVATE:\n");
+  file_io_get_gpg_keys(true);
+  exit(0);
+
+  //Check if password store is initialized
+  #ifdef __unix__
+  if (file_io_string_is_file(".gpg-id")){
+    int ret = gui_templates_initialize_password_store();
+    if (ret != 0){
+      exit(ret);
+    }
+  }
+  #elif defined(_WIN32) || defined (WIN32)
+
+  #endif
 
   int clavis_mode = CLAVIS_NORMAL_MODE;
   int opt;
