@@ -778,9 +778,381 @@ void gui_templates_clear_container(GtkWidget *window){
   g_list_free(children);
 }
 
+int gui_templates_password_store_init_handler(){
+  #ifdef __unix__
+  if (!file_io_string_is_file(".gpg-id")){
+    GtkWidget *dialog;
+    int response;
+
+    dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Hey! It seems this is your first time running Clavis.\nInitialize Password Store?");
+    gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+    GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+    { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+    gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+    GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Accept");
+    { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+    gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+    // GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+
+
+    gtk_widget_show_all(dialog);
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+    if (response != GTK_RESPONSE_OK){
+      destroy(dialog, dialog);
+      return 1;
+    }
+
+    destroy(dialog, dialog);
+    return gui_templates_initialize_password_store();
+  } else {
+    return 0;
+  }
+  #elif defined(_WIN32) || defined (WIN32)
+
+  #endif
+
+}
+
+void gui_templates_fill_combo_box_with_gpg_keys(GtkWidget *combo){
+  int nkeys;
+  char **keys = file_io_get_full_gpg_keys(&nkeys);
+
+  if (keys != NULL){
+    for (int i = 0; i < nkeys; i++){
+      gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo), NULL, keys[i]);
+      free(keys[i]);
+    }
+    free(keys);
+    gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
+  }
+}
+
+void gui_templates_import_key_handler(){
+  printf("Import new key\n");
+}
+int gui_templates_create_key_handler(){
+  GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Configure your new GPG key:");
+
+  gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+
+  GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+  GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Create key");
+  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+
+
+  //Boxes
+  GtkWidget *main_vbox;
+  GtkWidget *keytype_vbox;
+  GtkWidget *keylen_vbox;
+  GtkWidget *top_hbox;
+
+  GtkWidget *expiration_vbox;
+  GtkWidget *expiration_hbox;
+
+  GtkWidget *name_email_hbox;
+  GtkWidget *personal_info_vbox;
+
+  GtkWidget *password_vbox;
+  GtkWidget *password_hbox;
+
+  //Widgets
+  GtkWidget *combo_keytype;
+  GtkWidget *entry_keylen;
+
+  GtkWidget *entry_expiration_n;
+  GtkWidget *combo_expiration_type;
+
+  GtkWidget *entry_name;
+  GtkWidget *entry_email;
+  GtkWidget *entry_comment;
+
+  GtkWidget *entry_password_1;
+  GtkWidget *entry_password_2;
+  GtkWidget *check_password_visibility;
+
+  //Key types
+  // "RSA and DSA (default)"
+  // "DSA and ElGamal"
+
+  //key size
+  //1024
+  //2048
+  //3072
+  //4096
+
+  //Expiration
+  //n + {days, weeks, months, years}
+  //n = ndays
+  //nw; nm; ny
+  //0 = no
+
+  //y
+
+  //Name
+  //Email
+  //comment
+  //O
+
+  //Pack
+  //KEY TYPE VBOX
+  combo_keytype = gtk_combo_box_text_new();
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_keytype), NULL, "RSA and DSA (default)");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_keytype), NULL, "DSA and ElGamal");
+  gtk_combo_box_set_active(GTK_COMBO_BOX(combo_keytype), 0);
+  GtkWidget *label_keytype = gtk_label_new("Choose key type:");
+  keytype_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(keytype_vbox), label_keytype, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(keytype_vbox), combo_keytype, true, true, 0);
+
+  //KEY LENGTH VBOX
+  entry_keylen = gtk_entry_new();
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_keylen), "Key length");
+  gtk_entry_set_text(GTK_ENTRY(entry_keylen), "4096");
+  gtk_entry_set_width_chars(GTK_ENTRY(entry_keylen), 6);
+  GtkWidget *label_keylen = gtk_label_new("Key size:");
+  keylen_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(keylen_vbox), label_keylen, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(keylen_vbox), entry_keylen, true, true, 0);
+
+  top_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  gtk_box_pack_start(GTK_BOX(top_hbox), keytype_vbox, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(top_hbox), keylen_vbox, true, true, 0);
+
+  //EXPIRATION
+  GtkWidget *label_expiration = gtk_label_new("Set expiration (0 = eternal)");
+
+  entry_expiration_n = gtk_entry_new();
+  gtk_entry_set_text(GTK_ENTRY(entry_expiration_n), "0");
+
+  combo_expiration_type = gtk_combo_box_text_new();
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, "Days");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, "Weeks");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, "Months");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, "Years");
+  gtk_combo_box_set_active(GTK_COMBO_BOX(combo_expiration_type), 3);
+
+  expiration_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  gtk_box_pack_start(GTK_BOX(expiration_hbox), entry_expiration_n, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(expiration_hbox), combo_expiration_type, true, true, 0);
+
+  expiration_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(expiration_vbox), label_expiration, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(expiration_vbox), expiration_hbox, false, false, 0);
+
+
+  //PERSONAL INFO
+  GtkWidget *label_personal = gtk_label_new("Personal information:");
+  entry_name = gtk_entry_new();
+  entry_email = gtk_entry_new();
+  entry_comment = gtk_entry_new();
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_name), "Name");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_email), "Email");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_comment), "Comment (Optional)");
+
+  name_email_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  gtk_box_pack_start(GTK_BOX(name_email_hbox), entry_name, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(name_email_hbox), entry_email, true, true, 0);
+
+  personal_info_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(personal_info_vbox), label_personal, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(personal_info_vbox), name_email_hbox, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(personal_info_vbox), entry_comment, true, true, 0);
+
+  //KEY PASSWORD
+  check_password_visibility = gtk_check_button_new_with_label("Display password");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_password_visibility), false);
+  password_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+
+  entry_password_1 = gtk_entry_new();
+  gtk_entry_set_visibility(GTK_ENTRY(entry_password_1), false);
+  g_signal_connect(check_password_visibility, "toggled", G_CALLBACK(toggle_visibility_handler), (gpointer) entry_password_1);
+  gtk_box_pack_start(GTK_BOX(password_hbox), entry_password_1, true, true, 0);
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password_1), "Password");
+
+  entry_password_2 = gtk_entry_new();
+  gtk_entry_set_visibility(GTK_ENTRY(entry_password_2), false);
+  g_signal_connect(check_password_visibility, "toggled", G_CALLBACK(toggle_visibility_handler), (gpointer) entry_password_2);
+  gtk_box_pack_start(GTK_BOX(password_hbox), entry_password_2, true, true, 0);
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password_2), "Repeat password");
+
+
+  GtkWidget *password_label = gtk_label_new("Set key's password:");
+  password_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(password_vbox), password_label, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(password_vbox), password_hbox, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(password_vbox), check_password_visibility, false, false, 0);
+
+  //MAIN VBOX
+  main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(main_vbox), top_hbox, false, false, 0);
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(main_vbox), separator, false, false, 5);}
+  gtk_box_pack_start(GTK_BOX(main_vbox), expiration_vbox, false, false, 0);
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(main_vbox), separator, false, false, 5);}
+  gtk_box_pack_start(GTK_BOX(main_vbox), personal_info_vbox, false, false, 0);
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(main_vbox), separator, false, false, 5);}
+  gtk_box_pack_start(GTK_BOX(main_vbox), password_vbox, false, false, 0);
+
+  gtk_box_pack_start(GTK_BOX(dialog_box), main_vbox, false, false, 0);
+  gtk_widget_show_all(dialog);
+  int response = gtk_dialog_run(GTK_DIALOG(dialog));
+  if (response != GTK_RESPONSE_OK){
+    destroy(dialog, dialog);
+    return -1;
+  }
+
+  int p[2];
+  if (pipe(p) != 0){
+    perror("Could not pipe");
+    exit(-1);
+  }
+  int pid = fork();
+  if (pid < 0){
+    perror("Could not fork");
+    exit(pid);
+  }
+
+  if (pid == 0){ //Child
+    close(0);
+    dup(p[0]);
+    close(p[0]);
+    close(p[1]);
+
+    execlp("gpg", "gpg", "--full-generate-key", NULL);
+    exit(-1);
+  }
+  close(p[0]);
+
+  char entry_buffer[128];
+  char buffer[1000] = "\0";
+  strcat(buffer, "Key-Type: ");
+
+  sprintf(entry_buffer, "%d", gtk_combo_box_get_active(GTK_COMBO_BOX(combo_keytype))+1);
+  strcat(buffer, entry_buffer);
+
+  strcat(buffer, "\nKey-Length: ");
+  strcat(buffer, gtk_entry_get_text(GTK_ENTRY(entry_keylen)));
+
+  strcat(buffer, "\nName-Real: ");
+  strcat(buffer, gtk_entry_get_text(GTK_ENTRY(entry_name)));
+
+  strcat(buffer, "\nName-Comment: ");
+  strcat(buffer, gtk_entry_get_text(GTK_ENTRY(entry_comment)));
+
+  strcat(buffer, "\nName-Email: ");
+  strcat(buffer, gtk_entry_get_text(GTK_ENTRY(entry_email)));
+
+
+  strcat(buffer, "\nExpire-Date: ");
+  strcat(buffer, gtk_entry_get_text(GTK_ENTRY(entry_expiration_n)));
+  switch(gtk_combo_box_get_active(GTK_COMBO_BOX(combo_expiration_type))){
+    case 0:
+      strcat(buffer, "d");
+      break;
+    case 1:
+      strcat(buffer, "w");
+      break;
+    case 2:
+      strcat(buffer, "m");
+      break;
+    case 3:
+      strcat(buffer, "y");
+      break;
+  }
+
+  strcat(buffer, "\nPassphrase: ");
+  strcat(buffer, gtk_entry_get_text(GTK_ENTRY(entry_password_1)));
+
+  strcat(buffer, "\n%commit");
+
+  write(p[1], buffer, strlen(buffer));
+
+  close(p[1]);
+
+  destroy(dialog, dialog);
+  wait(NULL);
+  return 0;
+}
+
 int gui_templates_initialize_password_store(){
+  GtkWidget *dialog;
+  int response;
+
+  //Chose key
+  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Choose a GPG key, import one or create a new one.");
+  gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+
+  GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+  GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Confirm selection");
+  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+
+  //Boxes
+  GtkWidget *main_vbox;
+  GtkWidget *new_key_hbox;
+
+  //widgets
+  GtkWidget *key_combo_box;
+
+  GtkWidget *button_import;
+  GtkWidget *button_create;
+
+  button_import = gtk_button_new_with_label("Import key");
+  { GtkWidget *icon = gtk_image_new_from_icon_name("insert-object", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(button_import), icon); }
+  g_signal_connect(button_import, "pressed", G_CALLBACK(gui_templates_import_key_handler), NULL);
+  g_signal_connect(button_import, "activate", G_CALLBACK(gui_templates_import_key_handler), NULL);
+  button_create = gtk_button_new_with_label("Create new key");
+  { GtkWidget *icon = gtk_image_new_from_icon_name("document-new", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(button_create), icon); }
+  g_signal_connect(button_create, "pressed", G_CALLBACK(gui_templates_create_key_handler), NULL);
+  g_signal_connect(button_create, "activate", G_CALLBACK(gui_templates_create_key_handler), NULL);
+
+  //Pack
+  key_combo_box = gtk_combo_box_text_new();
+  gui_templates_fill_combo_box_with_gpg_keys(key_combo_box);
+
+  new_key_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  gtk_box_pack_start(GTK_BOX(new_key_hbox), button_import, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(new_key_hbox), button_create, true, true, 0);
 
 
+  main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(main_vbox), key_combo_box, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(main_vbox), new_key_hbox, false, false, 0);
+
+  gtk_box_pack_start(GTK_BOX(dialog_box), main_vbox, true, true, 0);
+
+  gtk_widget_show_all(dialog);
+  response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+  if (response != GTK_RESPONSE_OK){
+    destroy(dialog, dialog);
+    return 1;
+  }
+
+  char *key = malloc(sizeof(char) * (strlen(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(key_combo_box)))+1));
+  strcpy(key, gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(key_combo_box)));
+
+  destroy(dialog, dialog);
+
+  file_io_init_password_store(key);
+
+  free(key);
+  return 0;
 }
 
 void gui_templates_show_about_window(GtkWidget *w, gpointer data){

@@ -19,6 +19,7 @@ int mkdir_handler(const char *path);
 #ifdef __unix__
 char **file_io_get_gpg_keys(int *num, _Bool secret);
 char **file_io_get_full_gpg_keys(int *num);
+void file_io_init_password_store(const char *key);
 #endif
 
 #endif //_FILE_IO_H_

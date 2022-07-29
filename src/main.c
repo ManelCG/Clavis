@@ -27,17 +27,6 @@ int main(int argc, char *argv[]){
   }
   free((char *) papath);
 
-  //Check if password store is initialized
-  #ifdef __unix__
-  if (file_io_string_is_file(".gpg-id")){
-    int ret = gui_templates_initialize_password_store();
-    if (ret != 0){
-      exit(ret);
-    }
-  }
-  #elif defined(_WIN32) || defined (WIN32)
-
-  #endif
 
   int clavis_mode = CLAVIS_NORMAL_MODE;
   int opt;

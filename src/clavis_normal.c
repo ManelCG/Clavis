@@ -261,6 +261,11 @@ int clavis_normal_main(int argc, char *argv[]){
   gtk_window_set_default_size(GTK_WINDOW(window_root), 350, 650);
   gtk_widget_show_all(window_root);
   clavis_normal_draw_main_window(window_root, NULL);
+
+  if (gui_templates_password_store_init_handler() != 0){
+    exit(-1);
+  }
+
   gtk_main();
   return 0;
 }

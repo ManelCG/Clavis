@@ -81,7 +81,12 @@ int file_io_encrypt_password(const char *password, const char *path){
   #ifdef __unix__
     int pid;
     int p[2];
+    int p_sync[2];
     if (pipe(p) != 0){
+      perror("Could not pipe");
+      return -1;
+    }
+    if (pipe(p_sync) != 0){
       perror("Could not pipe");
       return -1;
     }
@@ -98,6 +103,8 @@ int file_io_encrypt_password(const char *password, const char *path){
       close(p[0]);
       close(p[1]);
 
+      close(p_sync[0]);
+
       execlp("pass", "pass", "add", path, NULL);
       exit(-1);
     }
@@ -108,8 +115,13 @@ int file_io_encrypt_password(const char *password, const char *path){
     write(p[1], password, strlen(password));
     write(p[1], "\n", 1);
     close(p[1]);
+    close(p_sync[1]);
 
     wait(NULL);
+    char c;
+    while(read(p_sync[0], &c, 1)){
+    }
+    close(p_sync[0]);
 
     return 0;
   #elif defined(_WIN32) || defined (WIN32)
@@ -456,5 +468,26 @@ char **file_io_get_gpg_keys(int *num, _Bool secret){
     *num = pindex;
   }
   return keys;
+}
+
+void file_io_init_password_store(const char *key){
+  int pid;
+  pid = fork();
+  if (pid < 0){
+    perror("Could not fork");
+  }
+  if (pid == 0){
+    execlp("pass", "pass", "init", key, NULL);
+  }
+  wait(NULL);
+
+  pid = fork();
+  if (pid < 0){
+    perror("Could not fork");
+  }
+  if (pid == 0){
+    execlp("pass", "pass", "git", "init", NULL);
+  }
+  wait(NULL);
 }
 #endif

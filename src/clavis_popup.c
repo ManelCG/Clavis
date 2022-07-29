@@ -123,6 +123,11 @@ int clavis_popup_main(int argc, char *argv[]){
   gtk_container_set_border_width(GTK_CONTAINER(window_root), 10);
   gtk_widget_show_all(window_root);
   clavis_popup_draw_main_window(window_root, NULL);
+
+  if (gui_templates_password_store_init_handler() != 0){
+    exit(-1);
+  }
+
   gtk_main();
   return 0;
 }
