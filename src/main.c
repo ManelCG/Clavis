@@ -27,12 +27,6 @@ int main(int argc, char *argv[]){
   }
   free((char *) papath);
 
-  printf("PUBLIC:\n");
-  file_io_get_gpg_keys(false);
-  printf("PRIVATE:\n");
-  file_io_get_gpg_keys(true);
-  exit(0);
-
   //Check if password store is initialized
   #ifdef __unix__
   if (file_io_string_is_file(".gpg-id")){

@@ -298,7 +298,47 @@ _Bool file_io_string_is_file(const char *s){
 }
 
 #ifdef __unix__
-const char **file_io_get_gpg_keys(_Bool secret){
+char **file_io_get_full_gpg_keys(int *num){
+  int npubs, nprivs;
+  char **pubs = file_io_get_gpg_keys(&npubs, false);
+  char **privs = file_io_get_gpg_keys(&nprivs, true);
+
+  int nkeys = 0;
+  char **keys = NULL;
+
+  for (int i = 0; i < npubs; i++){
+    for (int j = 0; j < nprivs; j++){
+      if (strcmp(pubs[i], privs[j]) == 0){
+        nkeys++;
+        if (keys == NULL){
+          keys = malloc(sizeof(char *) * nkeys);
+        } else {
+          keys = realloc(keys, sizeof(char *) * nkeys);
+        }
+
+        keys[nkeys-1] = malloc(sizeof(char) * (strlen(pubs[i])+1));
+        strcpy(keys[nkeys-1], pubs[i]);
+      }
+
+      if (i == npubs -1){
+        free(privs[j]);
+      }
+    }
+
+
+    free(pubs[i]);
+  }
+
+  free(pubs);
+  free(privs);
+
+  if (num != NULL){
+    *num = nkeys;
+  }
+  return keys;
+}
+
+char **file_io_get_gpg_keys(int *num, _Bool secret){
   //gpg --list-keys | grep -E "<*>" | awk '{print $NF}'
   //gpg --list-secret-keys | grep -E "<*>" | awk '{print $NF}'
   int pid;
@@ -412,11 +452,9 @@ const char **file_io_get_gpg_keys(_Bool secret){
   }
   close(pipe_awk_main[0]);
 
-  printf("We have %d keys\n", pindex);
-  for (int i = 0; i < pindex; i++){
-    printf("%s\n", keys[i]);
+  if (num != NULL){
+    *num = pindex;
   }
-
-
+  return keys;
 }
 #endif

@@ -17,8 +17,8 @@ const char *get_password_store_path();
 int mkdir_handler(const char *path);
 
 #ifdef __unix__
-const char **file_io_get_gpg_keys(_Bool secret);
-const char **file_io_get_full_gpg_keys();
+char **file_io_get_gpg_keys(int *num, _Bool secret);
+char **file_io_get_full_gpg_keys(int *num);
 #endif
 
 #endif //_FILE_IO_H_
