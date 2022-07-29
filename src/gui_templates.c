@@ -1027,7 +1027,7 @@ int gui_templates_create_key_handler(){
     close(p[0]);
     close(p[1]);
 
-    execlp("gpg", "gpg", "--full-generate-key", NULL);
+    execlp("gpg", "gpg", "--full-generate-key", "--batch", NULL);
     exit(-1);
   }
   close(p[0]);
