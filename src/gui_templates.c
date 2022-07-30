@@ -167,6 +167,14 @@ void set_passlen_handler(GtkWidget *widget, gpointer data){
   passgen *pg = (passgen *) data;
   passgen_set_len(pg, atoi(gtk_entry_get_text(GTK_ENTRY(widget))));
 }
+void gui_templates_toggle_widget_visible_handler(GtkWidget *toggle, gpointer data){
+  GtkWidget *wid = (GtkWidget *) data;
+  if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle))){
+    gtk_widget_show_all(wid);
+  } else {
+    gtk_widget_hide(wid);
+  }
+}
 void button_newpassword_handler(GtkWidget *widget, gpointer data){
   folderstate *fs = (folderstate *) data;
   passgen *pg = passgen_new();
@@ -174,8 +182,10 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
   GtkWidget *dialog;
   if (strcmp(gtk_widget_get_name(widget), CLAVIS_BUTTON_NEWPASSWORD_NAME) == 0){
     dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Add new password:");
+    gtk_window_set_title(GTK_WINDOW(dialog), "Add new password to Clavis");
   } else {
     dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Edit existing password:");
+    gtk_window_set_title(GTK_WINDOW(dialog), "Edit password in Clavis");
   }
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
@@ -331,6 +341,10 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
 
   //Main hbox
   main_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+
+  GtkWidget *dummy_entry = gtk_entry_new();
+  gtk_box_pack_start(GTK_BOX(main_hbox), dummy_entry, false, false, 0);
+
   gtk_box_pack_start(GTK_BOX(main_hbox), left_vbox, false, false, 0);
   {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
   gtk_box_pack_start(GTK_BOX(main_hbox), separator, false, false, 15);}
@@ -339,12 +353,43 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
 
   gtk_box_pack_start(GTK_BOX(dialog_box), main_hbox, false, false, 0);
   gtk_widget_show_all(dialog);
-  int response = gtk_dialog_run(GTK_DIALOG(dialog));
+  gtk_widget_hide(dummy_entry);
 
-  if (response == GTK_RESPONSE_OK){
-    const char *password = gtk_entry_get_text(GTK_ENTRY(entry_password));
-    const char *name = folderstate_file_get_full_path_from_string(fs, gtk_entry_get_text(GTK_ENTRY(entry_passname)));
-    file_io_encrypt_password(password, name);
+
+  _Bool valid_password = false;
+  while (! valid_password){
+    valid_password = true;
+    int response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+    if (response == GTK_RESPONSE_OK){
+      if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_password))) == 0){
+        GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Please enter a password");
+        gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
+
+        GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
+        gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+        gtk_dialog_run(GTK_DIALOG(dialog_failure));
+        destroy(dialog_failure, dialog_failure);
+        valid_password = false;
+      }
+      if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_passname))) == 0){
+        GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Please give a name to your password");
+        gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
+
+        GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
+        gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+        gtk_dialog_run(GTK_DIALOG(dialog_failure));
+        destroy(dialog_failure, dialog_failure);
+        valid_password = false;
+      }
+
+
+      if (valid_password){
+        const char *password = gtk_entry_get_text(GTK_ENTRY(entry_password));
+        const char *name = folderstate_file_get_full_path_from_string(fs, gtk_entry_get_text(GTK_ENTRY(entry_passname)));
+        file_io_encrypt_password(password, name);
+      }
+    }
   }
 
   destroy(dialog, dialog);
@@ -358,6 +403,7 @@ void button_newfolder_handler(GtkWidget *widget, gpointer data){
   folderstate *fs = (folderstate *) data;
 
   GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "New folder name:");
+  gtk_window_set_title(GTK_WINDOW(dialog), "New folder");
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
@@ -786,6 +832,7 @@ int gui_templates_password_store_init_handler(){
     int response;
 
     dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Hey! It seems this is your first time running Clavis.\nInitialize Password Store?");
+    gtk_window_set_title(GTK_WINDOW(dialog), "Welcome to Clavis!");
     gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
     GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
     { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
@@ -837,31 +884,27 @@ void gui_templates_export_key_handler(const char *key){
   const char *userhome = getenv("HOME");
   chdir(userhome);
 
+  char *keyname = malloc(sizeof(char) * (strlen(key) + 5));
+  strcpy(keyname, key);
+  strcat(keyname, ".sec");
+
   GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
   gtk_file_chooser_set_do_overwrite_confirmation(chooser, true);
-  gtk_file_chooser_set_current_name(chooser, key);
+  gtk_file_chooser_set_current_name(chooser, keyname);
 
 
   int response = gtk_dialog_run(GTK_DIALOG(dialog));
 
   if (response == GTK_RESPONSE_ACCEPT){
-    char *filename;
     GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
-    filename = gtk_file_chooser_get_filename(chooser);
 
-    char *pubkey = malloc(sizeof(char) * (strlen(filename)+5));
-    char *seckey = malloc(sizeof(char) * (strlen(filename)+5));
-    strcpy(pubkey, filename);
-    strcpy(seckey, filename);
-    strcat(pubkey, ".pub");
-    strcat(seckey, ".sec");
+    free(keyname);
 
-    file_io_export_gpg_keys(key, pubkey, false);
-    file_io_export_gpg_keys(key, seckey, true);
+    keyname = gtk_file_chooser_get_filename(chooser);
 
-    g_free(filename);
-    free(pubkey);
-    free(seckey);
+    file_io_export_gpg_keys(key, keyname, true);
+
+    g_free(keyname);
   }
   chdir(cwd);
   destroy(dialog, dialog);
@@ -938,6 +981,7 @@ void gui_templates_import_key_handler(){
 }
 int gui_templates_create_key_handler(){
   GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Configure your new GPG key:");
+  gtk_window_set_title(GTK_WINDOW(dialog), "Clavis Master Key creation");
 
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
 
@@ -980,6 +1024,8 @@ int gui_templates_create_key_handler(){
   GtkWidget *entry_password_1;
   GtkWidget *entry_password_2;
   GtkWidget *check_password_visibility;
+
+  GtkWidget *show_advanced_config;
 
   //Pack
   //KEY TYPE VBOX
@@ -1033,8 +1079,8 @@ int gui_templates_create_key_handler(){
   entry_name = gtk_entry_new();
   entry_email = gtk_entry_new();
   entry_comment = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_name), "Name");
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_email), "Email");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_name), "Your name");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_email), "Key name");
   gtk_entry_set_placeholder_text(GTK_ENTRY(entry_comment), "Comment (Optional)");
 
   name_email_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
@@ -1047,8 +1093,10 @@ int gui_templates_create_key_handler(){
   gtk_box_pack_start(GTK_BOX(personal_info_vbox), entry_comment, true, true, 0);
 
   //KEY PASSWORD
+  GtkWidget *display_password_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   check_password_visibility = gtk_check_button_new_with_label("Display password");
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_password_visibility), false);
+  gtk_box_pack_start(GTK_BOX(display_password_hbox), check_password_visibility, true, false, 0);
   password_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 
   entry_password_1 = gtk_entry_new();
@@ -1063,81 +1111,117 @@ int gui_templates_create_key_handler(){
   gtk_box_pack_start(GTK_BOX(password_hbox), entry_password_2, true, true, 0);
   gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password_2), "Repeat password");
 
-
   GtkWidget *password_label = gtk_label_new("Set key's password:");
   password_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
   gtk_box_pack_start(GTK_BOX(password_vbox), password_label, false, false, 0);
   gtk_box_pack_start(GTK_BOX(password_vbox), password_hbox, false, false, 0);
-  gtk_box_pack_start(GTK_BOX(password_vbox), check_password_visibility, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(password_vbox), display_password_hbox, false, false, 0);
+
+  //Advanced frame
+  show_advanced_config = gtk_check_button_new_with_label("Show advanced configuration");
+  GtkWidget *frame_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  GtkWidget *advanced_check_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  gtk_box_pack_start(GTK_BOX(advanced_check_hbox), show_advanced_config, true, false, 0);
+  g_signal_connect(show_advanced_config, "toggled", G_CALLBACK(gui_templates_toggle_widget_visible_handler), (gpointer) frame_vbox);
+
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(frame_vbox), separator, false, false, 5);}
+  gtk_box_pack_start(GTK_BOX(frame_vbox), top_hbox, false, false, 0);
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(frame_vbox), separator, false, false, 5);}
+  gtk_box_pack_start(GTK_BOX(frame_vbox), expiration_vbox, false, false, 0);
 
   //MAIN VBOX
   main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-  gtk_box_pack_start(GTK_BOX(main_vbox), top_hbox, false, false, 0);
-  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-  gtk_box_pack_start(GTK_BOX(main_vbox), separator, false, false, 5);}
-  gtk_box_pack_start(GTK_BOX(main_vbox), expiration_vbox, false, false, 0);
-  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-  gtk_box_pack_start(GTK_BOX(main_vbox), separator, false, false, 5);}
+
+  GtkWidget *dummy_entry = gtk_entry_new();
+  gtk_box_pack_start(GTK_BOX(main_vbox), dummy_entry, false, false, 0);
+
   gtk_box_pack_start(GTK_BOX(main_vbox), personal_info_vbox, false, false, 0);
   {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
   gtk_box_pack_start(GTK_BOX(main_vbox), separator, false, false, 5);}
   gtk_box_pack_start(GTK_BOX(main_vbox), password_vbox, false, false, 0);
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(main_vbox), separator, false, false, 5);}
+
+  gtk_box_pack_start(GTK_BOX(main_vbox), advanced_check_hbox, false, false, 0);
+
+  gtk_box_pack_start(GTK_BOX(main_vbox), frame_vbox, false, false, 0);
 
   gtk_box_pack_start(GTK_BOX(dialog_box), main_vbox, false, false, 0);
   gtk_widget_show_all(dialog);
-  int response = gtk_dialog_run(GTK_DIALOG(dialog));
-  if (response != GTK_RESPONSE_OK){
-    destroy(dialog, dialog);
-    return -1;
+
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(show_advanced_config), false);
+  gtk_widget_hide(frame_vbox);
+  gtk_widget_hide(dummy_entry);
+
+  _Bool valid_key = false;
+  while (! valid_key){
+    valid_key = true;
+    int response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+    //After accepting
+    if (response != GTK_RESPONSE_OK){
+      destroy(dialog, dialog);
+      return -1;
+    }
+
+    if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_keylen))) < 3){
+      GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Key length must be a 3+ digit number");
+      gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
+
+      GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
+      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+      gtk_dialog_run(GTK_DIALOG(dialog_failure));
+      destroy(dialog_failure, dialog_failure);
+      valid_key = false;
+    }
+
+    if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_name))) <=4){
+      GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Name must be at least 5 letters long.");
+      gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
+
+      GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
+      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+      gtk_dialog_run(GTK_DIALOG(dialog_failure));
+      destroy(dialog_failure, dialog_failure);
+      valid_key = false;
+    }
+
+    if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_email))) <=4){
+      GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Key name must be at least 5 letters long");
+      gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
+
+      GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
+      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+      gtk_dialog_run(GTK_DIALOG(dialog_failure));
+      destroy(dialog_failure, dialog_failure);
+      valid_key = false;
+    }
+
+    if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_password_1))) == 0){
+      GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Please enter a password");
+      gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
+
+      GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
+      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+      gtk_dialog_run(GTK_DIALOG(dialog_failure));
+      destroy(dialog_failure, dialog_failure);
+      valid_key = false;
+    }
+
+    if (strcmp(gtk_entry_get_text(GTK_ENTRY(entry_password_1)), gtk_entry_get_text(GTK_ENTRY(entry_password_2))) != 0){
+      GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Your passwords do not match!");
+      gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
+
+      GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
+      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+      gtk_dialog_run(GTK_DIALOG(dialog_failure));
+      destroy(dialog_failure, dialog_failure);
+      valid_key = false;
+    }
   }
-
-  if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_keylen))) < 3){
-    destroy(dialog, dialog);
-    GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Key length must be a 3+ digit number");
-    gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
-
-    GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
-    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
-    gtk_dialog_run(GTK_DIALOG(dialog_failure));
-    destroy(dialog_failure, dialog_failure);
-    return -1;
-  }
-
-  if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_name))) <=4){
-    destroy(dialog, dialog);
-    GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Name must be at least 4 letters long.");
-    gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
-
-    GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
-    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
-    gtk_dialog_run(GTK_DIALOG(dialog_failure));
-    destroy(dialog_failure, dialog_failure);
-    return -1;
-  }
-
-  if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_email))) <=3){
-    destroy(dialog, dialog);
-    GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Please enter valid email.");
-    gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
-
-    GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
-    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
-    gtk_dialog_run(GTK_DIALOG(dialog_failure));
-    destroy(dialog_failure, dialog_failure);
-    return -1;
-  }
-
-  if (strcmp(gtk_entry_get_text(GTK_ENTRY(entry_password_1)), gtk_entry_get_text(GTK_ENTRY(entry_password_2))) != 0){
-    destroy(dialog, dialog);
-    GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Your passwords do not match!");
-    gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
-
-    GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
-    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
-    gtk_dialog_run(GTK_DIALOG(dialog_failure));
-    destroy(dialog_failure, dialog_failure);
-    return -1;
-  }
+  //Key entered is valid. Proceed
 
   int p[2];
   if (pipe(p) != 0){
@@ -1174,8 +1258,10 @@ int gui_templates_create_key_handler(){
   strcat(buffer, "\nName-Real: ");
   strcat(buffer, gtk_entry_get_text(GTK_ENTRY(entry_name)));
 
-  strcat(buffer, "\nName-Comment: ");
-  strcat(buffer, gtk_entry_get_text(GTK_ENTRY(entry_comment)));
+  if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_comment))) != 0){
+    strcat(buffer, "\nName-Comment: ");
+    strcat(buffer, gtk_entry_get_text(GTK_ENTRY(entry_comment)));
+  }
 
   strcat(buffer, "\nName-Email: ");
   strcat(buffer, gtk_entry_get_text(GTK_ENTRY(entry_email)));
@@ -1205,7 +1291,7 @@ int gui_templates_create_key_handler(){
   write(p[1], buffer, strlen(buffer));
   close(p[1]);
 
-  wait(NULL);
+  waitpid(pid, NULL, 0);
 
   destroy(dialog, dialog);
   wait(NULL);
@@ -1232,6 +1318,7 @@ int gui_templates_initialize_password_store(){
 
   //Chose key
   dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Choose a GPG key, import one or create a new one.");
+  gtk_window_set_title(GTK_WINDOW(dialog), "Select your Clavis Master Key");
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
 
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
@@ -1263,6 +1350,8 @@ int gui_templates_initialize_password_store(){
   gtk_button_set_image(GTK_BUTTON(button_import), icon); }
   g_signal_connect(button_import, "pressed", G_CALLBACK(gui_templates_import_key_handler), NULL);
   g_signal_connect(button_import, "activate", G_CALLBACK(gui_templates_import_key_handler), NULL);
+  g_signal_connect(button_import, "pressed", G_CALLBACK(button_refresh_keys_handler_1), (gpointer) key_combo_box);
+  g_signal_connect(button_import, "activate", G_CALLBACK(button_refresh_keys_handler_1), (gpointer) key_combo_box);
 
   button_export = gtk_button_new_with_label("Export key");
   { GtkWidget *icon = gtk_image_new_from_icon_name("document-save-as", GTK_ICON_SIZE_MENU);
@@ -1275,6 +1364,8 @@ int gui_templates_initialize_password_store(){
   gtk_button_set_image(GTK_BUTTON(button_create), icon); }
   g_signal_connect(button_create, "pressed", G_CALLBACK(gui_templates_create_key_handler), NULL);
   g_signal_connect(button_create, "activate", G_CALLBACK(gui_templates_create_key_handler), NULL);
+  g_signal_connect(button_create, "pressed", G_CALLBACK(button_refresh_keys_handler_1), (gpointer) key_combo_box);
+  g_signal_connect(button_create, "activate", G_CALLBACK(button_refresh_keys_handler_1), (gpointer) key_combo_box);
 
   //Pack
   gui_templates_fill_combo_box_with_gpg_keys(key_combo_box);
@@ -1326,7 +1417,6 @@ int gui_templates_initialize_password_store(){
 
 void gui_templates_show_about_window(GtkWidget *w, gpointer data){
   GtkWindow *window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
-  // gui_templates_window_set_sempiternum_icon(window);
 
   gtk_window_set_title(window, "About Clavis");
   gtk_window_set_resizable(window, false);
