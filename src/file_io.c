@@ -382,9 +382,9 @@ char **file_io_get_gpg_keys(int *num, _Bool secret){
 
 
     if (secret){
-      execlp("gpg", "gpg", "--list-secret-keys", NULL);
+      execlp("gpg", "gpg", "--list-secret-keys", "--with-colons", NULL);
     } else {
-      execlp("gpg", "gpg", "--list-keys", NULL);
+      execlp("gpg", "gpg", "--list-keys", "--with-colons", NULL);
     }
   }
   //MAIN
@@ -410,7 +410,7 @@ char **file_io_get_gpg_keys(int *num, _Bool secret){
     close(pipe_grep_awk[1]);
     close(pipe_grep_awk[0]);
 
-    execlp("grep", "grep", "-E", "<*>", NULL);
+    execlp("grep", "grep", "-E", "<*>|^uid", NULL);
   }
   //MAIN
   close(pipe_gpg_grep[0]);
@@ -438,7 +438,7 @@ char **file_io_get_gpg_keys(int *num, _Bool secret){
     close(pipe_awk_main[1]);
     close(pipe_awk_main[0]);
 
-    execlp("awk", "awk", "{print $NF}", NULL);
+    execlp("awk", "awk", "-F:", "{print $10}", NULL);
   }
   //MAIN
   close(pipe_grep_awk[0]);
@@ -463,7 +463,7 @@ char **file_io_get_gpg_keys(int *num, _Bool secret){
       plen = DEFAULT_GPG_NAME_LEN;
       keys = realloc(keys, sizeof(char *) * (pindex+1));
       keys[pindex] = malloc(sizeof(char) * plen);
-    } else if (c != '<' && c != '>'){
+    } else /*if (c != '<' && c != '>')*/{
       keys[pindex][windex] = c;
       windex++;
       if (windex > plen-8){
