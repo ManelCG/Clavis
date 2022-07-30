@@ -21,5 +21,7 @@
 #define CLAVIS_PASSGEN_SYMBOLS "!|\"@#$~%&/{([)]=}?\\<>+*,;.:-_"
 
 #define CLAVIS_BUTTON_NEWPASSWORD_NAME "Button Newpassword"
+#define CLAVIS_BUTTON_EXPORT_PUBLIC_KEY_NAME "Export Public Key"
+#define CLAVIS_BUTTON_EXPORT_PRIVATE_KEY_NAME "Export Private Key"
 
 #endif //_CLAVIS_CONSTANTS_

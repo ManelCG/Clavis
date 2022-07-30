@@ -3,6 +3,7 @@
 #include <file_io.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <fcntl.h>
 
 #include <clavis_constants.h>
 #include <clavis_passgen.h>
@@ -480,6 +481,7 @@ void button_newfolder_handler(GtkWidget *widget, gpointer data){
     folderstate_reload(fs);
 
     GtkWidget *parent = gtk_widget_get_toplevel(widget);
+    parent = gtk_widget_get_toplevel(widget);
     draw_main_window_handler(parent, fs);
   }
 
@@ -877,7 +879,7 @@ void gui_templates_fill_combo_box_with_gpg_keys(GtkWidget *combo){
   }
 }
 
-void gui_templates_export_key_handler(const char *key){
+void gui_templates_export_key_handler(const char *key, _Bool private){
   GtkWidget *dialog = gtk_file_chooser_dialog_new("Save Keys", NULL, GTK_FILE_CHOOSER_ACTION_SAVE, "_Cancel", GTK_RESPONSE_CANCEL, "_Save", GTK_RESPONSE_ACCEPT, NULL);
 
   const char *cwd = getcwd(NULL, 0);
@@ -886,7 +888,11 @@ void gui_templates_export_key_handler(const char *key){
 
   char *keyname = malloc(sizeof(char) * (strlen(key) + 5));
   strcpy(keyname, key);
-  strcat(keyname, ".sec");
+  if (private){
+    strcat(keyname, ".sec");
+  } else {
+    strcat(keyname, ".pub");
+  }
 
   GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
   gtk_file_chooser_set_do_overwrite_confirmation(chooser, true);
@@ -902,7 +908,7 @@ void gui_templates_export_key_handler(const char *key){
 
     keyname = gtk_file_chooser_get_filename(chooser);
 
-    file_io_export_gpg_keys(key, keyname, true);
+    file_io_export_gpg_keys(key, keyname, private);
 
     g_free(keyname);
   }
@@ -918,7 +924,7 @@ void gui_templates_export_key_handler_combobox(GtkWidget *w, gpointer data){
     return;
   }
 
-  gui_templates_export_key_handler(key);
+  gui_templates_export_key_handler(key, true);
 }
 
 void gui_templates_export_key_handler_entry(GtkWidget *w, gpointer data){
@@ -929,7 +935,7 @@ void gui_templates_export_key_handler_entry(GtkWidget *w, gpointer data){
     return;
   }
 
-  gui_templates_export_key_handler(key);
+  gui_templates_export_key_handler(key, true);
 }
 
 void gui_templates_export_key_handler_label(GtkWidget *w, gpointer data){
@@ -940,7 +946,7 @@ void gui_templates_export_key_handler_label(GtkWidget *w, gpointer data){
     return;
   }
 
-  gui_templates_export_key_handler(key);
+  gui_templates_export_key_handler(key, true);
 }
 
 
@@ -1307,6 +1313,31 @@ void button_refresh_keys_handler(GtkWidget *widget, gpointer data){
   }
 
   gui_templates_fill_combo_box_with_gpg_keys(combo);
+}
+
+void menu_button_export_gpg_handler(GtkWidget *w, gpointer data){
+  #ifdef __unix__
+  char key_id[512];
+  int fd = open(".gpg-id", O_RDONLY);
+
+  if (fd < 0){
+    return;
+  }
+
+  int len = read(fd, key_id, 512);
+  if (len == 0){
+    return;
+  }
+
+  key_id[len-1] = '\0';
+
+  const char *widname = gtk_widget_get_name(w);
+  if (strcmp(widname, CLAVIS_BUTTON_EXPORT_PUBLIC_KEY_NAME) == 0){
+    gui_templates_export_key_handler(key_id, false);
+  } else if (strcmp(widname, CLAVIS_BUTTON_EXPORT_PRIVATE_KEY_NAME) == 0){
+    gui_templates_export_key_handler(key_id, true);
+  }
+  #endif
 }
 
 #ifdef __unix__

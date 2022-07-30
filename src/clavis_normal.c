@@ -52,6 +52,11 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   //File menu
   GtkWidget *menu_filemenu;
   GtkWidget *menu_fileMi;
+  GtkWidget *menu_button_new_password;
+  GtkWidget *menu_button_new_folder;
+  GtkWidget *menu_button_export_public_gpg;
+  GtkWidget *menu_button_export_private_gpg;
+  GtkWidget *menu_button_quit;
 
   //Edit menu
   GtkWidget *menu_editmenu;
@@ -73,6 +78,58 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   menu_fileMi = gtk_menu_item_new_with_label("File");
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_menubar), menu_fileMi);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_fileMi), menu_filemenu);
+
+  {
+    menu_button_export_public_gpg = gtk_image_menu_item_new_with_label("Export public GPG key");
+    g_signal_connect(menu_button_export_public_gpg, "activate", G_CALLBACK(menu_button_export_gpg_handler), NULL);
+    gtk_widget_set_name(menu_button_export_public_gpg, CLAVIS_BUTTON_EXPORT_PUBLIC_KEY_NAME);
+    GtkWidget *icon = gtk_image_new_from_icon_name("document-save-as", 16);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_export_public_gpg), icon);
+  }
+
+  {
+    menu_button_export_private_gpg = gtk_image_menu_item_new_with_label("Export private GPG key");
+    g_signal_connect(menu_button_export_private_gpg, "activate", G_CALLBACK(menu_button_export_gpg_handler), NULL);
+    gtk_widget_set_name(menu_button_export_private_gpg, CLAVIS_BUTTON_EXPORT_PRIVATE_KEY_NAME);
+    GtkWidget *icon = gtk_image_new_from_icon_name("document-save-as", 16);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_export_private_gpg), icon);
+  }
+
+
+  {
+    menu_button_new_folder = gtk_image_menu_item_new_with_label("New folder");
+    g_signal_connect(menu_button_new_folder, "activate", G_CALLBACK(button_newfolder_handler), (gpointer) fs);
+    g_signal_connect(menu_button_new_folder, "activate", G_CALLBACK(button_reload_handler), (gpointer) fs);
+    GtkWidget *icon = gtk_image_new_from_icon_name("folder-new", 16);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_new_folder), icon);
+  }
+
+  {
+    menu_button_new_password = gtk_image_menu_item_new_with_label("New password");
+    g_signal_connect(menu_button_new_password, "activate", G_CALLBACK(button_newpassword_handler), (gpointer) fs);
+    g_signal_connect(menu_button_new_password, "activate", G_CALLBACK(button_reload_handler), (gpointer) fs);
+    gtk_widget_set_name(menu_button_new_password, CLAVIS_BUTTON_NEWPASSWORD_NAME);
+    GtkWidget *icon = gtk_image_new_from_icon_name("list-add", 16);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_new_password), icon);
+  }
+
+  {
+    menu_button_quit = gtk_image_menu_item_new_with_label("Quit");
+    g_signal_connect(menu_button_quit, "activate", G_CALLBACK(gtk_main_quit), NULL);
+    GtkWidget *icon = gtk_image_new_from_icon_name("window-close", 16);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_quit), icon);
+  }
+
+
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_new_folder);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_new_password);
+  {GtkWidget *separator = gtk_separator_menu_item_new();
+   gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), separator);}
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_export_public_gpg);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_export_private_gpg);
+  {GtkWidget *separator = gtk_separator_menu_item_new();
+   gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), separator);}
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_quit);
 
   //Edit submenu
   menu_editMi = gtk_menu_item_new_with_label("Edit");
