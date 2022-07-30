@@ -830,6 +830,71 @@ void gui_templates_fill_combo_box_with_gpg_keys(GtkWidget *combo){
   }
 }
 
+void gui_templates_export_key_handler(const char *key){
+  GtkWidget *dialog = gtk_file_chooser_dialog_new("Save Keys", NULL, GTK_FILE_CHOOSER_ACTION_SAVE, "_Cancel", GTK_RESPONSE_CANCEL, "_Save", GTK_RESPONSE_ACCEPT, NULL);
+  GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
+  gtk_file_chooser_set_do_overwrite_confirmation(chooser, true);
+  gtk_file_chooser_set_current_name(chooser, key);
+
+
+  int response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+  if (response == GTK_RESPONSE_ACCEPT){
+    char *filename;
+    GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
+    filename = gtk_file_chooser_get_filename(chooser);
+
+    char *pubkey = malloc(sizeof(char) * (strlen(filename)+5));
+    char *seckey = malloc(sizeof(char) * (strlen(filename)+5));
+    strcpy(pubkey, filename);
+    strcpy(seckey, filename);
+    strcat(pubkey, ".pub");
+    strcat(seckey, ".sec");
+
+    file_io_export_gpg_keys(key, pubkey, false);
+    file_io_export_gpg_keys(key, seckey, true);
+
+    g_free(filename);
+    free(pubkey);
+    free(seckey);
+  }
+  destroy(dialog, dialog);
+}
+
+void gui_templates_export_key_handler_combobox(GtkWidget *w, gpointer data){
+  GtkWidget *combo = (GtkWidget *) data;
+  const char *key = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo));
+
+  if (key == NULL){
+    return;
+  }
+
+  gui_templates_export_key_handler(key);
+}
+
+void gui_templates_export_key_handler_entry(GtkWidget *w, gpointer data){
+  GtkWidget *entry = (GtkWidget *) data;
+  const char *key = gtk_entry_get_text(GTK_ENTRY(entry));
+
+  if (key == NULL){
+    return;
+  }
+
+  gui_templates_export_key_handler(key);
+}
+
+void gui_templates_export_key_handler_label(GtkWidget *w, gpointer data){
+  GtkWidget *label = (GtkWidget *) data;
+  const char *key = gtk_label_get_text(GTK_LABEL(label));
+
+  if (key == NULL){
+    return;
+  }
+
+  gui_templates_export_key_handler(key);
+}
+
+
 void gui_templates_import_key_handler(){
   GtkWidget *dialog = gtk_file_chooser_dialog_new("Open File", NULL, GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, NULL);
   int response = gtk_dialog_run(GTK_DIALOG(dialog));
@@ -1179,14 +1244,24 @@ int gui_templates_initialize_password_store(){
   GtkWidget *key_combo_box;
 
   GtkWidget *button_import;
+  GtkWidget *button_export;
   GtkWidget *button_create;
   GtkWidget *button_refresh;
+
+  key_combo_box = gtk_combo_box_text_new();
 
   button_import = gtk_button_new_with_label("Import key");
   { GtkWidget *icon = gtk_image_new_from_icon_name("insert-object", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_import), icon); }
   g_signal_connect(button_import, "pressed", G_CALLBACK(gui_templates_import_key_handler), NULL);
   g_signal_connect(button_import, "activate", G_CALLBACK(gui_templates_import_key_handler), NULL);
+
+  button_export = gtk_button_new_with_label("Export key");
+  { GtkWidget *icon = gtk_image_new_from_icon_name("document-save-as", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(button_export), icon); }
+  g_signal_connect(button_export, "pressed", G_CALLBACK(gui_templates_export_key_handler_combobox), (gpointer) key_combo_box);
+  g_signal_connect(button_export, "activate", G_CALLBACK(gui_templates_export_key_handler_combobox), (gpointer) key_combo_box);
+
   button_create = gtk_button_new_with_label("Create new key");
   { GtkWidget *icon = gtk_image_new_from_icon_name("document-new", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_create), icon); }
@@ -1194,7 +1269,6 @@ int gui_templates_initialize_password_store(){
   g_signal_connect(button_create, "activate", G_CALLBACK(gui_templates_create_key_handler), NULL);
 
   //Pack
-  key_combo_box = gtk_combo_box_text_new();
   gui_templates_fill_combo_box_with_gpg_keys(key_combo_box);
 
   button_refresh = gtk_button_new();
@@ -1212,6 +1286,7 @@ int gui_templates_initialize_password_store(){
 
   new_key_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   gtk_box_pack_start(GTK_BOX(new_key_hbox), button_import, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(new_key_hbox), button_export, true, true, 0);
   gtk_box_pack_start(GTK_BOX(new_key_hbox), button_create, true, true, 0);
 
 

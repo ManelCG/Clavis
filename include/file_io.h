@@ -20,6 +20,8 @@ int mkdir_handler(const char *path);
 char **file_io_get_gpg_keys(int *num, _Bool secret);
 char **file_io_get_full_gpg_keys(int *num);
 void file_io_init_password_store(const char *key);
+
+void file_io_export_gpg_keys(const char *key, const char *path, _Bool private);
 #endif
 
 #endif //_FILE_IO_H_

@@ -26,4 +26,8 @@ int gui_templates_initialize_password_store();
 void gui_templates_import_key_handler();
 int gui_templates_create_key_handler();
 
+void gui_templates_export_key_handler_combobox(GtkWidget *wid, gpointer data);
+void gui_templates_export_key_handler_entry(GtkWidget *wid, gpointer data);
+void gui_templates_export_key_handler_label(GtkWidget *wid, gpointer data);
+
 #endif //_GUI_TEMPLATES_H_

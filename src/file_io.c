@@ -500,4 +500,25 @@ void file_io_init_password_store(const char *key){
   }
   wait(NULL);
 }
+
+void file_io_export_gpg_keys(const char *key, const char *path, _Bool private){
+  int pid = fork();
+  if (pid < 0){
+    perror("Could not fork");
+    return;
+  }
+  if (pid == 0){  //Child
+    close(1);
+    fopen(path, "w");
+
+    if (private){
+      execlp("gpg", "gpg", "--export-secret-key", "-a", key, NULL);
+      exit(-1);
+    } else {
+      execlp("gpg", "gpg", "--export", "-a", key, NULL);
+      exit(-1);
+    }
+  }
+  return;
+}
 #endif
