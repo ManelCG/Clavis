@@ -1298,7 +1298,7 @@ int gui_templates_create_key_handler(){
   return 0;
 }
 
-void button_refresh_keys_handler_1(GtkWidget *widget, gpointer data){
+void button_refresh_keys_handler(GtkWidget *widget, gpointer data){
   GtkWidget *combo = (GtkWidget *) data;
   gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
   while (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)) != -1){
@@ -1308,10 +1308,8 @@ void button_refresh_keys_handler_1(GtkWidget *widget, gpointer data){
 
   gui_templates_fill_combo_box_with_gpg_keys(combo);
 }
-void button_refresh_keys_handler_2(GtkWidget *widget, gpointer data){
 
-}
-
+#ifdef __unix__
 int gui_templates_initialize_password_store(){
   GtkWidget *dialog;
   int response;
@@ -1350,8 +1348,8 @@ int gui_templates_initialize_password_store(){
   gtk_button_set_image(GTK_BUTTON(button_import), icon); }
   g_signal_connect(button_import, "pressed", G_CALLBACK(gui_templates_import_key_handler), NULL);
   g_signal_connect(button_import, "activate", G_CALLBACK(gui_templates_import_key_handler), NULL);
-  g_signal_connect(button_import, "pressed", G_CALLBACK(button_refresh_keys_handler_1), (gpointer) key_combo_box);
-  g_signal_connect(button_import, "activate", G_CALLBACK(button_refresh_keys_handler_1), (gpointer) key_combo_box);
+  g_signal_connect(button_import, "pressed", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
+  g_signal_connect(button_import, "activate", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
 
   button_export = gtk_button_new_with_label("Export key");
   { GtkWidget *icon = gtk_image_new_from_icon_name("document-save-as", GTK_ICON_SIZE_MENU);
@@ -1364,8 +1362,8 @@ int gui_templates_initialize_password_store(){
   gtk_button_set_image(GTK_BUTTON(button_create), icon); }
   g_signal_connect(button_create, "pressed", G_CALLBACK(gui_templates_create_key_handler), NULL);
   g_signal_connect(button_create, "activate", G_CALLBACK(gui_templates_create_key_handler), NULL);
-  g_signal_connect(button_create, "pressed", G_CALLBACK(button_refresh_keys_handler_1), (gpointer) key_combo_box);
-  g_signal_connect(button_create, "activate", G_CALLBACK(button_refresh_keys_handler_1), (gpointer) key_combo_box);
+  g_signal_connect(button_create, "pressed", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
+  g_signal_connect(button_create, "activate", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
 
   //Pack
   gui_templates_fill_combo_box_with_gpg_keys(key_combo_box);
@@ -1373,10 +1371,8 @@ int gui_templates_initialize_password_store(){
   button_refresh = gtk_button_new();
   { GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_refresh), icon); }
-  g_signal_connect(button_refresh, "pressed", G_CALLBACK(button_refresh_keys_handler_1), (gpointer) key_combo_box);
-  g_signal_connect(button_refresh, "pressed", G_CALLBACK(button_refresh_keys_handler_2), (gpointer) dialog);
-  g_signal_connect(button_refresh, "activate", G_CALLBACK(button_refresh_keys_handler_1), (gpointer) key_combo_box);
-  g_signal_connect(button_refresh, "activate", G_CALLBACK(button_refresh_keys_handler_2), (gpointer) dialog);
+  g_signal_connect(button_refresh, "pressed", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
+  g_signal_connect(button_refresh, "activate", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
 
 
   combo_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
@@ -1414,6 +1410,7 @@ int gui_templates_initialize_password_store(){
   free(key);
   return 0;
 }
+#endif
 
 void gui_templates_show_about_window(GtkWidget *w, gpointer data){
   GtkWindow *window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
