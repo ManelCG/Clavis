@@ -485,6 +485,7 @@ void file_io_init_password_store(const char *key){
   pid = fork();
   if (pid < 0){
     perror("Could not fork");
+    exit(-1);
   }
   if (pid == 0){
     execlp("pass", "pass", "init", key, NULL);
@@ -498,6 +499,34 @@ void file_io_init_password_store(const char *key){
   if (pid == 0){
     execlp("pass", "pass", "git", "init", NULL);
   }
+  wait(NULL);
+}
+
+void file_io_gpg_trust_key(const char *key){
+  int pid;
+  int p[2];
+  if (pipe(p) < 0){
+    perror("Could not pipe");
+    exit(-1);
+  }
+  pid = fork();
+  if (pid < 0){
+    perror("Could not fork");
+    exit(-1);
+  }
+
+  if (pid == 0){
+    close(0);
+    dup(p[0]);
+    close(p[1]);
+    close(p[0]);
+
+    execlp("gpg", "gpg", "--command-fd", "0", "--expert", "--edit-key", key, "trust", NULL);
+  }
+
+  close(p[0]);
+  write(p[1], "5\ny\n", 4);
+  close(p[1]);
   wait(NULL);
 }
 

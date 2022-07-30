@@ -832,6 +832,11 @@ void gui_templates_fill_combo_box_with_gpg_keys(GtkWidget *combo){
 
 void gui_templates_export_key_handler(const char *key){
   GtkWidget *dialog = gtk_file_chooser_dialog_new("Save Keys", NULL, GTK_FILE_CHOOSER_ACTION_SAVE, "_Cancel", GTK_RESPONSE_CANCEL, "_Save", GTK_RESPONSE_ACCEPT, NULL);
+
+  const char *cwd = getcwd(NULL, 0);
+  const char *userhome = getenv("HOME");
+  chdir(userhome);
+
   GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
   gtk_file_chooser_set_do_overwrite_confirmation(chooser, true);
   gtk_file_chooser_set_current_name(chooser, key);
@@ -858,6 +863,7 @@ void gui_templates_export_key_handler(const char *key){
     free(pubkey);
     free(seckey);
   }
+  chdir(cwd);
   destroy(dialog, dialog);
 }
 
@@ -907,17 +913,19 @@ void gui_templates_import_key_handler(){
     if (pipe(p_sync) < 0){
       perror("Could not pipe");
     }
+
     int pid = fork();
     if (pid < 0){
       perror("Could not fork");
     }
-
     if (pid == 0){  //Child
       close(p_sync[0]);
-      execlp("gpg", "gpg", "--import", filename, NULL);
+      execlp("gpg", "gpg", "--always-trust", "--import", filename, NULL);
       exit(-1);
     }
+
     wait(NULL);
+
     close(p_sync[1]);
     char c;
     while(read(p_sync[0], &c, 1)){
@@ -1309,6 +1317,7 @@ int gui_templates_initialize_password_store(){
 
   destroy(dialog, dialog);
 
+  file_io_gpg_trust_key(key);
   file_io_init_password_store(key);
 
   free(key);
