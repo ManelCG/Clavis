@@ -23,12 +23,18 @@ const char *get_password_store_path(){
   char *path;
 
   #ifdef __unix__
-    char *pa = ".password-store";
+    char *passtoredir = getenv("PASSWORD_STORE_DIR");
+    if (passtoredir == NULL){
+      char *pa = ".password-store";
 
-    homelen = strlen(getenv("HOME"));
-    path = malloc(sizeof(char) * (homelen + strlen(pa) + 8));
+      homelen = strlen(getenv("HOME"));
+      path = malloc(sizeof(char) * (homelen + strlen(pa) + 8));
 
-    sprintf(path, "%s/%s/", getenv("HOME"), pa);
+      sprintf(path, "%s/%s/", getenv("HOME"), pa);
+    } else {
+      path = malloc(sizeof(char) * (strlen(passtoredir)+1));
+      strcpy(path, passtoredir);
+    }
   #elif defined(_WIN32) || defined (WIN32)
     char *pa = "Clavis_Passwords";
 
