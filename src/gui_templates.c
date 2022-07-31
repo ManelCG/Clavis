@@ -481,7 +481,6 @@ void button_newfolder_handler(GtkWidget *widget, gpointer data){
     folderstate_reload(fs);
 
     GtkWidget *parent = gtk_widget_get_toplevel(widget);
-    parent = gtk_widget_get_toplevel(widget);
     draw_main_window_handler(parent, fs);
   }
 
@@ -702,11 +701,7 @@ void button_goup_handler(GtkWidget *widget, gpointer data){
   folderstate_chdir(fs, "..");
   GtkWidget *parent = gtk_widget_get_toplevel(widget);
 
-  if (strcmp(gtk_widget_get_name(parent), "Clavis Popup") == 0){
-    clavis_popup_draw_main_window(parent, (gpointer) fs);
-  } else if (strcmp(gtk_widget_get_name(parent), "Clavis Normal") == 0){
-    clavis_normal_draw_main_window(parent, (gpointer) fs);
-  }
+  draw_main_window_handler(parent, fs);
 }
 
 GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate *fs, _Bool editmode, GtkWidget *output_widget){
@@ -969,7 +964,7 @@ void gui_templates_import_key_handler(){
     }
     if (pid == 0){  //Child
       close(p_sync[0]);
-      execlp("gpg", "gpg", "--always-trust", "--import", filename, NULL);
+      execlp("gpg", "gpg", "--import", filename, NULL);
       exit(-1);
     }
 
