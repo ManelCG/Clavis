@@ -61,6 +61,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   //Edit menu
   GtkWidget *menu_editmenu;
   GtkWidget *menu_editMi;
+  GtkWidget *menu_button_edit_gpg;
 
   //Help menu
   GtkWidget *menu_helpmenu;
@@ -135,6 +136,15 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   menu_editMi = gtk_menu_item_new_with_label("Edit");
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_menubar), menu_editMi);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_editMi), menu_editmenu);
+
+  {
+    menu_button_edit_gpg = gtk_image_menu_item_new_with_label("GPG key settings");
+    g_signal_connect(menu_button_edit_gpg, "activate", G_CALLBACK(gui_templates_initialize_password_store), NULL);
+    GtkWidget *icon = gtk_image_new_from_icon_name("channel-secure", 16);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_edit_gpg), icon);
+  }
+
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_button_edit_gpg);
 
   //Help submenu
   menu_helpMi = gtk_menu_item_new_with_label("Help");
