@@ -32,4 +32,8 @@ void gui_templates_export_key_handler_label(GtkWidget *wid, gpointer data);
 
 void menu_button_export_gpg_handler(GtkWidget *, gpointer);
 
+void gui_templates_pull_from_repo();
+void gui_templates_push_to_repo();
+void gui_templates_sync_repo();
+
 #endif //_GUI_TEMPLATES_H_

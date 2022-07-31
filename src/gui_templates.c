@@ -112,6 +112,15 @@ void type_entry_with_keyboard_handler(GtkWidget *widget, gpointer data){
     #endif
   }
 }
+void gui_templates_pull_from_repo(){
+  printf("Pull\n");
+}
+void gui_templates_push_to_repo(){
+  printf("Push\n");
+}
+void gui_templates_sync_repo(){
+  printf("Sync\n");
+}
 void toggle_visibility_handler(GtkWidget *widget, gpointer data){
   GtkWidget *entry = (GtkWidget *) data;
   gtk_entry_set_visibility(GTK_ENTRY(entry), gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
