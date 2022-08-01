@@ -113,13 +113,58 @@ void type_entry_with_keyboard_handler(GtkWidget *widget, gpointer data){
   }
 }
 void gui_templates_pull_from_repo(){
-  printf("Pull\n");
+  int p_sync[2];
+  int pid;
+  if (pipe(p_sync) != 0){
+    perror("Could not pipe");
+    return;
+  }
+  pid = fork();
+  if (pid < 0){
+    perror("Could not fork");
+    return pid;
+  }
+
+  if (pid == 0){
+    execlp("git", "git", "pull", "--ff", "--no-edit", NULL);
+    return;
+  }
+
+  wait(NULL);
+  close(p_sync[1]);
+  char c;
+  while(read(p_sync[0], &c, 1)){}
+  close(p_sync[0]);
+  return;
 }
 void gui_templates_push_to_repo(){
-  printf("Push\n");
+  int p_sync[2];
+  int pid;
+  if (pipe(p_sync) != 0){
+    perror("Could not pipe");
+    return;
+  }
+  pid = fork();
+  if (pid < 0){
+    perror("Could not fork");
+    return pid;
+  }
+
+  if (pid == 0){
+    execlp("git", "git", "push", NULL);
+    return;
+  }
+
+  wait(NULL);
+  close(p_sync[1]);
+  char c;
+  while(read(p_sync[0], &c, 1)){}
+  close(p_sync[0]);
+  return;
 }
 void gui_templates_sync_repo(){
-  printf("Sync\n");
+  gui_templates_pull_from_repo();
+  gui_templates_push_to_repo();
 }
 void toggle_visibility_handler(GtkWidget *widget, gpointer data){
   GtkWidget *entry = (GtkWidget *) data;
