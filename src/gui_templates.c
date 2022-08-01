@@ -112,6 +112,10 @@ void type_entry_with_keyboard_handler(GtkWidget *widget, gpointer data){
     #endif
   }
 }
+void gui_templates_synthesize_button(GtkWidget *w, gpointer data){
+  GtkWidget *button = (GtkWidget *) data;
+  g_signal_emit_by_name(button, "clicked");
+}
 void gui_templates_pull_from_repo(){
   int p_sync[2];
   int pid;
