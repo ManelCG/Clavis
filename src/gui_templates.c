@@ -122,7 +122,7 @@ void gui_templates_pull_from_repo(){
   pid = fork();
   if (pid < 0){
     perror("Could not fork");
-    return pid;
+    return;
   }
 
   if (pid == 0){
@@ -147,7 +147,7 @@ void gui_templates_push_to_repo(){
   pid = fork();
   if (pid < 0){
     perror("Could not fork");
-    return pid;
+    return;
   }
 
   if (pid == 0){
