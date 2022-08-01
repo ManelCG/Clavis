@@ -301,10 +301,21 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   { GtkWidget *icon = gtk_image_new_from_icon_name("edit-copy", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_copy), icon); }
   g_signal_connect(button_copy, "pressed", G_CALLBACK(copy_entry_to_clipboard_handler), (gpointer) password_output);
-  GtkWidget *toggle_visibility = gtk_check_button_new_with_label("Display password");
+
+  #ifdef __unix__
+  GtkWidget *button_xdotool = gtk_button_new();
+  #elif defined(_WIN32) || defined (WIN32)
+  GtkWidget *button_xdotool = gtk_button_new_with_label("Type");
+  #endif
+  { GtkWidget *icon = gtk_image_new_from_icon_name("document-edit", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(button_xdotool), icon); }
+  g_signal_connect(button_xdotool, "pressed", G_CALLBACK(type_entry_with_keyboard_handler), (gpointer) password_output);
+
+  GtkWidget *toggle_visibility = gtk_check_button_new_with_label("Show pass");
   g_signal_connect(toggle_visibility, "toggled", G_CALLBACK(toggle_visibility_handler), (gpointer) password_output);
   gtk_box_pack_start(GTK_BOX(password_hbox), password_output, true, true, 0);
   gtk_box_pack_start(GTK_BOX(password_hbox), button_copy, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(password_hbox), button_xdotool, false, false, 0);
   gtk_box_pack_start(GTK_BOX(password_hbox), toggle_visibility, false, false, 0);
 
   folder_scrollbox = gtk_scrolled_window_new(NULL, NULL);
