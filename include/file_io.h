@@ -23,6 +23,8 @@ void file_io_init_password_store(const char *key);
 
 void file_io_export_gpg_keys(const char *key, const char *path, _Bool private);
 void file_io_gpg_trust_key(const char *key);
+
+int file_io_remove_password(const char *path);
 #endif
 
 #endif //_FILE_IO_H_

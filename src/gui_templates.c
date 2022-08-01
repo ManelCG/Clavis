@@ -647,7 +647,11 @@ void button_delete_handler(GtkWidget *widget, gpointer data){
     int response = gtk_dialog_run(GTK_DIALOG(dialog));
 
     if (response == GTK_RESPONSE_OK){
+      #ifdef __unix__
+      file_io_remove_password(path);
+      #elif defined(_WIN32) || defined (WIN32)
       remove(path);
+      #endif
       deleted = true;
     }
     destroy(dialog, dialog);
