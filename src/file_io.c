@@ -107,7 +107,10 @@ int file_io_get_file_count(const char *path, _Bool recursive){
           count += 1;
         }
       } else if (recursive){
-        count += file_io_get_file_count(filepath, true);
+        int n = file_io_get_file_count(filepath, true);
+        if (n > 0){
+          count += n;
+        }
       }
 
       free(files[i]);
