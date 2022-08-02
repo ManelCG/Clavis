@@ -91,6 +91,37 @@ _Bool file_io_rm_rf(const char *path){
   return removed;
 }
 
+int file_io_get_file_count(const char *path, _Bool recursive){
+  if (file_io_string_is_folder(path)){
+    int nfiles = file_io_folder_get_file_n(path, "");
+    char **files = file_io_folder_get_file_list(path, nfiles, "");
+
+    int count = 0;
+
+    for (int i = 0; i < nfiles; i++){
+      char filepath[strlen(path) + strlen(files[i]) + 8];
+      sprintf(filepath, "%s/%s", path, files[i]);
+
+      if (file_io_string_is_file(filepath)){
+        if (strlen(filepath) > 4 && strcmp(&filepath[strlen(filepath)-4], ".gpg") == 0){
+          count += 1;
+        }
+      } else if (recursive){
+        count += file_io_get_file_count(filepath, true);
+      }
+
+      free(files[i]);
+    }
+
+    free(files);
+    return count;
+  } else if (file_io_string_is_file(path)){
+    return 0;
+  } else {
+    return -1;
+  }
+}
+
 #ifdef __unix__
 int file_io_remove_password(const char *path){
   char filepath[strlen(path)+1];

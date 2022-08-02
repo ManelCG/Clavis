@@ -27,7 +27,6 @@ int main(int argc, char *argv[]){
   }
   free((char *) papath);
 
-
   int clavis_mode = CLAVIS_NORMAL_MODE;
   int opt;
   while ((opt = getopt(argc, argv, ":p")) != -1){

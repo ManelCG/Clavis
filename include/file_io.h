@@ -5,6 +5,7 @@ _Bool file_io_string_is_folder(const char *s);
 _Bool file_io_string_is_file(const char *s);
 
 _Bool file_io_rm_rf(const char *s);
+int file_io_get_file_count(const char *s, _Bool recursive);
 
 int file_io_folder_get_file_n(const char *folder, const char *filter);
 char **file_io_folder_get_file_list(const char *folder, int nfiles, const char *filter);
