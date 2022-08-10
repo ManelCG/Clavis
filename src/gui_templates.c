@@ -1500,6 +1500,34 @@ int gui_templates_initialize_password_store(){
 }
 #endif
 
+void gui_templates_show_password_store_info_window(GtkWidget *w, gpointer data){
+  GtkWindow *window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
+
+  gtk_window_set_title(window, "Password Store data");
+  gtk_window_set_resizable(window, false);
+  gtk_container_set_border_width(GTK_CONTAINER(window), 10);
+  gtk_window_set_default_size(GTK_WINDOW(window), 320, 0);
+
+  //Boxes
+  GtkWidget *main_vbox;
+
+  //Widgets
+  GtkWidget *entry_pass_dir;
+
+  //Packing
+  entry_pass_dir = gtk_entry_new();
+  gtk_editable_set_editable(GTK_EDITABLE(entry_pass_dir), false);
+  gtk_entry_set_text(GTK_ENTRY(entry_pass_dir), getcwd(NULL, 0));
+
+  main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(main_vbox), gtk_label_new("Password Store directory"), false, false, 0);
+  gtk_box_pack_start(GTK_BOX(main_vbox), entry_pass_dir, false, false, 0);
+
+  //Showing window
+  gtk_container_add(GTK_CONTAINER(window), main_vbox);
+  gtk_widget_show_all(GTK_WIDGET(window));
+}
+
 void gui_templates_show_about_window(GtkWidget *w, gpointer data){
   GtkWindow *window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
 

@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include <gui_templates.h>
+#include <file_io.h>
 #include <folderstate.h>
 #include <clavis_constants.h>
 
@@ -52,6 +53,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   //File menu
   GtkWidget *menu_filemenu;
   GtkWidget *menu_fileMi;
+  GtkWidget *menu_button_pass_stats;
   GtkWidget *menu_button_new_password;
   GtkWidget *menu_button_new_folder;
   GtkWidget *menu_button_export_public_gpg;
@@ -95,6 +97,13 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_fileMi), menu_filemenu);
 
   {
+    menu_button_pass_stats = gtk_image_menu_item_new_with_label("Password Store data");
+    g_signal_connect(menu_button_pass_stats, "activate", G_CALLBACK(gui_templates_show_password_store_info_window), NULL);
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_pass_stats), icon);
+  }
+
+  {
     menu_button_export_public_gpg = gtk_image_menu_item_new_with_label("Export public GPG key");
     g_signal_connect(menu_button_export_public_gpg, "activate", G_CALLBACK(menu_button_export_gpg_handler), NULL);
     gtk_widget_set_name(menu_button_export_public_gpg, CLAVIS_BUTTON_EXPORT_PUBLIC_KEY_NAME);
@@ -136,14 +145,20 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   }
 
 
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_pass_stats);
+  {GtkWidget *separator = gtk_separator_menu_item_new();
+   gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), separator);}
+
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_new_folder);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_new_password);
   {GtkWidget *separator = gtk_separator_menu_item_new();
    gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), separator);}
+
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_export_public_gpg);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_export_private_gpg);
   {GtkWidget *separator = gtk_separator_menu_item_new();
    gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), separator);}
+
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_quit);
 
   //Edit submenu
