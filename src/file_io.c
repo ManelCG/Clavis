@@ -143,12 +143,15 @@ const char *file_io_get_git_config_field(const char *field){
   close(pipe_grep_cut[0]);
   close(pipe_grep_cut[1]);
 
+  wait(NULL);
+
   //Read
   size_t stringlen = 32;
   int index = 0;
   return_string = calloc(sizeof(char) * stringlen, 1);
   char c;
 
+  close(pipe_cut_main[1]);
   while (read(pipe_cut_main[0], &c, sizeof(c))){
     if (c != '\0' && c != '\n'){
       if (index == stringlen){
@@ -170,7 +173,6 @@ const char *file_io_get_git_config_field(const char *field){
   return_string[index] = '\0';
 
   close(pipe_cut_main[0]);
-  close(pipe_cut_main[1]);
 
   return return_string;
   #elif defined(_WIN32) || defined (WIN32)
