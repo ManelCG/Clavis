@@ -330,6 +330,8 @@ int gui_templates_git_config_window(){
     user_git_repo = NULL;
   }
 
+  file_io_apply_git_settings(user_git_name, user_git_email, user_git_repo);
+
   destroy(dialog, dialog);
   return 0;
 }
