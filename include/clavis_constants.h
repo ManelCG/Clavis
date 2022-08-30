@@ -24,4 +24,8 @@
 #define CLAVIS_BUTTON_EXPORT_PUBLIC_KEY_NAME "Export Public Key"
 #define CLAVIS_BUTTON_EXPORT_PRIVATE_KEY_NAME "Export Private Key"
 
+#define CLAVIS_REGEX_HTTPS "(http(s)?:\\/\\/.)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)"
+#define CLAVIS_REGEX_SSH "/^\\w+\\@(\\w|\\.)+\\:(\\/\\w+)*$/"
+#define CLAVIS_REGEX_GIT "/(?:git|ssh|https?|git@[-\\w.]+):(\\/\\/)?(.*?)(\\.git)(\\/?|\\#[-\\d\\w._]+?)$/"
+
 #endif //_CLAVIS_CONSTANTS_

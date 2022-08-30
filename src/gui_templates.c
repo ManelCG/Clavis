@@ -11,6 +11,8 @@
 #include <clavis_popup.h>
 #include <clavis_normal.h>
 
+#include <clavis_regex.h>
+
 #ifdef __unix__
 #include <sys/wait.h>
 #elif defined(_WIN32) || defined (WIN32)
@@ -170,6 +172,153 @@ void gui_templates_sync_repo(){
   gui_templates_pull_from_repo();
   gui_templates_push_to_repo();
 }
+
+int gui_templates_git_config_window(){
+  GtkWidget *dialog;
+  int response;
+
+  const char *user_git_email = NULL;
+  const char *user_git_name = NULL;
+  const char *user_git_repo = NULL;
+
+  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Configure your Git server:");
+
+  GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+  GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Apply");
+  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+
+  GtkWindow *window = GTK_WINDOW(dialog);
+
+  gtk_window_set_title(window, "Git Syncronization Config");
+  gtk_window_set_resizable(window, false);
+  gtk_container_set_border_width(GTK_CONTAINER(window), 10);
+  gtk_window_set_default_size(GTK_WINDOW(window), 0, 0);
+
+  //GTK Widgets
+  GtkWidget *dialog_box;
+
+  GtkWidget *main_vbox;
+  GtkWidget *name_vbox;
+  GtkWidget *mail_vbox;
+  GtkWidget *name_email_hbox;
+  GtkWidget *lower_buttons_hbox;
+
+  GtkWidget *label_username;
+  GtkWidget *label_email;
+  GtkWidget *entry_username;
+  GtkWidget *entry_email;
+
+  GtkWidget *label_repo_url;
+  GtkWidget *entry_repo_url;
+
+  GtkWidget *button_info;
+  GtkWidget *button_cancel;
+  GtkWidget *button_confirm;
+
+  GtkWidget **entry_list = malloc(sizeof(GtkWidget *) * 3);
+
+  //Instance
+  //User Config
+  label_username = gtk_label_new("Git username");
+  label_email = gtk_label_new("Git email");
+  entry_username = gtk_entry_new();
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_username), "Git username");
+  entry_email = gtk_entry_new();
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_email), "Git email");
+
+  user_git_name = file_io_get_git_config_field("user.name");
+  user_git_email = file_io_get_git_config_field("user.email");
+
+  if (user_git_name != NULL){
+    gtk_entry_set_text(GTK_ENTRY(entry_username), user_git_name);
+    free((void *) user_git_name);
+  }
+  if (user_git_email != NULL){
+    gtk_entry_set_text(GTK_ENTRY(entry_email), user_git_email);
+    free((void *) user_git_email);
+  }
+
+  name_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  mail_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(name_vbox), label_username, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(name_vbox), entry_username, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(mail_vbox), label_email, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(mail_vbox), entry_email, false, false, 0);
+
+  name_email_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  gtk_box_pack_start(GTK_BOX(name_email_hbox), name_vbox, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(name_email_hbox), mail_vbox, false, false, 0);
+
+  //Repo config
+  label_repo_url = gtk_label_new("Git repo URL");
+  entry_repo_url = gtk_entry_new();
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_repo_url), "Git repo URL");
+
+  user_git_repo = file_io_get_git_config_field("remote.origin.url");
+  if (user_git_repo != NULL){
+    gtk_entry_set_text(GTK_ENTRY(entry_repo_url), user_git_repo);
+    free((void *) user_git_repo);
+  }
+
+  //Buttons
+  button_info = gtk_button_new_with_label("Help");
+  { GtkWidget *icon = gtk_image_new_from_icon_name("system-help", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(button_info), icon); }
+
+  button_cancel = gtk_button_new_with_label("Cancel");
+  { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(button_cancel), icon); }
+  g_signal_connect(button_cancel, "activate", G_CALLBACK(destroy), (gpointer) window);
+  g_signal_connect(button_cancel, "pressed", G_CALLBACK(destroy), (gpointer) window);
+
+  button_confirm = gtk_button_new_with_label("Confirm");
+  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(button_confirm), icon); }
+
+  lower_buttons_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  gtk_box_pack_start(GTK_BOX(lower_buttons_hbox), button_info, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(lower_buttons_hbox), button_cancel, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(lower_buttons_hbox), button_confirm, true, true, 0);
+
+
+  //Main vbox
+  main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(main_vbox), name_email_hbox, false, false, 0);
+
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(main_vbox), separator, false, false, 5);}
+
+  gtk_box_pack_start(GTK_BOX(main_vbox), label_repo_url, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(main_vbox), entry_repo_url, false, false, 0);
+
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(main_vbox), separator, false, false, 5);}
+
+  // gtk_box_pack_start(GTK_BOX(main_vbox), lower_buttons_hbox, false, false, 0);
+
+  entry_list[0] = entry_username;
+  entry_list[1] = entry_email;
+  entry_list[2] = entry_repo_url;
+
+  //Showing window
+  dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  gtk_box_pack_start(GTK_BOX(dialog_box), main_vbox, false, false, 0);
+
+  gtk_widget_show_all(GTK_WIDGET(window));
+  response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+  if (response != GTK_RESPONSE_OK){
+    destroy(dialog, dialog);
+    return 1;
+  }
+
+  return 0;
+}
+
 void toggle_visibility_handler(GtkWidget *widget, gpointer data){
   GtkWidget *entry = (GtkWidget *) data;
   gtk_entry_set_visibility(GTK_ENTRY(entry), gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
@@ -884,6 +1033,42 @@ void gui_templates_clear_container(GtkWidget *window){
   g_list_free(children);
 }
 
+int gui_templates_git_init_handler(){
+  #ifdef __unix__
+  GtkWidget *dialog;
+  int response;
+
+  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Would you like to configure Git Server?");
+  gtk_window_set_title(GTK_WINDOW(dialog), "Welcome to Clavis!");
+  gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+  GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+  GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Accept");
+  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+  // GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+
+
+  gtk_widget_show_all(dialog);
+  response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+  if (response != GTK_RESPONSE_OK){
+    destroy(dialog, dialog);
+    return 1;
+  }
+
+  destroy(dialog, dialog);
+
+  int init = gui_templates_git_config_window();
+
+  return init;
+  #elif defined(_WIN32) || defined (WIN32)
+  return 0;
+  #endif
+}
+
 int gui_templates_password_store_init_handler(){
   #ifdef __unix__
   if (!file_io_string_is_file(".gpg-id")){
@@ -912,7 +1097,12 @@ int gui_templates_password_store_init_handler(){
     }
 
     destroy(dialog, dialog);
-    return gui_templates_initialize_password_store();
+
+    int init = gui_templates_initialize_password_store();
+
+    gui_templates_git_init_handler();
+
+    return init;
   } else {
     return 0;
   }

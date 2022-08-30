@@ -27,10 +27,10 @@ LDIR=lib
 
 LIBS = -lm -lpthread
 
-_DEPS = clavis_popup.h clavis_normal.h clavis_constants.h gui_templates.h file_io.h folderstate.h algorithms.h clavis_passgen.h
+_DEPS = clavis_popup.h clavis_normal.h clavis_constants.h gui_templates.h file_io.h folderstate.h algorithms.h clavis_passgen.h clavis_regex.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = main.o clavis_popup.o clavis_normal.o gui_templates.o file_io.o folderstate.o algorithms.o clavis_passgen.o
+_OBJ = main.o clavis_popup.o clavis_normal.o gui_templates.o file_io.o folderstate.o algorithms.o clavis_passgen.o clavis_regex.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: $(SDIR)/%.c $(DEPS)

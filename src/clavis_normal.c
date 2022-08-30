@@ -63,6 +63,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   //Edit menu
   GtkWidget *menu_editmenu;
   GtkWidget *menu_editMi;
+  GtkWidget *menu_config_git;
   GtkWidget *menu_button_download_git;
   GtkWidget *menu_button_upload_git;
   GtkWidget *menu_button_sync_git;
@@ -197,11 +198,19 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_sync_git), icon);
   }
 
+  {
+    menu_config_git = gtk_image_menu_item_new_with_label("Git server settings");
+    g_signal_connect(menu_config_git, "activate", G_CALLBACK(gui_templates_git_config_window), NULL);
+    GtkWidget *icon = gtk_image_new_from_icon_name("emblem-system", 16);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_config_git), icon);
+  }
+
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_button_upload_git);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_button_download_git);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_button_sync_git);
   {GtkWidget *separator = gtk_separator_menu_item_new();
    gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), separator);}
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_config_git);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_button_edit_gpg);
 
   //Help submenu

@@ -19,6 +19,7 @@ void toggle_visibility_handler(GtkWidget *widget, gpointer data);
 
 //pass init
 int gui_templates_password_store_init_handler();
+int gui_templates_git_init_handler();
 int gui_templates_initialize_password_store();
 
 //Button handlers
@@ -50,6 +51,8 @@ void type_entry_with_keyboard_handler(GtkWidget *w, gpointer);
 void gui_templates_pull_from_repo();
 void gui_templates_push_to_repo();
 void gui_templates_sync_repo();
+
+int gui_templates_git_config_window();
 
 //Extra functionalities
 void gui_templates_synthesize_button(GtkWidget *w, gpointer data);

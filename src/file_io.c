@@ -46,6 +46,138 @@ const char *get_password_store_path(){
   return path;
 }
 
+const char *file_io_get_git_config_field(const char *field){
+  #ifdef __unix__
+  int pid_git;
+  int pid_grep;
+  int pid_cut;
+
+  int pipe_git_grep[2];
+  int pipe_grep_cut[2];
+  int pipe_cut_main[2];
+
+  char *return_string;
+
+  if (pipe(pipe_git_grep) < 0){
+    perror("Could not pipe");
+    return NULL;
+  }
+  pid_git = fork();
+  if (pid_git < 0){
+    perror("Could not fork");
+    close(pipe_git_grep[0]);
+    close(pipe_git_grep[1]);
+    return NULL;
+  }
+  if (pid_git == 0){
+    close(1);
+    dup(pipe_git_grep[1]);
+    close(pipe_git_grep[0]);
+    close(pipe_git_grep[1]);
+
+    execlp("git", "git", "config", "--list", NULL);
+    return NULL;
+  }
+
+  if (pipe(pipe_grep_cut) < 0){
+    perror("Could not pipe");
+    close(pipe_git_grep[0]);
+    close(pipe_git_grep[1]);
+    return NULL;
+  }
+  pid_grep = fork();
+  if (pid_grep < 0){
+    perror("Could not fork");
+    close(pipe_git_grep[0]);
+    close(pipe_git_grep[1]);
+    close(pipe_grep_cut[0]);
+    close(pipe_grep_cut[1]);
+    return NULL;
+  }
+  if (pid_grep == 0){
+    close(0);
+    dup(pipe_git_grep[0]);
+    close(pipe_git_grep[0]);
+    close(pipe_git_grep[1]);
+
+    close(1);
+    dup(pipe_grep_cut[1]);
+    close(pipe_grep_cut[0]);
+    close(pipe_grep_cut[1]);
+
+    execlp("grep", "grep", field, NULL);
+  }
+
+  close(pipe_git_grep[0]);
+  close(pipe_git_grep[1]);
+
+  if (pipe(pipe_cut_main) < 0){
+    perror("Could not pipe");
+    close(pipe_grep_cut[0]);
+    close(pipe_grep_cut[1]);
+    return NULL;
+  }
+  pid_cut = fork();
+  if (pid_cut < 0){
+    perror("Could not fork");
+    close(pipe_grep_cut[0]);
+    close(pipe_grep_cut[1]);
+    close(pipe_cut_main[0]);
+    close(pipe_cut_main[1]);
+    return NULL;
+  }
+  if (pid_cut == 0){
+    close(0);
+    dup(pipe_grep_cut[0]);
+    close(pipe_grep_cut[0]);
+    close(pipe_grep_cut[1]);
+
+    close(1);
+    dup(pipe_cut_main[1]);
+    close(pipe_cut_main[0]);
+    close(pipe_cut_main[1]);
+
+    execlp("cut", "cut", "-d=", "-f2", NULL);
+  }
+
+  close(pipe_grep_cut[0]);
+  close(pipe_grep_cut[1]);
+
+  //Read
+  size_t stringlen = 32;
+  int index = 0;
+  return_string = calloc(sizeof(char) * stringlen, 1);
+  char c;
+
+  while (read(pipe_cut_main[0], &c, sizeof(c))){
+    if (c != '\0' && c != '\n'){
+      if (index == stringlen){
+        stringlen *= 2;
+        return_string = realloc(return_string, stringlen);
+      }
+
+      return_string[index] = c;
+      index++;
+    } else {
+      break;
+    }
+  }
+
+  if (index == stringlen){
+    stringlen += 2;
+    return_string = realloc(return_string, stringlen);
+  }
+  return_string[index] = '\0';
+
+  close(pipe_cut_main[0]);
+  close(pipe_cut_main[1]);
+
+  return return_string;
+  #elif defined(_WIN32) || defined (WIN32)
+
+  #endif
+}
+
 _Bool file_io_rm_rf(const char *path){
   _Bool removed = false;
   if (file_io_string_is_file(path)){

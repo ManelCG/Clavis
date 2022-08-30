@@ -17,6 +17,9 @@ const char *get_password_store_path();
 
 int mkdir_handler(const char *path);
 
+const char *file_io_get_git_config_field(const char *field);
+
+
 #ifdef __unix__
 char **file_io_get_gpg_keys(int *num, _Bool secret);
 char **file_io_get_full_gpg_keys(int *num);
