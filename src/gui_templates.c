@@ -316,6 +316,21 @@ int gui_templates_git_config_window(){
     return 1;
   }
 
+  user_git_name  = gtk_entry_get_text(GTK_ENTRY(entry_username));
+  user_git_email = gtk_entry_get_text(GTK_ENTRY(entry_email));
+  user_git_repo  = gtk_entry_get_text(GTK_ENTRY(entry_repo_url));
+
+  if (strcmp(user_git_name, "") == 0){
+    user_git_name = NULL;
+  }
+  if (strcmp(user_git_email, "") == 0){
+    user_git_email = NULL;
+  }
+  if (strcmp(user_git_repo, "") == 0){
+    user_git_repo = NULL;
+  }
+
+  destroy(dialog, dialog);
   return 0;
 }
 

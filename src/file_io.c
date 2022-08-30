@@ -225,6 +225,58 @@ _Bool file_io_rm_rf(const char *path){
   return removed;
 }
 
+int file_io_apply_git_settings(const char *username, const char *email, const char *repo_url){
+  int pid;
+
+  if (email != NULL){
+    if ((pid = fork()) < 0){
+      perror("Could not fork");
+      return -1;
+    }
+    if (pid == 0){
+      execlp("git", "git", "config", "user.email", email, NULL);
+      return -1;
+    }
+    wait(NULL);
+  }
+
+  if (username != NULL){
+    if ((pid = fork()) < 0){
+      perror("Could not fork");
+      return -1;
+    }
+    if (pid == 0){
+      execlp("git", "git", "config", "user.name", username, NULL);
+      return -1;
+    }
+    wait(NULL);
+  }
+
+  if (repo_url != NULL){
+    if ((pid = fork()) < 0){
+      perror("Could not fork");
+      return -1;
+    }
+    if (pid == 0){
+      execlp("git", "git", "remote", "add", "origin", repo_url, NULL);
+      return -1;
+    }
+    wait(NULL);
+
+    if ((pid = fork()) < 0){
+      perror("Could not fork");
+      return -1;
+    }
+    if (pid == 0){
+      execlp("git", "git", "push", "origin", "master", NULL);
+      return -1;
+    }
+    wait(NULL);
+  }
+
+  return 0;
+}
+
 int file_io_get_file_count(const char *path, _Bool recursive){
   if (file_io_string_is_folder(path)){
     int nfiles = file_io_folder_get_file_n(path, "");
