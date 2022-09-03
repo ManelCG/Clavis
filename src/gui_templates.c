@@ -181,6 +181,8 @@ int gui_templates_git_config_window(){
   const char *user_git_name = NULL;
   const char *user_git_repo = NULL;
 
+  _Bool create_new;
+
   dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Configure your Git server:");
 
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
@@ -218,6 +220,8 @@ int gui_templates_git_config_window(){
   GtkWidget *button_info;
   GtkWidget *button_cancel;
   GtkWidget *button_confirm;
+
+  GtkWidget *toggle_create_new;
 
   GtkWidget **entry_list = malloc(sizeof(GtkWidget *) * 3);
 
@@ -284,6 +288,9 @@ int gui_templates_git_config_window(){
   gtk_box_pack_start(GTK_BOX(lower_buttons_hbox), button_cancel, true, true, 0);
   gtk_box_pack_start(GTK_BOX(lower_buttons_hbox), button_confirm, true, true, 0);
 
+  toggle_create_new = gtk_check_button_new_with_label("Create new repository");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle_create_new), true);
+
 
   //Main vbox
   main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
@@ -295,10 +302,10 @@ int gui_templates_git_config_window(){
   gtk_box_pack_start(GTK_BOX(main_vbox), label_repo_url, false, false, 0);
   gtk_box_pack_start(GTK_BOX(main_vbox), entry_repo_url, false, false, 0);
 
+  gtk_box_pack_start(GTK_BOX(main_vbox), toggle_create_new, false, false, 0);
+
   {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
   gtk_box_pack_start(GTK_BOX(main_vbox), separator, false, false, 5);}
-
-  // gtk_box_pack_start(GTK_BOX(main_vbox), lower_buttons_hbox, false, false, 0);
 
   entry_list[0] = entry_username;
   entry_list[1] = entry_email;
@@ -313,7 +320,7 @@ int gui_templates_git_config_window(){
 
   if (response != GTK_RESPONSE_OK){
     destroy(dialog, dialog);
-    return 1;
+    return -1;
   }
 
   user_git_name  = gtk_entry_get_text(GTK_ENTRY(entry_username));
@@ -330,10 +337,16 @@ int gui_templates_git_config_window(){
     user_git_repo = NULL;
   }
 
-  file_io_apply_git_settings(user_git_name, user_git_email, user_git_repo);
+  create_new = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle_create_new));
+
+  // file_io_apply_git_settings(user_git_name, user_git_email, user_git_repo, create_new);
 
   destroy(dialog, dialog);
-  return 0;
+  if (create_new){
+    return 0;
+  } else {
+    return 1;
+  }
 }
 
 void toggle_visibility_handler(GtkWidget *widget, gpointer data){
@@ -1078,9 +1091,7 @@ int gui_templates_git_init_handler(){
 
   destroy(dialog, dialog);
 
-  int init = gui_templates_git_config_window();
-
-  return init;
+  return 0;
   #elif defined(_WIN32) || defined (WIN32)
   return 0;
   #endif
@@ -1115,9 +1126,9 @@ int gui_templates_password_store_init_handler(){
 
     destroy(dialog, dialog);
 
-    int init = gui_templates_initialize_password_store();
+    int init;
 
-    gui_templates_git_init_handler();
+    init = gui_templates_initialize_password_store();
 
     return init;
   } else {
@@ -1636,6 +1647,29 @@ int gui_templates_initialize_password_store(){
   GtkWidget *button_create;
   GtkWidget *button_refresh;
 
+  //Git
+  GtkWidget *name_vbox;
+  GtkWidget *mail_vbox;
+  GtkWidget *name_email_hbox;
+  GtkWidget *git_frame_vbox;
+  GtkWidget *toggle_hbox;
+
+  GtkWidget *label_username;
+  GtkWidget *label_email;
+  GtkWidget *entry_username;
+  GtkWidget *entry_email;
+
+  GtkWidget *label_repo_url;
+  GtkWidget *entry_repo_url;
+
+  GtkWidget *toggle_git_server;
+  GtkWidget *toggle_create_new;
+
+  const char *user_git_email = NULL;
+  const char *user_git_name = NULL;
+  const char *user_git_repo = NULL;
+
+  //Instance
   key_combo_box = gtk_combo_box_text_new();
 
   button_import = gtk_button_new_with_label("Import key");
@@ -1662,6 +1696,7 @@ int gui_templates_initialize_password_store(){
 
   //Pack
   gui_templates_fill_combo_box_with_gpg_keys(key_combo_box);
+  // gtk_label_set_width_chars(GTK_LABEL(key_combo_box), 5);
 
   button_refresh = gtk_button_new();
   { GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh", GTK_ICON_SIZE_MENU);
@@ -1679,14 +1714,90 @@ int gui_templates_initialize_password_store(){
   gtk_box_pack_start(GTK_BOX(new_key_hbox), button_export, true, true, 0);
   gtk_box_pack_start(GTK_BOX(new_key_hbox), button_create, true, true, 0);
 
+  //Git config
+  //User Config
+  label_username = gtk_label_new("Git username");
+  label_email = gtk_label_new("Git email");
+  entry_username = gtk_entry_new();
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_username), "Git username");
+  entry_email = gtk_entry_new();
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_email), "Git email");
+
+  user_git_name = file_io_get_git_config_field("user.name");
+  user_git_email = file_io_get_git_config_field("user.email");
+
+  if (user_git_name != NULL){
+    gtk_entry_set_text(GTK_ENTRY(entry_username), user_git_name);
+    free((void *) user_git_name);
+  }
+  if (user_git_email != NULL){
+    gtk_entry_set_text(GTK_ENTRY(entry_email), user_git_email);
+    free((void *) user_git_email);
+  }
+
+  name_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  mail_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(name_vbox), label_username, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(name_vbox), entry_username, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(mail_vbox), label_email, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(mail_vbox), entry_email, false, false, 0);
+
+  name_email_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  gtk_box_pack_start(GTK_BOX(name_email_hbox), name_vbox, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(name_email_hbox), mail_vbox, true, true, 0);
+
+  //Repo config
+  label_repo_url = gtk_label_new("Git repo URL");
+  entry_repo_url = gtk_entry_new();
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_repo_url), "Git repo URL");
+
+  user_git_repo = file_io_get_git_config_field("remote.origin.url");
+  if (user_git_repo != NULL){
+    gtk_entry_set_text(GTK_ENTRY(entry_repo_url), user_git_repo);
+    free((void *) user_git_repo);
+  }
+
+  //Toggles
+  toggle_git_server = gtk_check_button_new_with_label("Use git server");
+  toggle_create_new = gtk_check_button_new_with_label("Create new repo");
+  toggle_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  gtk_box_pack_start(GTK_BOX(toggle_hbox), toggle_git_server, true, false, 0);
+  gtk_box_pack_start(GTK_BOX(toggle_hbox), toggle_create_new, true, false, 0);
+
+  //Git vbox
+  git_frame_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(git_frame_vbox), name_email_hbox, false, false, 0);
+
+  gtk_box_pack_start(GTK_BOX(git_frame_vbox), label_repo_url, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(git_frame_vbox), entry_repo_url, false, false, 0);
+
+  gtk_box_pack_start(GTK_BOX(git_frame_vbox), toggle_hbox, false, false, 0);
+
+
+  //Toggle for git
+  GtkWidget *show_git_config = gtk_check_button_new_with_label("Git server settings");
+  GtkWidget *git_check_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  gtk_box_pack_start(GTK_BOX(git_check_hbox), show_git_config, true, false, 0);
+  g_signal_connect(show_git_config, "toggled", G_CALLBACK(gui_templates_toggle_widget_visible_handler), (gpointer) git_frame_vbox);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(show_git_config), false);
+
 
   main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
   gtk_box_pack_start(GTK_BOX(main_vbox), combo_hbox, false, false, 0);
   gtk_box_pack_start(GTK_BOX(main_vbox), new_key_hbox, false, false, 0);
 
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(main_vbox), separator, false, false, 5);}
+
+  gtk_box_pack_start(GTK_BOX(main_vbox), git_check_hbox, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(main_vbox), git_frame_vbox, false, false, 0);
+
   gtk_box_pack_start(GTK_BOX(dialog_box), main_vbox, true, true, 0);
 
   gtk_widget_show_all(dialog);
+
+  gtk_widget_hide(git_frame_vbox);
+
   response = gtk_dialog_run(GTK_DIALOG(dialog));
 
   if (response != GTK_RESPONSE_OK){
@@ -1697,10 +1808,26 @@ int gui_templates_initialize_password_store(){
   char *key = malloc(sizeof(char) * (strlen(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(key_combo_box)))+1));
   strcpy(key, gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(key_combo_box)));
 
-  destroy(dialog, dialog);
-
   file_io_gpg_trust_key(key);
-  file_io_init_password_store(key);
+
+  if (! gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle_git_server))){
+    printf("Here\n");
+    file_io_init_password_store(key);
+  } else {
+    user_git_name  = gtk_entry_get_text(GTK_ENTRY(entry_username));
+    user_git_email = gtk_entry_get_text(GTK_ENTRY(entry_email));
+    user_git_repo  = gtk_entry_get_text(GTK_ENTRY(entry_repo_url));
+
+    if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle_create_new))){
+      file_io_init_password_store(key);
+      file_io_init_git_server(user_git_name, user_git_email, user_git_repo, true);
+    } else {
+      mkdir_handler(".");
+      file_io_init_git_server(user_git_name, user_git_email, user_git_repo, false);
+    }
+  }
+
+  destroy(dialog, dialog);
 
   free(key);
   return 0;

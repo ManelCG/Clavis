@@ -225,8 +225,34 @@ _Bool file_io_rm_rf(const char *path){
   return removed;
 }
 
-int file_io_apply_git_settings(const char *username, const char *email, const char *repo_url){
+int file_io_init_git_server(const char *username, const char *email, const char *repo_url, _Bool create_new){
   int pid;
+
+  if (repo_url != NULL){
+    if (! create_new){
+      if ((pid = fork()) < 0){
+        perror("Could not fork");
+        return -1;
+      }
+      if (pid == 0){
+        execlp("git", "git", "clone", repo_url, ".", NULL);
+        return -1;
+      }
+      waitpid(pid, NULL, 0);
+    }
+  }
+
+  if (create_new){
+    if ((pid = fork()) < 0){
+      perror("Could not fork");
+      return -1;
+    }
+    if (pid == 0){
+      execlp("pass", "pass", "git", "init", NULL);
+      return -1;
+    }
+    waitpid(pid, NULL, 0);
+  }
 
   if (email != NULL){
     if ((pid = fork()) < 0){
@@ -237,7 +263,7 @@ int file_io_apply_git_settings(const char *username, const char *email, const ch
       execlp("git", "git", "config", "user.email", email, NULL);
       return -1;
     }
-    wait(NULL);
+    waitpid(pid, NULL, 0);
   }
 
   if (username != NULL){
@@ -249,29 +275,41 @@ int file_io_apply_git_settings(const char *username, const char *email, const ch
       execlp("git", "git", "config", "user.name", username, NULL);
       return -1;
     }
-    wait(NULL);
+    waitpid(pid, NULL, 0);
   }
 
-  if (repo_url != NULL){
-    if ((pid = fork()) < 0){
-      perror("Could not fork");
-      return -1;
-    }
-    if (pid == 0){
-      execlp("git", "git", "remote", "add", "origin", repo_url, NULL);
-      return -1;
-    }
-    wait(NULL);
+  if (create_new){
+    if (repo_url != NULL){
+      if ((pid = fork()) < 0){
+        perror("Could not fork");
+        return -1;
+      }
+      if (pid == 0){
+        execlp("git", "git", "remote", "add", "origin", repo_url, NULL);
+        return -1;
+      }
+      waitpid(pid, NULL, 0);
 
-    if ((pid = fork()) < 0){
-      perror("Could not fork");
-      return -1;
+      if ((pid = fork()) < 0){
+        perror("Could not fork");
+        return -1;
+      }
+      if (pid == 0){
+        execlp("git", "git", "config", "pull.rebase", "false", NULL);
+        return -1;
+      }
+      waitpid(pid, NULL, 0);
+
+      if ((pid = fork()) < 0){
+        perror("Could not fork");
+        return -1;
+      }
+      if (pid == 0){
+        execlp("git", "git", "push", "--set-upstream", "origin", "master", NULL);
+        return -1;
+      }
+      waitpid(pid, NULL, 0);
     }
-    if (pid == 0){
-      execlp("git", "git", "push", "origin", "master", NULL);
-      return -1;
-    }
-    wait(NULL);
   }
 
   return 0;
@@ -770,14 +808,15 @@ void file_io_init_password_store(const char *key){
   }
   wait(NULL);
 
-  pid = fork();
-  if (pid < 0){
-    perror("Could not fork");
-  }
-  if (pid == 0){
-    execlp("pass", "pass", "git", "init", NULL);
-  }
-  wait(NULL);
+  // pid = fork();
+  // if (pid < 0){
+  //   perror("Could not fork");
+  // }
+  // if (pid == 0){
+  //   execlp("pass", "pass", "git", "init", NULL);
+  // }
+  // wait(NULL);
+
 }
 
 void file_io_gpg_trust_key(const char *key){
