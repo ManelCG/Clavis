@@ -116,4 +116,3 @@ The ```clavis``` package is thoroughly tested for bugs, so it should be safe to 
 ## Further development
 
 * Full Windows compatibility is one of the first things on the list.
-* Full git compatibility, allowing user to easily syncronize their passwords between different devices.
