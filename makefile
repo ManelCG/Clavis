@@ -1,4 +1,4 @@
-CLAVIS_VERSION = "1.0.3"
+CLAVIS_VERSION = "1.1.0"
 
 SDIR = src
 
