@@ -339,7 +339,7 @@ int gui_templates_git_config_window(){
 
   create_new = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle_create_new));
 
-  // file_io_apply_git_settings(user_git_name, user_git_email, user_git_repo, create_new);
+  file_io_init_git_server(user_git_name, user_git_email, user_git_repo, create_new, true);
 
   destroy(dialog, dialog);
   if (create_new){
@@ -1061,40 +1061,6 @@ void gui_templates_clear_container(GtkWidget *window){
     gtk_widget_destroy(GTK_WIDGET(iter->data));
   }
   g_list_free(children);
-}
-
-int gui_templates_git_init_handler(){
-  #ifdef __unix__
-  GtkWidget *dialog;
-  int response;
-
-  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Would you like to configure Git Server?");
-  gtk_window_set_title(GTK_WINDOW(dialog), "Welcome to Clavis!");
-  gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
-  GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
-  { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
-  gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
-  GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Accept");
-  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
-  gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
-  // GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-
-
-  gtk_widget_show_all(dialog);
-  response = gtk_dialog_run(GTK_DIALOG(dialog));
-
-  if (response != GTK_RESPONSE_OK){
-    destroy(dialog, dialog);
-    return 1;
-  }
-
-  destroy(dialog, dialog);
-
-  return 0;
-  #elif defined(_WIN32) || defined (WIN32)
-  return 0;
-  #endif
 }
 
 int gui_templates_password_store_init_handler(){
@@ -1820,10 +1786,10 @@ int gui_templates_initialize_password_store(){
 
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle_create_new))){
       file_io_init_password_store(key);
-      file_io_init_git_server(user_git_name, user_git_email, user_git_repo, true);
+      file_io_init_git_server(user_git_name, user_git_email, user_git_repo, true, false);
     } else {
       mkdir_handler(".");
-      file_io_init_git_server(user_git_name, user_git_email, user_git_repo, false);
+      file_io_init_git_server(user_git_name, user_git_email, user_git_repo, false, false);
     }
   }
 

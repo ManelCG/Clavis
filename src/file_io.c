@@ -225,7 +225,7 @@ _Bool file_io_rm_rf(const char *path){
   return removed;
 }
 
-int file_io_init_git_server(const char *username, const char *email, const char *repo_url, _Bool create_new){
+int file_io_init_git_server(const char *username, const char *email, const char *repo_url, _Bool create_new, _Bool refactor_git){
   int pid;
 
   if (repo_url != NULL){
@@ -285,7 +285,11 @@ int file_io_init_git_server(const char *username, const char *email, const char 
         return -1;
       }
       if (pid == 0){
-        execlp("git", "git", "remote", "add", "origin", repo_url, NULL);
+        if(!refactor_git){
+          execlp("git", "git", "remote", "add", "origin", repo_url, NULL);
+        } else {
+          execlp("git", "git", "remote", "set-url", "origin", repo_url, NULL);
+        }
         return -1;
       }
       waitpid(pid, NULL, 0);

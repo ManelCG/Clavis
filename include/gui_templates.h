@@ -19,7 +19,6 @@ void toggle_visibility_handler(GtkWidget *widget, gpointer data);
 
 //pass init
 int gui_templates_password_store_init_handler();
-int gui_templates_git_init_handler();
 int gui_templates_initialize_password_store();
 
 //Button handlers

@@ -18,7 +18,7 @@ const char *get_password_store_path();
 int mkdir_handler(const char *path);
 
 const char *file_io_get_git_config_field(const char *field);
-int file_io_init_git_server(const char *username, const char *email, const char *repo_url, _Bool createnew);
+int file_io_init_git_server(const char *username, const char *email, const char *repo_url, _Bool createnew, _Bool refactor_git);
 
 
 #ifdef __unix__
