@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include <gui_templates.h>
+#include <file_io.h>
 #include <folderstate.h>
 #include <clavis_constants.h>
 
@@ -52,6 +53,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   //File menu
   GtkWidget *menu_filemenu;
   GtkWidget *menu_fileMi;
+  GtkWidget *menu_button_pass_stats;
   GtkWidget *menu_button_new_password;
   GtkWidget *menu_button_new_folder;
   GtkWidget *menu_button_export_public_gpg;
@@ -61,6 +63,11 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   //Edit menu
   GtkWidget *menu_editmenu;
   GtkWidget *menu_editMi;
+  GtkWidget *menu_config_git;
+  GtkWidget *menu_button_download_git;
+  GtkWidget *menu_button_upload_git;
+  GtkWidget *menu_button_sync_git;
+  GtkWidget *menu_button_edit_gpg;
 
   //Help menu
   GtkWidget *menu_helpmenu;
@@ -74,10 +81,28 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   menu_editmenu = gtk_menu_new();
   menu_helpmenu = gtk_menu_new();
 
+  //We need to initialize this button here because many other buttons emit signals on it
+  #ifdef __unix__
+  button_reload = gtk_button_new();
+  { GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(button_reload), icon); }
+  #elif defined(_WIN32) || defined (WIN32)
+  button_reload = gtk_button_new_with_label("Refresh");
+  #endif
+  g_signal_connect(button_reload, "clicked", G_CALLBACK(button_reload_handler), (gpointer) fs);
+
+
   //File submenu
   menu_fileMi = gtk_menu_item_new_with_label("File");
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_menubar), menu_fileMi);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_fileMi), menu_filemenu);
+
+  {
+    menu_button_pass_stats = gtk_image_menu_item_new_with_label("Password Store data");
+    g_signal_connect(menu_button_pass_stats, "activate", G_CALLBACK(gui_templates_show_password_store_info_window), NULL);
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_pass_stats), icon);
+  }
 
   {
     menu_button_export_public_gpg = gtk_image_menu_item_new_with_label("Export public GPG key");
@@ -99,7 +124,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   {
     menu_button_new_folder = gtk_image_menu_item_new_with_label("New folder");
     g_signal_connect(menu_button_new_folder, "activate", G_CALLBACK(button_newfolder_handler), (gpointer) fs);
-    g_signal_connect(menu_button_new_folder, "activate", G_CALLBACK(button_reload_handler), (gpointer) fs);
+    g_signal_connect(menu_button_new_folder, "activate", G_CALLBACK(gui_templates_synthesize_button), (gpointer) button_reload);
     GtkWidget *icon = gtk_image_new_from_icon_name("folder-new", 16);
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_new_folder), icon);
   }
@@ -107,7 +132,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   {
     menu_button_new_password = gtk_image_menu_item_new_with_label("New password");
     g_signal_connect(menu_button_new_password, "activate", G_CALLBACK(button_newpassword_handler), (gpointer) fs);
-    g_signal_connect(menu_button_new_password, "activate", G_CALLBACK(button_reload_handler), (gpointer) fs);
+    g_signal_connect(menu_button_new_password, "activate", G_CALLBACK(gui_templates_synthesize_button), (gpointer) button_reload);
     gtk_widget_set_name(menu_button_new_password, CLAVIS_BUTTON_NEWPASSWORD_NAME);
     GtkWidget *icon = gtk_image_new_from_icon_name("list-add", 16);
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_new_password), icon);
@@ -121,20 +146,72 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   }
 
 
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_pass_stats);
+  {GtkWidget *separator = gtk_separator_menu_item_new();
+   gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), separator);}
+
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_new_folder);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_new_password);
   {GtkWidget *separator = gtk_separator_menu_item_new();
    gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), separator);}
+
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_export_public_gpg);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_export_private_gpg);
   {GtkWidget *separator = gtk_separator_menu_item_new();
    gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), separator);}
+
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_quit);
 
   //Edit submenu
   menu_editMi = gtk_menu_item_new_with_label("Edit");
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_menubar), menu_editMi);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_editMi), menu_editmenu);
+
+  {
+    menu_button_edit_gpg = gtk_image_menu_item_new_with_label("GPG key settings");
+    g_signal_connect(menu_button_edit_gpg, "activate", G_CALLBACK(gui_templates_initialize_password_store), NULL);
+    GtkWidget *icon = gtk_image_new_from_icon_name("channel-secure", 16);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_edit_gpg), icon);
+  }
+
+  {
+    menu_button_download_git = gtk_image_menu_item_new_with_label("Download passwords from Git");
+    g_signal_connect(menu_button_download_git, "activate", G_CALLBACK(gui_templates_pull_from_repo), NULL);
+    g_signal_connect(menu_button_download_git, "activate", G_CALLBACK(gui_templates_synthesize_button), (gpointer) button_reload);
+    GtkWidget *icon = gtk_image_new_from_icon_name("go-down", 16);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_download_git), icon);
+  }
+
+  {
+    menu_button_upload_git = gtk_image_menu_item_new_with_label("Upload passwords to Git");
+    g_signal_connect(menu_button_upload_git, "activate", G_CALLBACK(gui_templates_push_to_repo), NULL);
+    g_signal_connect(menu_button_upload_git, "activate", G_CALLBACK(gui_templates_synthesize_button), (gpointer) button_reload);
+    GtkWidget *icon = gtk_image_new_from_icon_name("go-up", 16);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_upload_git), icon);
+  }
+
+  {
+    menu_button_sync_git = gtk_image_menu_item_new_with_label("Sync all passwords");
+    g_signal_connect(menu_button_sync_git, "activate", G_CALLBACK(gui_templates_sync_repo), NULL);
+    g_signal_connect(menu_button_sync_git, "activate", G_CALLBACK(gui_templates_synthesize_button), (gpointer) button_reload);
+    GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh", 16);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_sync_git), icon);
+  }
+
+  {
+    menu_config_git = gtk_image_menu_item_new_with_label("Git server settings");
+    g_signal_connect(menu_config_git, "activate", G_CALLBACK(gui_templates_git_config_window), NULL);
+    GtkWidget *icon = gtk_image_new_from_icon_name("emblem-system", 16);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_config_git), icon);
+  }
+
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_button_upload_git);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_button_download_git);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_button_sync_git);
+  {GtkWidget *separator = gtk_separator_menu_item_new();
+   gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), separator);}
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_config_git);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_button_edit_gpg);
 
   //Help submenu
   menu_helpMi = gtk_menu_item_new_with_label("Help");
@@ -172,16 +249,6 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   button_newfolder = gtk_button_new_with_label("New folder");
   #endif
   g_signal_connect(button_newfolder, "clicked", G_CALLBACK(button_newfolder_handler), (gpointer) fs);
-
-
-  #ifdef __unix__
-  button_reload = gtk_button_new();
-  { GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh", GTK_ICON_SIZE_MENU);
-  gtk_button_set_image(GTK_BUTTON(button_reload), icon); }
-  #elif defined(_WIN32) || defined (WIN32)
-  button_reload = gtk_button_new_with_label("Refresh");
-  #endif
-  g_signal_connect(button_reload, "clicked", G_CALLBACK(button_reload_handler), (gpointer) fs);
 
   #ifdef __unix__
   button_newpassword = gtk_button_new();
@@ -258,10 +325,21 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   { GtkWidget *icon = gtk_image_new_from_icon_name("edit-copy", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_copy), icon); }
   g_signal_connect(button_copy, "pressed", G_CALLBACK(copy_entry_to_clipboard_handler), (gpointer) password_output);
-  GtkWidget *toggle_visibility = gtk_check_button_new_with_label("Display password");
+
+  #ifdef __unix__
+  GtkWidget *button_xdotool = gtk_button_new();
+  #elif defined(_WIN32) || defined (WIN32)
+  GtkWidget *button_xdotool = gtk_button_new_with_label("Type");
+  #endif
+  { GtkWidget *icon = gtk_image_new_from_icon_name("document-edit", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(button_xdotool), icon); }
+  g_signal_connect(button_xdotool, "pressed", G_CALLBACK(type_entry_with_keyboard_handler), (gpointer) password_output);
+
+  GtkWidget *toggle_visibility = gtk_check_button_new_with_label("Show pass");
   g_signal_connect(toggle_visibility, "toggled", G_CALLBACK(toggle_visibility_handler), (gpointer) password_output);
   gtk_box_pack_start(GTK_BOX(password_hbox), password_output, true, true, 0);
   gtk_box_pack_start(GTK_BOX(password_hbox), button_copy, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(password_hbox), button_xdotool, false, false, 0);
   gtk_box_pack_start(GTK_BOX(password_hbox), toggle_visibility, false, false, 0);
 
   folder_scrollbox = gtk_scrolled_window_new(NULL, NULL);
@@ -316,12 +394,14 @@ int clavis_normal_main(int argc, char *argv[]){
   gtk_window_set_position(GTK_WINDOW(window_root), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(window_root), 0);
   gtk_window_set_default_size(GTK_WINDOW(window_root), 350, 650);
-  gtk_widget_show_all(window_root);
-  clavis_normal_draw_main_window(window_root, NULL);
 
   if (gui_templates_password_store_init_handler() != 0){
     exit(-1);
   }
+
+  gtk_widget_show_all(window_root);
+  clavis_normal_draw_main_window(window_root, NULL);
+
 
   gtk_main();
   return 0;

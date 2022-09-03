@@ -46,10 +46,148 @@ const char *get_password_store_path(){
   return path;
 }
 
+const char *file_io_get_git_config_field(const char *field){
+  #ifdef __unix__
+  int pid_git;
+  int pid_grep;
+  int pid_cut;
+
+  int pipe_git_grep[2];
+  int pipe_grep_cut[2];
+  int pipe_cut_main[2];
+
+  char *return_string;
+
+  if (pipe(pipe_git_grep) < 0){
+    perror("Could not pipe");
+    return NULL;
+  }
+  pid_git = fork();
+  if (pid_git < 0){
+    perror("Could not fork");
+    close(pipe_git_grep[0]);
+    close(pipe_git_grep[1]);
+    return NULL;
+  }
+  if (pid_git == 0){
+    close(1);
+    dup(pipe_git_grep[1]);
+    close(pipe_git_grep[0]);
+    close(pipe_git_grep[1]);
+
+    execlp("git", "git", "config", "--list", NULL);
+    return NULL;
+  }
+
+  if (pipe(pipe_grep_cut) < 0){
+    perror("Could not pipe");
+    close(pipe_git_grep[0]);
+    close(pipe_git_grep[1]);
+    return NULL;
+  }
+  pid_grep = fork();
+  if (pid_grep < 0){
+    perror("Could not fork");
+    close(pipe_git_grep[0]);
+    close(pipe_git_grep[1]);
+    close(pipe_grep_cut[0]);
+    close(pipe_grep_cut[1]);
+    return NULL;
+  }
+  if (pid_grep == 0){
+    close(0);
+    dup(pipe_git_grep[0]);
+    close(pipe_git_grep[0]);
+    close(pipe_git_grep[1]);
+
+    close(1);
+    dup(pipe_grep_cut[1]);
+    close(pipe_grep_cut[0]);
+    close(pipe_grep_cut[1]);
+
+    execlp("grep", "grep", field, NULL);
+  }
+
+  close(pipe_git_grep[0]);
+  close(pipe_git_grep[1]);
+
+  if (pipe(pipe_cut_main) < 0){
+    perror("Could not pipe");
+    close(pipe_grep_cut[0]);
+    close(pipe_grep_cut[1]);
+    return NULL;
+  }
+  pid_cut = fork();
+  if (pid_cut < 0){
+    perror("Could not fork");
+    close(pipe_grep_cut[0]);
+    close(pipe_grep_cut[1]);
+    close(pipe_cut_main[0]);
+    close(pipe_cut_main[1]);
+    return NULL;
+  }
+  if (pid_cut == 0){
+    close(0);
+    dup(pipe_grep_cut[0]);
+    close(pipe_grep_cut[0]);
+    close(pipe_grep_cut[1]);
+
+    close(1);
+    dup(pipe_cut_main[1]);
+    close(pipe_cut_main[0]);
+    close(pipe_cut_main[1]);
+
+    execlp("cut", "cut", "-d=", "-f2", NULL);
+  }
+
+  close(pipe_grep_cut[0]);
+  close(pipe_grep_cut[1]);
+
+  wait(NULL);
+
+  //Read
+  size_t stringlen = 32;
+  int index = 0;
+  return_string = calloc(sizeof(char) * stringlen, 1);
+  char c;
+
+  close(pipe_cut_main[1]);
+  while (read(pipe_cut_main[0], &c, sizeof(c))){
+    if (c != '\0' && c != '\n'){
+      if (index == stringlen){
+        stringlen *= 2;
+        return_string = realloc(return_string, stringlen);
+      }
+
+      return_string[index] = c;
+      index++;
+    } else {
+      break;
+    }
+  }
+
+  if (index == stringlen){
+    stringlen += 2;
+    return_string = realloc(return_string, stringlen);
+  }
+  return_string[index] = '\0';
+
+  close(pipe_cut_main[0]);
+
+  return return_string;
+  #elif defined(_WIN32) || defined (WIN32)
+
+  #endif
+}
+
 _Bool file_io_rm_rf(const char *path){
   _Bool removed = false;
   if (file_io_string_is_file(path)){
+    #ifdef __unix__
+    if (file_io_remove_password(path) == 0){
+    #elif defined(_WIN32) || defined (WIN32)
     if (remove(path) == 0){
+    #endif
       removed = true;
     }
   } else if (file_io_string_is_folder(path)){
@@ -61,7 +199,11 @@ _Bool file_io_rm_rf(const char *path){
         char filepath[strlen(path) + strlen(files[i]) + 8];
         sprintf(filepath, "%s/%s", path, files[i]);
         if (file_io_string_is_file(filepath)){
+          #ifdef __unix__
+          if (file_io_remove_password(filepath) == 0){
+          #elif defined(_WIN32) || defined (WIN32)
           if (remove(filepath) == 0){
+          #endif
             removed = true;
           }
         } else if (file_io_string_is_folder(filepath)){
@@ -82,6 +224,184 @@ _Bool file_io_rm_rf(const char *path){
 
   return removed;
 }
+
+int file_io_init_git_server(const char *username, const char *email, const char *repo_url, _Bool create_new, _Bool refactor_git){
+  int pid;
+
+  if (repo_url != NULL){
+    if (! create_new){
+      if ((pid = fork()) < 0){
+        perror("Could not fork");
+        return -1;
+      }
+      if (pid == 0){
+        execlp("git", "git", "clone", repo_url, ".", NULL);
+        return -1;
+      }
+      waitpid(pid, NULL, 0);
+    }
+  }
+
+  if (create_new){
+    if ((pid = fork()) < 0){
+      perror("Could not fork");
+      return -1;
+    }
+    if (pid == 0){
+      execlp("pass", "pass", "git", "init", NULL);
+      return -1;
+    }
+    waitpid(pid, NULL, 0);
+  }
+
+  if (email != NULL){
+    if ((pid = fork()) < 0){
+      perror("Could not fork");
+      return -1;
+    }
+    if (pid == 0){
+      execlp("git", "git", "config", "user.email", email, NULL);
+      return -1;
+    }
+    waitpid(pid, NULL, 0);
+  }
+
+  if (username != NULL){
+    if ((pid = fork()) < 0){
+      perror("Could not fork");
+      return -1;
+    }
+    if (pid == 0){
+      execlp("git", "git", "config", "user.name", username, NULL);
+      return -1;
+    }
+    waitpid(pid, NULL, 0);
+  }
+
+  if (create_new){
+    if (repo_url != NULL){
+      if ((pid = fork()) < 0){
+        perror("Could not fork");
+        return -1;
+      }
+      if (pid == 0){
+        if(!refactor_git){
+          execlp("git", "git", "remote", "add", "origin", repo_url, NULL);
+        } else {
+          execlp("git", "git", "remote", "set-url", "origin", repo_url, NULL);
+        }
+        return -1;
+      }
+      waitpid(pid, NULL, 0);
+
+      if ((pid = fork()) < 0){
+        perror("Could not fork");
+        return -1;
+      }
+      if (pid == 0){
+        execlp("git", "git", "config", "pull.rebase", "false", NULL);
+        return -1;
+      }
+      waitpid(pid, NULL, 0);
+
+      if ((pid = fork()) < 0){
+        perror("Could not fork");
+        return -1;
+      }
+      if (pid == 0){
+        execlp("git", "git", "push", "--set-upstream", "origin", "master", NULL);
+        return -1;
+      }
+      waitpid(pid, NULL, 0);
+    }
+  }
+
+  return 0;
+}
+
+int file_io_get_file_count(const char *path, _Bool recursive){
+  if (file_io_string_is_folder(path)){
+    int nfiles = file_io_folder_get_file_n(path, "");
+    char **files = file_io_folder_get_file_list(path, nfiles, "");
+
+    int count = 0;
+
+    for (int i = 0; i < nfiles; i++){
+      char filepath[strlen(path) + strlen(files[i]) + 8];
+      sprintf(filepath, "%s/%s", path, files[i]);
+
+      if (file_io_string_is_file(filepath)){
+        if (strlen(filepath) > 4 && strcmp(&filepath[strlen(filepath)-4], ".gpg") == 0){
+          count += 1;
+        }
+      } else if (recursive){
+        int n = file_io_get_file_count(filepath, true);
+        if (n > 0){
+          count += n;
+        }
+      }
+
+      free(files[i]);
+    }
+
+    free(files);
+    return count;
+  } else if (file_io_string_is_file(path)){
+    return 0;
+  } else {
+    return -1;
+  }
+}
+
+#ifdef __unix__
+int file_io_remove_password(const char *path){
+  char filepath[strlen(path)+1];
+  strcpy(filepath, path);
+  if (strlen(filepath) > 4 && strcmp(&filepath[strlen(filepath)-4], ".gpg") == 0){
+    filepath[strlen(filepath)-4] = '\0';
+  }
+
+  int pid;
+  int p_sync[2];
+  int p[2];
+  if (pipe(p) != 0){
+    perror("Could not pipe");
+    return -1;
+  }
+  if (pipe(p_sync) != 0){
+    perror("Could not pipe");
+    return -1;
+  }
+
+  pid = fork();
+  if (pid < 0){
+    perror("Could not fork");
+    return pid;
+  }
+
+  if (pid == 0){
+    close(0);
+    dup(p[0]);
+    close(p[0]);
+    close(p[1]);
+
+    execlp("pass", "pass", "rm", filepath, NULL);
+    return -1;
+  }
+
+  close(p[0]);
+  write(p[1], "y\n", 2);
+  close(p[1]);
+
+  wait(NULL);
+  close(p_sync[1]);
+  char c;
+  while (read(p_sync[0], &c, 1)){}
+  close(p_sync[0]);
+
+  return 0;
+}
+#endif
 
 int file_io_encrypt_password(const char *password, const char *path){
   #ifdef __unix__
@@ -492,14 +812,15 @@ void file_io_init_password_store(const char *key){
   }
   wait(NULL);
 
-  pid = fork();
-  if (pid < 0){
-    perror("Could not fork");
-  }
-  if (pid == 0){
-    execlp("pass", "pass", "git", "init", NULL);
-  }
-  wait(NULL);
+  // pid = fork();
+  // if (pid < 0){
+  //   perror("Could not fork");
+  // }
+  // if (pid == 0){
+  //   execlp("pass", "pass", "git", "init", NULL);
+  // }
+  // wait(NULL);
+
 }
 
 void file_io_gpg_trust_key(const char *key){
