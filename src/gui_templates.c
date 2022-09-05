@@ -14,6 +14,7 @@
 #ifdef __unix__
 #include <sys/wait.h>
 #elif defined(_WIN32) || defined (WIN32)
+#include <windows.h>
 #endif
 
 #define GUI_TEMPLATES_BUTTON_WIDTH 85
@@ -1237,9 +1238,22 @@ void gui_templates_import_key_handler(){
 
   gtk_widget_destroy(dialog);
   #elif defined(_WIN32) || defined (WIN32)
-  GtkFileChooserNative *native = gtk_file_chooser_native_new("Open File", NULL, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
-  int response = gtk_native_dialog_run(GTK_NATIVE_DIALOG(native));
-  g_object_unref(native);
+  char filename[MAX_PATH];
+  OPENFILENAMEA ofn;
+  memset(&ofn, 0, sizeof(ofn));
+  ofn.lStructSize = sizeof(ofn);
+  ofn.hwndOwner = NULL;
+  ofn.hInstance = NULL;
+  ofn.lpstrFilter = "GPG Keys (.gpg, .sec, .pub, .key)\0*.sec;*.gpg;*.pub;*.key\0\0";
+  ofn.lpstrFile = filename;
+  ofn.nMaxFile = MAX_PATH;
+  ofn.lpstrTitle = "Select your GPG key";
+  ofn.Flags = OFN_NONETWORKBUTTON | OFN_FILEMUSTEXIST;
+
+  if (!GetOpenFileName(&ofn)){
+    return;
+  }
+  //Import gpg key somehow
   #endif
 }
 int gui_templates_create_key_handler(){
