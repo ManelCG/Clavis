@@ -1611,12 +1611,16 @@ int gui_templates_initialize_password_store(){
 
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  #ifdef __unix__
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+  #endif
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
   gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Confirm selection");
+  #ifdef __unix__
   { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+  #endif
 
   //Boxes
   GtkWidget *main_vbox;
@@ -1657,22 +1661,28 @@ int gui_templates_initialize_password_store(){
   key_combo_box = gtk_combo_box_text_new();
 
   button_import = gtk_button_new_with_label("Import key");
+  #ifdef __unix__
   { GtkWidget *icon = gtk_image_new_from_icon_name("insert-object", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_import), icon); }
+  #endif
   g_signal_connect(button_import, "pressed", G_CALLBACK(gui_templates_import_key_handler), NULL);
   g_signal_connect(button_import, "activate", G_CALLBACK(gui_templates_import_key_handler), NULL);
   g_signal_connect(button_import, "pressed", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
   g_signal_connect(button_import, "activate", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
 
   button_export = gtk_button_new_with_label("Export key");
+  #ifdef __unix__
   { GtkWidget *icon = gtk_image_new_from_icon_name("document-save-as", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_export), icon); }
+  #endif
   g_signal_connect(button_export, "pressed", G_CALLBACK(gui_templates_export_key_handler_combobox), (gpointer) key_combo_box);
   g_signal_connect(button_export, "activate", G_CALLBACK(gui_templates_export_key_handler_combobox), (gpointer) key_combo_box);
 
   button_create = gtk_button_new_with_label("Create new key");
+  #ifdef __unix__
   { GtkWidget *icon = gtk_image_new_from_icon_name("document-new", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_create), icon); }
+  #endif
   g_signal_connect(button_create, "pressed", G_CALLBACK(gui_templates_create_key_handler), NULL);
   g_signal_connect(button_create, "activate", G_CALLBACK(gui_templates_create_key_handler), NULL);
   g_signal_connect(button_create, "pressed", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
@@ -1683,8 +1693,12 @@ int gui_templates_initialize_password_store(){
   // gtk_label_set_width_chars(GTK_LABEL(key_combo_box), 5);
 
   button_refresh = gtk_button_new();
+  #ifdef __unix__
   { GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_refresh), icon); }
+  #elif defined (_WIN32) || defined (WIN32)
+  gtk_button_set_label(GTK_BUTTON(button_refresh), "Refresh");
+  #endif
   g_signal_connect(button_refresh, "pressed", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
   g_signal_connect(button_refresh, "activate", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
 
