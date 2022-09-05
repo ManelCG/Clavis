@@ -1239,6 +1239,7 @@ void gui_templates_import_key_handler(){
   gtk_widget_destroy(dialog);
   #elif defined(_WIN32) || defined (WIN32)
   char filename[MAX_PATH];
+  filename[0] = '\0';
   OPENFILENAMEA ofn;
   memset(&ofn, 0, sizeof(ofn));
   ofn.lStructSize = sizeof(ofn);
