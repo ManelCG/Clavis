@@ -1816,13 +1816,13 @@ int gui_templates_initialize_password_store(){
       file_io_init_git_server(user_git_name, user_git_email, user_git_repo, false, false);
     }
   }
+
+  free(key);
   #elif defined(_WIN32) || defined (WIN32)
 
   #endif
 
   destroy(dialog, dialog);
-
-  free(key);
   return 0;
 }
 
