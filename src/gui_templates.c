@@ -1254,6 +1254,8 @@ void gui_templates_import_key_handler(){
 
   gtk_widget_destroy(dialog);
   #elif defined(_WIN32) || defined (WIN32)
+  const char *cwd = _getcwd(NULL, 0);
+
   char filename[MAX_PATH];
   filename[0] = '\0';
   OPENFILENAMEA ofn;
@@ -1268,17 +1270,20 @@ void gui_templates_import_key_handler(){
   ofn.Flags = OFN_NONETWORKBUTTON | OFN_FILEMUSTEXIST;
 
   if (!GetOpenFileName(&ofn)){
+    chdir(cwd);
+    free((char *) cwd);
     return;
   }
+  chdir(cwd);
 
-  const char *keystore_path = get_key_store_path();
+  const char *keystore_path = cwd;
   char *base_name = strrchr(filename, '\\');
   if (base_name[0] == '\\'){
     base_name += 1;
   }
-  char *imported_path = malloc(strlen(keystore_path) + strlen(base_name) + 8);
+  char *imported_path = malloc(strlen(keystore_path) + strlen(base_name) + 16);
 
-  sprintf(imported_path, "%s%s", keystore_path, base_name);
+  sprintf(imported_path, "%s\\..\\Keys\\%s", keystore_path, base_name);
   cp(filename, imported_path);
 
   free((char *) keystore_path);
