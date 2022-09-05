@@ -226,6 +226,7 @@ _Bool file_io_rm_rf(const char *path){
 }
 
 int file_io_init_git_server(const char *username, const char *email, const char *repo_url, _Bool create_new, _Bool refactor_git){
+  #ifdef __unix__
   int pid;
 
   if (repo_url != NULL){
@@ -315,8 +316,10 @@ int file_io_init_git_server(const char *username, const char *email, const char 
       waitpid(pid, NULL, 0);
     }
   }
-
   return 0;
+  #elif defined(_WIN32) || defined (WIN32)
+  return 0;
+  #endif
 }
 
 int file_io_get_file_count(const char *path, _Bool recursive){

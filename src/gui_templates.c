@@ -1209,6 +1209,7 @@ void gui_templates_import_key_handler(){
   GtkWidget *dialog = gtk_file_chooser_dialog_new("Open File", NULL, GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, NULL);
   int response = gtk_dialog_run(GTK_DIALOG(dialog));
   if (response == GTK_RESPONSE_ACCEPT){
+    #ifdef __unix__
     char *filename;
     GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
     filename = gtk_file_chooser_get_filename (chooser);
@@ -1236,6 +1237,10 @@ void gui_templates_import_key_handler(){
     }
     close(p_sync[0]);
     g_free(filename);
+
+    #elif defined(_WIN32) || defined (WIN32)
+
+    #endif
   }
 
   gtk_widget_destroy(dialog);
@@ -1558,11 +1563,10 @@ int gui_templates_create_key_handler(){
   wait(NULL);
   return 0;
   #elif defined(_WIN32) || defined (WIN32)
-
-  #endif
-
   destroy(dialog, dialog);
   return 0;
+  #endif
+
 }
 
 void button_refresh_keys_handler(GtkWidget *widget, gpointer data){
