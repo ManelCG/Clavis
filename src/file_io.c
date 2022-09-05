@@ -176,7 +176,7 @@ const char *file_io_get_git_config_field(const char *field){
 
   return return_string;
   #elif defined(_WIN32) || defined (WIN32)
-
+  return NULL;
   #endif
 }
 
