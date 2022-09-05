@@ -119,6 +119,7 @@ void gui_templates_synthesize_button(GtkWidget *w, gpointer data){
   g_signal_emit_by_name(button, "clicked");
 }
 void gui_templates_pull_from_repo(){
+  #ifdef __unix__
   int p_sync[2];
   int pid;
   if (pipe(p_sync) != 0){
@@ -142,8 +143,12 @@ void gui_templates_pull_from_repo(){
   while(read(p_sync[0], &c, 1)){}
   close(p_sync[0]);
   return;
+  #elif defined(_WIN32) || defined (WIN32)
+
+  #endif
 }
 void gui_templates_push_to_repo(){
+  #ifdef __unix__
   int p_sync[2];
   int pid;
   if (pipe(p_sync) != 0){
@@ -167,6 +172,9 @@ void gui_templates_push_to_repo(){
   while(read(p_sync[0], &c, 1)){}
   close(p_sync[0]);
   return;
+  #elif defined(_WIN32) || defined (WIN32)
+
+  #endif
 }
 void gui_templates_sync_repo(){
   gui_templates_pull_from_repo();
@@ -1101,12 +1109,13 @@ int gui_templates_password_store_init_handler(){
     return 0;
   }
   #elif defined(_WIN32) || defined (WIN32)
-
+  return 0;
   #endif
 
 }
 
 void gui_templates_fill_combo_box_with_gpg_keys(GtkWidget *combo){
+  #ifdef __unix__
   int nkeys;
   char **keys = file_io_get_full_gpg_keys(&nkeys);
 
@@ -1118,6 +1127,9 @@ void gui_templates_fill_combo_box_with_gpg_keys(GtkWidget *combo){
     free(keys);
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
   }
+  #elif defined(_WIN32) || defined (WIN32)
+
+  #endif
 }
 
 void gui_templates_export_key_handler(const char *key, _Bool private){
@@ -1149,7 +1161,11 @@ void gui_templates_export_key_handler(const char *key, _Bool private){
 
     keyname = gtk_file_chooser_get_filename(chooser);
 
+    #ifdef __unix__
     file_io_export_gpg_keys(key, keyname, private);
+    #elif defined(_WIN32) || defined (WIN32)
+
+    #endif
 
     g_free(keyname);
   }
@@ -1470,6 +1486,7 @@ int gui_templates_create_key_handler(){
   }
   //Key entered is valid. Proceed
 
+  #ifdef __unix__
   int p[2];
   if (pipe(p) != 0){
     perror("Could not pipe");
@@ -1539,9 +1556,14 @@ int gui_templates_create_key_handler(){
   close(p[1]);
 
   waitpid(pid, NULL, 0);
-
   destroy(dialog, dialog);
   wait(NULL);
+  return 0;
+  #elif defined(_WIN32) || defined (WIN32)
+
+  #endif
+
+  destroy(dialog, dialog);
   return 0;
 }
 
