@@ -37,7 +37,7 @@ const char *get_password_store_path(){
       strcpy(path, passtoredir);
     }
   #elif defined(_WIN32) || defined (WIN32)
-    char *password_store_path = "Clavis/Passwords";
+    char *password_store_path = "Clavis\\Passwords";
 
     homelen = strlen(getenv("HOMEPATH"));
     path = malloc(sizeof(char) * (homelen + strlen(password_store_path) + 8));
@@ -65,7 +65,7 @@ const char *get_key_store_path(){
   int homelen;
   char *path;
 
-  char *key_store_path = "Clavis/Keys";
+  char *key_store_path = "Clavis\\Keys";
 
   homelen = strlen(getenv("HOMEPATH"));
   path = malloc(sizeof(char) * (homelen + strlen(key_store_path) + 8));

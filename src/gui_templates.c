@@ -1272,10 +1272,17 @@ void gui_templates_import_key_handler(){
   }
 
   const char *keystore_path = get_key_store_path();
-  const char *imported_path = malloc(strlen(keystore_path) + strlen(filename) + 8);
-  sprintf(imported_path, "%s/%s", keystore_path, filename);
+  char *base_name = strrchr(filename, '\\');
+  if (base_name[0] == '\\'){
+    base_name += 1;
+  }
+  char *imported_path = malloc(strlen(keystore_path) + strlen(base_name) + 8);
+
+  sprintf(imported_path, "%s%s", keystore_path, base_name);
   cp(filename, imported_path);
+
   free((char *) keystore_path);
+  free((char *) imported_path):
   #endif
 }
 int gui_templates_create_key_handler(){
