@@ -32,6 +32,7 @@ void file_io_gpg_trust_key(const char *key);
 int file_io_remove_password(const char *path);
 #elif defined(_WIN32) || defined (WIN32)
 const char *get_key_store_path();
+const char *get_clavis_path();
 #endif
 
 #endif //_FILE_IO_H_

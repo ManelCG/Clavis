@@ -47,6 +47,19 @@ const char *get_password_store_path(){
 }
 
 #if defined(_WIN32) || defined (WIN32)
+const char *get_clavis_path(){
+  int homelen;
+  char *path;
+
+  char *key_store_path = "Clavis";
+
+  homelen = strlen(getenv("HOMEPATH"));
+  path = malloc(sizeof(char) * (homelen + strlen(key_store_path) + 8));
+
+  sprintf(path, "%s\\%s\\", getenv("HOMEPATH"), key_store_path);
+
+  return path;
+}
 const char *get_key_store_path(){
   int homelen;
   char *path;
