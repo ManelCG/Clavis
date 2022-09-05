@@ -1605,7 +1605,6 @@ void menu_button_export_gpg_handler(GtkWidget *w, gpointer data){
   #endif
 }
 
-#ifdef __unix__
 int gui_templates_initialize_password_store(){
   GtkWidget *dialog;
   int response;
@@ -1822,7 +1821,6 @@ int gui_templates_initialize_password_store(){
   free(key);
   return 0;
 }
-#endif
 
 void gui_templates_show_password_store_info_window(GtkWidget *w, gpointer data){
   GtkWindow *window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
