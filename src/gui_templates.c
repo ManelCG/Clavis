@@ -1270,7 +1270,12 @@ void gui_templates_import_key_handler(){
   if (!GetOpenFileName(&ofn)){
     return;
   }
-  //Import gpg key somehow
+
+  const char *keystore_path = get_key_store_path();
+  const char *imported_path = malloc(strlen(keystore_path) + strlen(filename) + 8);
+  sprintf(imported_path, "%s/%s", keystore_path, filename);
+  cp(filename, imported_path);
+  free((char *) keystore_path);
   #endif
 }
 int gui_templates_create_key_handler(){
