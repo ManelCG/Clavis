@@ -27,6 +27,12 @@ int main(int argc, char *argv[]){
   }
   free((char *) papath);
 
+  #if defined(_WIN32) || defined (WIN32)
+  const char *kspath = get_key_store_path();
+  mkdir_handler(kspath);
+  free((char *) kspath);
+  #endif
+
   int clavis_mode = CLAVIS_NORMAL_MODE;
   int opt;
   while ((opt = getopt(argc, argv, ":p")) != -1){

@@ -36,15 +36,31 @@ const char *get_password_store_path(){
       strcpy(path, passtoredir);
     }
   #elif defined(_WIN32) || defined (WIN32)
-    char *pa = "Clavis_Passwords";
+    char *password_store_path = "Clavis/Passwords";
 
     homelen = strlen(getenv("HOMEPATH"));
-    path = malloc(sizeof(char) * (homelen + strlen(pa) + 8));
+    path = malloc(sizeof(char) * (homelen + strlen(password_store_path) + 8));
 
-    sprintf(path, "%s\\%s\\", getenv("HOMEPATH"), pa);
+    sprintf(path, "%s\\%s\\", getenv("HOMEPATH"), password_store_path);
   #endif
   return path;
 }
+
+#if defined(_WIN32) || defined (WIN32)
+const char *get_key_store_path(){
+  int homelen;
+  char *path;
+
+  char *key_store_path = "Clavis/Keys";
+
+  homelen = strlen(getenv("HOMEPATH"));
+  path = malloc(sizeof(char) * (homelen + strlen(key_store_path) + 8));
+
+  sprintf(path, "%s\\%s\\", getenv("HOMEPATH"), key_store_path);
+
+  return path;
+}
+#endif
 
 const char *file_io_get_git_config_field(const char *field){
   #ifdef __unix__
