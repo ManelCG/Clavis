@@ -1176,7 +1176,7 @@ void gui_templates_export_key_handler(const char *key, _Bool private){
   ofn.lpstrTitle = "Save your GPG key";
   ofn.Flags = OFN_NONETWORKBUTTON | OFN_FILEMUSTEXIST;
 
-  if (!GetOpenSaveName(&ofn)){
+  if (!GetSaveFileName(&ofn)){
     return;
   }
   //Export gpg key somehow
