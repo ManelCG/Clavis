@@ -1282,7 +1282,7 @@ void gui_templates_import_key_handler(){
   cp(filename, imported_path);
 
   free((char *) keystore_path);
-  free((char *) imported_path):
+  free((char *) imported_path);
   #endif
 }
 int gui_templates_create_key_handler(){
