@@ -1794,6 +1794,7 @@ int gui_templates_initialize_password_store(){
     return 1;
   }
 
+  #ifdef __unix__
   char *key = malloc(sizeof(char) * (strlen(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(key_combo_box)))+1));
   strcpy(key, gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(key_combo_box)));
 
@@ -1815,6 +1816,9 @@ int gui_templates_initialize_password_store(){
       file_io_init_git_server(user_git_name, user_git_email, user_git_repo, false, false);
     }
   }
+  #elif defined(_WIN32) || defined (WIN32)
+
+  #endif
 
   destroy(dialog, dialog);
 
