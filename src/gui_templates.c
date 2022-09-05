@@ -1201,10 +1201,10 @@ void gui_templates_export_key_handler_label(GtkWidget *w, gpointer data){
 
 
 void gui_templates_import_key_handler(){
+  #ifdef __unix__
   GtkWidget *dialog = gtk_file_chooser_dialog_new("Open File", NULL, GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, NULL);
   int response = gtk_dialog_run(GTK_DIALOG(dialog));
   if (response == GTK_RESPONSE_ACCEPT){
-    #ifdef __unix__
     char *filename;
     GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
     filename = gtk_file_chooser_get_filename (chooser);
@@ -1233,12 +1233,14 @@ void gui_templates_import_key_handler(){
     close(p_sync[0]);
     g_free(filename);
 
-    #elif defined(_WIN32) || defined (WIN32)
-
-    #endif
   }
 
   gtk_widget_destroy(dialog);
+  #elif defined(_WIN32) || defined (WIN32)
+  GtkFileChooserNative *native = gtk_file_chooser_native_new("Open File", NULL, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
+  int response = gtk_native_dialog_run(GTK_NATIVE_DIALOG(native));
+  g_object_unref(native);
+  #endif
 }
 int gui_templates_create_key_handler(){
   GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Configure your new GPG key:");
