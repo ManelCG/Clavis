@@ -1070,7 +1070,6 @@ void gui_templates_clear_container(GtkWidget *window){
 }
 
 int gui_templates_password_store_init_handler(){
-  #ifdef __unix__
   if (!file_io_string_is_file(".gpg-id")){
     GtkWidget *dialog;
     int response;
@@ -1106,10 +1105,6 @@ int gui_templates_password_store_init_handler(){
   } else {
     return 0;
   }
-  #elif defined(_WIN32) || defined (WIN32)
-  return 0;
-  #endif
-
 }
 
 void gui_templates_fill_combo_box_with_gpg_keys(GtkWidget *combo){
