@@ -22,9 +22,9 @@ const char *file_io_get_git_config_field(const char *field);
 int file_io_init_git_server(const char *username, const char *email, const char *repo_url, _Bool createnew, _Bool refactor_git);
 
 
+char **file_io_get_full_gpg_keys(int *num);
 #ifdef __unix__
 char **file_io_get_gpg_keys(int *num, _Bool secret);
-char **file_io_get_full_gpg_keys(int *num);
 void file_io_init_password_store(const char *key);
 
 void file_io_export_gpg_keys(const char *key, const char *path, _Bool private);
@@ -32,6 +32,7 @@ void file_io_gpg_trust_key(const char *key);
 
 int file_io_remove_password(const char *path);
 #elif defined(_WIN32) || defined (WIN32)
+
 const char *get_key_store_path();
 const char *get_clavis_path();
 #endif

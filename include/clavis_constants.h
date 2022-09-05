@@ -28,4 +28,10 @@
 #define CLAVIS_REGEX_SSH "/^\\w+\\@(\\w|\\.)+\\:(\\/\\w+)*$/"
 #define CLAVIS_REGEX_GIT "/(?:git|ssh|https?|git@[-\\w.]+):(\\/\\/)?(.*?)(\\.git)(\\/?|\\#[-\\d\\w._]+?)$/"
 
+#if defined(_WIN32) || defined (WIN32)
+#define CLAVIS_WINDOWS_MAIN_DIR "Clavis"
+#define CLAVIS_WINDOWS_KEYS_DIR "Keys"
+#define CLAVIS_WINDOWS_PASS_DIR "Passwords"
+#endif //WIN32
+
 #endif //_CLAVIS_CONSTANTS_

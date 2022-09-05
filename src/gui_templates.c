@@ -1109,7 +1109,6 @@ int gui_templates_password_store_init_handler(){
 }
 
 void gui_templates_fill_combo_box_with_gpg_keys(GtkWidget *combo){
-  #ifdef __unix__
   int nkeys;
   char **keys = file_io_get_full_gpg_keys(&nkeys);
 
@@ -1121,9 +1120,6 @@ void gui_templates_fill_combo_box_with_gpg_keys(GtkWidget *combo){
     free(keys);
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
   }
-  #elif defined(_WIN32) || defined (WIN32)
-
-  #endif
 }
 
 void gui_templates_export_key_handler(const char *key, _Bool private){
