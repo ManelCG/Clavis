@@ -1127,6 +1127,7 @@ void gui_templates_fill_combo_box_with_gpg_keys(GtkWidget *combo){
 }
 
 void gui_templates_export_key_handler(const char *key, _Bool private){
+  #ifdef __unix__
   GtkWidget *dialog = gtk_file_chooser_dialog_new("Save Keys", NULL, GTK_FILE_CHOOSER_ACTION_SAVE, "_Cancel", GTK_RESPONSE_CANCEL, "_Save", GTK_RESPONSE_ACCEPT, NULL);
 
   const char *cwd = getcwd(NULL, 0);
@@ -1155,16 +1156,31 @@ void gui_templates_export_key_handler(const char *key, _Bool private){
 
     keyname = gtk_file_chooser_get_filename(chooser);
 
-    #ifdef __unix__
     file_io_export_gpg_keys(key, keyname, private);
-    #elif defined(_WIN32) || defined (WIN32)
-
-    #endif
 
     g_free(keyname);
   }
   chdir(cwd);
   destroy(dialog, dialog);
+  #elif defined(_WIN32) || defined (WIN32)
+  char filename[MAX_PATH];
+  filename[0] = '\0';
+  OPENFILENAMEA ofn;
+  memset(&ofn, 0, sizeof(ofn));
+  ofn.lStructSize = sizeof(ofn);
+  ofn.hwndOwner = NULL;
+  ofn.hInstance = NULL;
+  ofn.lpstrFilter = "GPG Secret key (.sec)\0*.sec\0\0";
+  ofn.lpstrFile = filename;
+  ofn.nMaxFile = MAX_PATH;
+  ofn.lpstrTitle = "Save your GPG key";
+  ofn.Flags = OFN_NONETWORKBUTTON | OFN_FILEMUSTEXIST;
+
+  if (!GetOpenSaveName(&ofn)){
+    return;
+  }
+  //Export gpg key somehow
+  #endif
 }
 
 void gui_templates_export_key_handler_combobox(GtkWidget *w, gpointer data){
