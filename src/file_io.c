@@ -13,6 +13,7 @@
 #ifdef __unix__
 #include <sys/wait.h>
 #elif defined(_WIN32) || defined (WIN32)
+#include <folderstate.h>
 #endif
 
 #include <file_io.h>
@@ -961,15 +962,16 @@ void file_io_export_gpg_keys(const char *key, const char *path, _Bool private){
 #elif defined(_WIN32) || defined (WIN32)
 char **file_io_get_full_gpg_keys(int *num){
   const char *cwd = _getcwd(NULL, 0);
-  const char *key_store = malloc(strlen(cwd) + 16);
   const char *key_dir = CLAVIS_WINDOWS_KEYS_DIR;
+  char *key_store = malloc(strlen(cwd) + 16);
 
   int retl = 0;
+  int index = 0;
   char **ret = NULL;
-  char **files = NULL;
+  const char **files = NULL;
 
   int n_ext = 4;
-  const char *extensions[n_ext] = {".gpg", ".sec", ".pub", ".key"};
+  const char *extensions[] = {".gpg", ".sec", ".pub", ".key"};
 
   sprintf(key_store, "%s\\..\\%s\\", cwd, key_dir);
 
@@ -977,25 +979,29 @@ char **file_io_get_full_gpg_keys(int *num){
 
   for (int i = 0; i < n_ext; i++){
     folderstate_set_filter(fs, extensions[i]);
+    folderstate_reload(fs);
+    int nfiles = folderstate_get_nfiles(fs);
+
+    retl += nfiles;
+  }
+
+  ret = malloc(sizeof(char *) * retl);
+
+  for (int i = 0; i < n_ext; i++){
     int nfiles = folderstate_get_nfiles(fs);
     files = folderstate_get_files(fs);
 
-    if (ret == NULL){
-      ret = malloc(sizeof(char *) * nfiles);
-    } else {
-      ret = realloc(ret, sizeof(char *) * (nfiles + retl));
+    for (int j = 0; j < nfiles; j++){
+      ret[j+index] = calloc(sizeof(char) * (strlen(files[j]) + 8));
+      strcpy(ret[j+index], files[j]);
     }
-
-    for (j = 0; j < nfiles; j++){
-      ret[j+retl] = files[j];
-    }
-    free(files);
+    index += nfiles;
+    // free(files);
   }
 
-
-  free((char *) cwd);
-  free((char *) key_store);
-  folderstate_destroy(fd);
+  // free((char *) cwd);
+  // free((char *) key_store);
+  // folderstate_destroy(fd);
 
   return ret;
 }
