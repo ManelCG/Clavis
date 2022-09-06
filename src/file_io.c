@@ -967,6 +967,7 @@ char **file_io_get_full_gpg_keys(int *num){
 
   int retl = 0;
   int index = 0;
+  int nfiles;
   char **ret = NULL;
   const char **files = NULL;
 
@@ -980,29 +981,36 @@ char **file_io_get_full_gpg_keys(int *num){
   for (int i = 0; i < n_ext; i++){
     folderstate_set_filter(fs, extensions[i]);
     folderstate_reload(fs);
-    int nfiles = folderstate_get_nfiles(fs);
+    nfiles = folderstate_get_nfiles(fs);
 
     retl += nfiles;
   }
 
-  ret = malloc(sizeof(char *) * retl);
+  if (retl > 0){
+    ret = malloc(sizeof(char *) * retl);
 
-  for (int i = 0; i < n_ext; i++){
-    int nfiles = folderstate_get_nfiles(fs);
-    files = folderstate_get_files(fs);
+    for (int i = 0; i < n_ext; i++){
+      folderstate_set_filter(fs, extensions[i]);
+      folderstate_reload(fs);
+      nfiles = folderstate_get_nfiles(fs);
+      files = folderstate_get_files(fs);
 
-    for (int j = 0; j < nfiles; j++){
-      ret[j+index] = calloc(sizeof(char) * (strlen(files[j]) + 8));
-      strcpy(ret[j+index], files[j]);
+      for (int j = 0; j < nfiles; j++){
+        ret[j+index] = calloc(sizeof(char) * (strlen(files[j]) + 8), 1);
+        strcpy(ret[j+index], files[j]);
+      }
+      index += nfiles;
     }
-    index += nfiles;
-    // free(files);
+
+    free((char *) cwd);
+    free((char *) key_store);
+    free(fs);
+
+    *num = retl;
+    return ret;
+  } else {
+    *num = 0;
+    return NULL;
   }
-
-  // free((char *) cwd);
-  // free((char *) key_store);
-  // folderstate_destroy(fd);
-
-  return ret;
 }
 #endif
