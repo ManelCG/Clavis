@@ -1159,23 +1159,37 @@ void gui_templates_export_key_handler(const char *key, _Bool private){
   chdir(cwd);
   destroy(dialog, dialog);
   #elif defined(_WIN32) || defined (WIN32)
+  const char *cwd = _getcwd(NULL, 0);
+
   char filename[MAX_PATH];
-  filename[0] = '\0';
+  strcpy(filename, key);
   OPENFILENAMEA ofn;
   memset(&ofn, 0, sizeof(ofn));
   ofn.lStructSize = sizeof(ofn);
   ofn.hwndOwner = NULL;
   ofn.hInstance = NULL;
-  ofn.lpstrFilter = "GPG Secret key (.sec)\0*.sec\0\0";
+  ofn.lpstrFilter = "GPG key\0*.sec;*.pub;*.gpg;*.key\0\0";
   ofn.lpstrFile = filename;
   ofn.nMaxFile = MAX_PATH;
   ofn.lpstrTitle = "Save your GPG key";
   ofn.Flags = OFN_NONETWORKBUTTON | OFN_FILEMUSTEXIST;
 
   if (!GetSaveFileName(&ofn)){
+    chdir(cwd);
+    free((char *) cwd);
     return;
   }
-  //Export gpg key somehow
+  chdir(cwd);
+
+  const char *keystore_path = cwd;
+  char *key_path = malloc(strlen(keystore_path) + strlen(key) + 16);
+
+  sprintf(key_path, "%s\\..\\Keys\\%s", keystore_path, key);
+  cp(key_path, filename);
+
+  free((char *) keystore_path);
+  free((char *) key_path);
+
   #endif
 }
 
