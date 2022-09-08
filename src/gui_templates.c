@@ -26,7 +26,6 @@
 #endif
 
 
-
 //Tools
 void destroy(GtkWidget *w, gpointer data){
   GtkWidget *window = (GtkWidget *) data;
@@ -1112,7 +1111,7 @@ void gui_templates_fill_combo_box_with_gpg_keys(GtkWidget *combo){
   int nkeys;
   char **keys = file_io_get_full_gpg_keys(&nkeys);
 
-  if (keys != NULL){
+  if (keys != NULL && nkeys != 0){
     for (int i = 0; i < nkeys; i++){
       gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo), NULL, keys[i]);
       free(keys[i]);
@@ -1162,7 +1161,33 @@ void gui_templates_export_key_handler(const char *key, _Bool private){
   const char *cwd = _getcwd(NULL, 0);
 
   char filename[MAX_PATH];
+  char *token;
   strcpy(filename, key);
+
+  token = strchr(filename, '<');
+  if (token[0] == '<'){
+    token[0] = '[';
+  }
+  token = strchr(filename, '>');
+  if (token[0] == '>'){
+    token[0] = ']';
+  }
+
+  token = strchr(key, '<');
+  if (token[0] == '<'){
+    token[0] = ' ';
+  }
+  token = strchr(key, '>');
+  if (token[0] == '>'){
+    token[0] = ' ';
+  }
+
+  if (private){
+    strcat(filename, ".sec");
+  } else {
+    strcat(filename, ".pub");
+  }
+
   OPENFILENAMEA ofn;
   memset(&ofn, 0, sizeof(ofn));
   ofn.lStructSize = sizeof(ofn);
@@ -1181,15 +1206,9 @@ void gui_templates_export_key_handler(const char *key, _Bool private){
   }
   chdir(cwd);
 
-  const char *keystore_path = cwd;
-  char *key_path = malloc(strlen(keystore_path) + strlen(key) + 16);
+  file_io_export_gpg_keys(key, filename, private);
 
-  sprintf(key_path, "%s\\..\\Keys\\%s", keystore_path, key);
-  cp(key_path, filename);
-
-  free((char *) keystore_path);
-  free((char *) key_path);
-
+  free((char *) cwd);
   #endif
 }
 
@@ -1286,18 +1305,51 @@ void gui_templates_import_key_handler(){
   }
   chdir(cwd);
 
-  const char *keystore_path = cwd;
-  char *base_name = strrchr(filename, '\\');
-  if (base_name[0] == '\\'){
-    base_name += 1;
+  HANDLE child_SYNC_rd = NULL;
+  HANDLE child_SYNC_wr = NULL;
+
+  SECURITY_ATTRIBUTES saAttr;
+  saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+  saAttr.bInheritHandle = true;
+  saAttr.lpSecurityDescriptor = NULL;
+
+  CreatePipe(&child_SYNC_rd, &child_SYNC_wr, &saAttr, 0);
+  SetHandleInformation(child_SYNC_rd, HANDLE_FLAG_INHERIT, 0);
+
+  PROCESS_INFORMATION piProcInfo;
+  STARTUPINFO siStartInfo;
+  ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+  ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+  siStartInfo.cb = sizeof(STARTUPINFO);
+  siStartInfo.hStdError = NULL;
+  siStartInfo.hStdOutput = child_SYNC_wr;
+  siStartInfo.hStdInput = NULL;
+  siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+  char gpg_parms[strlen(filename) + 64];
+  sprintf(gpg_parms, "gpg.exe --import \"%s\"", filename);
+  printf("%s\n", gpg_parms);
+
+  CreateProcessA("C:\\Program Files (x86)\\GnuPG\\bin\\gpg.exe",
+                 gpg_parms,
+                 NULL,
+                 NULL,
+                 true,
+                 0,
+                 NULL,
+                 NULL,
+                 &siStartInfo,
+                 &piProcInfo);
+
+  CloseHandle(piProcInfo.hProcess);
+  CloseHandle(piProcInfo.hThread);
+  CloseHandle(child_SYNC_wr);
+
+  char blackhole;
+  while(ReadFile(child_SYNC_rd, &blackhole, 1, NULL, NULL)){
   }
-  char *imported_path = malloc(strlen(keystore_path) + strlen(base_name) + 16);
 
-  sprintf(imported_path, "%s\\..\\Keys\\%s", keystore_path, base_name);
-  cp(filename, imported_path);
-
-  free((char *) keystore_path);
-  free((char *) imported_path);
+  free((char *) cwd);
   #endif
 }
 int gui_templates_create_key_handler(){
@@ -1566,9 +1618,11 @@ int gui_templates_create_key_handler(){
     exit(-1);
   }
   close(p[0]);
+  #endif
 
   char entry_buffer[128];
   char buffer[1000] = "\0";
+
   strcat(buffer, "Key-Type: ");
 
   sprintf(entry_buffer, "%d", gtk_combo_box_get_active(GTK_COMBO_BOX(combo_keytype))+1);
@@ -1608,8 +1662,12 @@ int gui_templates_create_key_handler(){
 
   strcat(buffer, "\nPassphrase: ");
   strcat(buffer, gtk_entry_get_text(GTK_ENTRY(entry_password_1)));
-  strcat(buffer, "\n%commit");
 
+  #ifdef __unix__
+  strcat(buffer, "\n%commit");
+  #endif
+
+  #ifdef __unix__
   write(p[1], buffer, strlen(buffer));
   close(p[1]);
 
@@ -1618,10 +1676,60 @@ int gui_templates_create_key_handler(){
   wait(NULL);
   return 0;
   #elif defined(_WIN32) || defined (WIN32)
+  HANDLE child_IN_rd = NULL;
+  HANDLE child_IN_wr = NULL;
+
+  HANDLE child_SYNC_rd = NULL;
+  HANDLE child_SYNC_wr = NULL;
+
+  SECURITY_ATTRIBUTES saAttr;
+  saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+  saAttr.bInheritHandle = true;
+  saAttr.lpSecurityDescriptor = NULL;
+
+  CreatePipe(&child_IN_rd, &child_IN_wr, &saAttr, 0);
+  SetHandleInformation(child_IN_wr, HANDLE_FLAG_INHERIT, 0);
+
+  CreatePipe(&child_SYNC_rd, &child_SYNC_wr, &saAttr, 0);
+  SetHandleInformation(child_SYNC_rd, HANDLE_FLAG_INHERIT, 0);
+
+  PROCESS_INFORMATION piProcInfo;
+  STARTUPINFO siStartInfo;
+  ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+  ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+  siStartInfo.cb = sizeof(STARTUPINFO);
+  siStartInfo.hStdError = NULL;
+  siStartInfo.hStdOutput = child_SYNC_wr;
+  siStartInfo.hStdInput = child_IN_rd;
+  siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+  CreateProcessA("C:\\Program Files (x86)\\GnuPG\\bin\\gpg.exe",
+                 "gpg.exe --full-generate-key --batch",
+                 NULL,
+                 NULL,
+                 true,
+                 0,
+                 NULL,
+                 NULL,
+                 &siStartInfo,
+                 &piProcInfo);
+
+  CloseHandle(piProcInfo.hProcess);
+  CloseHandle(piProcInfo.hThread);
+  CloseHandle(child_IN_rd);
+  CloseHandle(child_SYNC_wr);
+
+  WriteFile(child_IN_wr, buffer, strlen(buffer), NULL, NULL);
+  CloseHandle(child_IN_wr);
+
+  char blackhole;
+  while(ReadFile(child_SYNC_rd, &blackhole, 1, NULL, NULL)){
+  }
+  CloseHandle(child_SYNC_rd);
+
   destroy(dialog, dialog);
   return 0;
   #endif
-
 }
 
 void button_refresh_keys_handler(GtkWidget *widget, gpointer data){

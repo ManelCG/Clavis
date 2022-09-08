@@ -19,7 +19,7 @@ void draw_main_window(GtkWidget *widget, gpointer data){
 }
 
 int main(int argc, char *argv[]){
-  #ifdef __unix__
+  // #ifdef __unix__
   const char *papath = get_password_store_path();
   if (chdir(papath) != 0){
     mkdir_handler(papath);
@@ -27,22 +27,22 @@ int main(int argc, char *argv[]){
     chdir(papath);
   }
   free((char *) papath);
-  #elif defined(_WIN32) || defined (WIN32)
-  const char *papath = get_password_store_path();
-  if (chdir(papath) != 0){
-    const char *clpath = get_clavis_path();
-    mkdir_handler(clpath);
-    free((char *) clpath);
+  // #elif defined(_WIN32) || defined (WIN32)
+  // const char *papath = get_password_store_path();
+  // if (chdir(papath) != 0){
+  //   const char *clpath = get_clavis_path();
+  //   mkdir_handler(clpath);
+  //   free((char *) clpath);
 
-    const char *kspath = get_key_store_path();
-    mkdir_handler(kspath);
-    free((char *) kspath);
+  //   const char *kspath = get_key_store_path();
+  //   mkdir_handler(kspath);
+  //   free((char *) kspath);
 
-    mkdir_handler(papath);
-    chdir(papath);
-  }
-  free((char *) papath);
-  #endif
+  //   mkdir_handler(papath);
+  //   chdir(papath);
+  // }
+  // free((char *) papath);
+  // #endif
 
   int clavis_mode = CLAVIS_NORMAL_MODE;
   int opt;

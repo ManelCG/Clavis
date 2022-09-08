@@ -13,6 +13,7 @@
 #ifdef __unix__
 #include <sys/wait.h>
 #elif defined(_WIN32) || defined (WIN32)
+#include <windows.h>
 #include <folderstate.h>
 #endif
 
@@ -38,44 +39,15 @@ const char *get_password_store_path(){
       strcpy(path, passtoredir);
     }
   #elif defined(_WIN32) || defined (WIN32)
-    char *password_store_path = "Clavis\\Passwords";
+    char *password_store_path = "Clavis_Passwords";
 
     homelen = strlen(getenv("HOMEPATH"));
     path = malloc(sizeof(char) * (homelen + strlen(password_store_path) + 8));
 
-    sprintf(path, "%s\\%s\\", getenv("HOMEPATH"), password_store_path);
+    sprintf(path, "C:%s\\%s\\", getenv("HOMEPATH"), password_store_path);
   #endif
   return path;
 }
-
-#if defined(_WIN32) || defined (WIN32)
-const char *get_clavis_path(){
-  int homelen;
-  char *path;
-
-  char *key_store_path = "Clavis";
-
-  homelen = strlen(getenv("HOMEPATH"));
-  path = malloc(sizeof(char) * (homelen + strlen(key_store_path) + 8));
-
-  sprintf(path, "%s\\%s\\", getenv("HOMEPATH"), key_store_path);
-
-  return path;
-}
-const char *get_key_store_path(){
-  int homelen;
-  char *path;
-
-  char *key_store_path = "Clavis\\Keys";
-
-  homelen = strlen(getenv("HOMEPATH"));
-  path = malloc(sizeof(char) * (homelen + strlen(key_store_path) + 8));
-
-  sprintf(path, "%s\\%s\\", getenv("HOMEPATH"), key_store_path);
-
-  return path;
-}
-#endif
 
 const char *file_io_get_git_config_field(const char *field){
   #ifdef __unix__
@@ -727,7 +699,6 @@ _Bool file_io_string_is_file(const char *s){
   return S_ISREG(pstat.st_mode);
 }
 
-#ifdef __unix__
 char **file_io_get_full_gpg_keys(int *num){
   int npubs, nprivs;
   char **pubs = file_io_get_gpg_keys(&npubs, false);
@@ -771,6 +742,7 @@ char **file_io_get_full_gpg_keys(int *num){
 char **file_io_get_gpg_keys(int *num, _Bool secret){
   //gpg --list-keys | grep -E "<*>" | awk '{print $NF}'
   //gpg --list-secret-keys | grep -E "<*>" | awk '{print $NF}'
+  #ifdef __unix__
   int pid;
   int pipe_gpg_grep[2];
   if (pipe(pipe_gpg_grep) != 0){
@@ -886,8 +858,141 @@ char **file_io_get_gpg_keys(int *num, _Bool secret){
     *num = pindex;
   }
   return keys;
+  #elif defined(_WIN32) || defined (WIN32)
+  //gpg --list-keys --with-colons
+  //gpg --list-secret-keys --with-colons
+  HANDLE gpg_OUT_rd = NULL;
+  HANDLE gpg_OUT_wr = NULL;
+
+  SECURITY_ATTRIBUTES saAttr;
+  saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+  saAttr.bInheritHandle = true;
+  saAttr.lpSecurityDescriptor = NULL;
+
+  CreatePipe(&gpg_OUT_rd, &gpg_OUT_wr, &saAttr, 0);
+  SetHandleInformation(gpg_OUT_rd, HANDLE_FLAG_INHERIT, 0);
+
+  PROCESS_INFORMATION piProcInfo;
+  STARTUPINFO siStartInfo;
+  ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+  ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+  siStartInfo.cb = sizeof(STARTUPINFO);
+  siStartInfo.hStdError = NULL;
+  siStartInfo.hStdOutput = gpg_OUT_wr;
+  siStartInfo.hStdInput = NULL;
+  siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+  if (secret){
+    CreateProcessA("C:\\Program Files (x86)\\GnuPG\\bin\\gpg.exe",
+                   "gpg.exe --list-secret-keys --with-colons",
+                   NULL,
+                   NULL,
+                   true,
+                   0,
+                   NULL,
+                   NULL,
+                   &siStartInfo,
+                   &piProcInfo);
+  } else {
+    CreateProcessA("C:\\Program Files (x86)\\GnuPG\\bin\\gpg.exe",
+                   "gpg.exe --list-keys --with-colons",
+                   NULL,
+                   NULL,
+                   true,
+                   0,
+                   NULL,
+                   NULL,
+                   &siStartInfo,
+                   &piProcInfo);
+  }
+  CloseHandle(piProcInfo.hProcess);
+  CloseHandle(piProcInfo.hThread);
+  CloseHandle(gpg_OUT_wr);
+
+  int buffer_size = 128;
+  char *buffer = malloc(sizeof(char) * buffer_size);
+  buffer[0] = '\0';
+  char c;
+  int i = 0;
+
+  while (ReadFile(gpg_OUT_rd, &c, 1, NULL, NULL)){
+    buffer[i] = c;
+
+    i++;
+    if (i == buffer_size){
+      buffer_size *= 2;
+    }
+    buffer = realloc(buffer, sizeof(char) * buffer_size);
+    buffer[i] = '\0';
+  }
+
+  CloseHandle(gpg_OUT_rd);
+
+  //Vars for saving output
+  int pindex = 0;
+  char **keys = NULL;
+
+  //grep "^uid:"
+  unsigned int line_buff_size = 4096;
+  char line_buffer[line_buff_size];
+  char aux_buffer[8];
+  char *token = buffer;
+  char *last_token;
+  long long int len;
+  i = 0;
+
+  while (1 && buffer[0] != '\0'){
+    last_token = token;
+    token = strchr(token, '\n');
+    len = token - last_token;
+
+    if (len < line_buff_size){
+      snprintf(line_buffer, len, last_token);
+      snprintf(aux_buffer, 5, line_buffer);
+      if (strcmp(aux_buffer, "uid:") == 0){
+        //awk -F: '{print $10}'
+        char *colon_token = line_buffer;
+        char *last_colon_token;
+        for (int i = 0; i < 9; i++){
+          colon_token = strchr(colon_token, ':');
+          colon_token++;
+        }
+        last_colon_token = strchr(colon_token, ':');
+        last_colon_token[0] = '\0';
+
+        //Save output
+        if (keys == NULL){
+          keys = malloc(sizeof(char *));
+        } else {
+          keys = realloc(keys, sizeof(char *) * (pindex +1));
+        }
+        keys[pindex] = malloc(sizeof(char) * ((last_colon_token-colon_token)+2));
+        strcpy(keys[pindex], colon_token);
+        pindex++;
+      }
+    }
+
+    if (token[0] == '\n'){
+      token++;
+    }
+    if (token[0] == '\0'){
+      break;
+    }
+
+    i++;
+  }
+
+  free(buffer);
+
+
+  if (num != NULL){
+    *num = pindex;
+  }
+  return keys;
+  #endif
 }
 
+#ifdef __unix__
 void file_io_init_password_store(const char *key){
   int pid;
   pid = fork();
@@ -938,8 +1043,10 @@ void file_io_gpg_trust_key(const char *key){
   close(p[1]);
   wait(NULL);
 }
+#endif
 
 void file_io_export_gpg_keys(const char *key, const char *path, _Bool private){
+#ifdef __unix__
   int pid = fork();
   if (pid < 0){
     perror("Could not fork");
@@ -958,59 +1065,71 @@ void file_io_export_gpg_keys(const char *key, const char *path, _Bool private){
     }
   }
   return;
-}
 #elif defined(_WIN32) || defined (WIN32)
-char **file_io_get_full_gpg_keys(int *num){
-  const char *cwd = _getcwd(NULL, 0);
-  const char *key_dir = CLAVIS_WINDOWS_KEYS_DIR;
-  char *key_store = malloc(strlen(cwd) + 16);
+  HANDLE hFile;
+  hFile = CreateFile(path,
+                     GENERIC_WRITE,
+                     0,
+                     NULL,
+                     CREATE_ALWAYS,
+                     FILE_ATTRIBUTE_NORMAL,
+                     NULL);
 
-  int retl = 0;
-  int index = 0;
-  int nfiles;
-  char **ret = NULL;
-  const char **files = NULL;
-
-  int n_ext = 4;
-  const char *extensions[] = {".gpg", ".sec", ".pub", ".key"};
-
-  sprintf(key_store, "%s\\..\\%s\\", cwd, key_dir);
-
-  folderstate *fs = folderstate_new(key_store);
-
-  for (int i = 0; i < n_ext; i++){
-    folderstate_set_filter(fs, extensions[i]);
-    folderstate_reload(fs);
-    nfiles = folderstate_get_nfiles(fs);
-
-    retl += nfiles;
+  if (hFile == INVALID_HANDLE_VALUE){
+    return;
   }
 
-  if (retl > 0){
-    ret = malloc(sizeof(char *) * retl);
+  HANDLE child_OUT_rd = NULL;
+  HANDLE child_OUT_wr = NULL;
 
-    for (int i = 0; i < n_ext; i++){
-      folderstate_set_filter(fs, extensions[i]);
-      folderstate_reload(fs);
-      nfiles = folderstate_get_nfiles(fs);
-      files = folderstate_get_files(fs);
+  SECURITY_ATTRIBUTES saAttr;
+  saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+  saAttr.bInheritHandle = true;
+  saAttr.lpSecurityDescriptor = NULL;
 
-      for (int j = 0; j < nfiles; j++){
-        ret[j+index] = calloc(sizeof(char) * (strlen(files[j]) + 8), 1);
-        strcpy(ret[j+index], files[j]);
-      }
-      index += nfiles;
-    }
+  CreatePipe(&child_OUT_rd, &child_OUT_wr, &saAttr, 0);
+  SetHandleInformation(child_OUT_rd, HANDLE_FLAG_INHERIT, 0);
 
-    free((char *) cwd);
-    free((char *) key_store);
-    free(fs);
+  PROCESS_INFORMATION piProcInfo;
+  STARTUPINFO siStartInfo;
+  ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+  ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+  siStartInfo.cb = sizeof(STARTUPINFO);
+  siStartInfo.hStdError = NULL;
+  siStartInfo.hStdOutput = child_OUT_wr;
+  siStartInfo.hStdInput = NULL;
+  siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 
-    *num = retl;
-    return ret;
+  char gpg_parms[strlen(key) + 64];
+  if (private){
+    sprintf(gpg_parms, "gpg.exe --export-secret-key -a 'Clavis test key'");
   } else {
-    *num = 0;
-    return NULL;
+    sprintf(gpg_parms, "gpg.exe --export -a '%s'", key);
   }
-}
+  printf("%s\n", gpg_parms);
+
+  CreateProcessA("C:\\Program Files (x86)\\GnuPG\\bin\\gpg.exe",
+                 gpg_parms,
+                 NULL,
+                 NULL,
+                 true,
+                 0,
+                 NULL,
+                 NULL,
+                 &siStartInfo,
+                 &piProcInfo);
+
+  CloseHandle(piProcInfo.hProcess);
+  CloseHandle(piProcInfo.hThread);
+  CloseHandle(child_OUT_wr);
+
+
+  char c;
+  while (ReadFile(child_OUT_rd, &c, 1, NULL, NULL)){
+    WriteFile(hFile, &c, 1, NULL, NULL);
+  }
+
+  CloseHandle(hFile);
+  return;
 #endif
+}

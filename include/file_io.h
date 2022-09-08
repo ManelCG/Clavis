@@ -1,6 +1,10 @@
 #ifndef __FILE_IO_H_
 #define __FILE_IO_H_
 
+#if defined(_WIN32) || defined (WIN32)
+
+#endif
+
 _Bool file_io_string_is_folder(const char *s);
 _Bool file_io_string_is_file(const char *s);
 
@@ -23,18 +27,17 @@ int file_io_init_git_server(const char *username, const char *email, const char 
 
 
 char **file_io_get_full_gpg_keys(int *num);
-#ifdef __unix__
 char **file_io_get_gpg_keys(int *num, _Bool secret);
-void file_io_init_password_store(const char *key);
 
 void file_io_export_gpg_keys(const char *key, const char *path, _Bool private);
 void file_io_gpg_trust_key(const char *key);
+#ifdef __unix__
+void file_io_init_password_store(const char *key);
+
 
 int file_io_remove_password(const char *path);
 #elif defined(_WIN32) || defined (WIN32)
 
-const char *get_key_store_path();
-const char *get_clavis_path();
 #endif
 
 #endif //_FILE_IO_H_
