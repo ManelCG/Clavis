@@ -117,13 +117,15 @@ const char *passgen_generate_new_password(passgen *pg){
     }
 
     //Generate random password
-    char *password = calloc(sizeof(char) * pg->len, 1);
+    char *password = calloc(sizeof(char) * (pg->len + 1), 1);
     unsigned int randint;
     for (int i = 0; i < pg->len; i++){
       RAND_priv_bytes((unsigned char *) &randint, sizeof(randint));
       randint = randint % charslen;
       password[i] = charlist[randint];
     }
+
+    password[pg->len] = '\0';
 
     if (pg->output_entry != NULL){
       gtk_entry_set_text(GTK_ENTRY(pg->output_entry), password);
