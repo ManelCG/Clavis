@@ -539,6 +539,23 @@ int file_io_encrypt_password(const char *password, const char *path){
 }
 
 char *file_io_get_gpgid(){
+  #ifdef __unix__
+  char *key_id = malloc(sizeof(char) * 512);
+  int fd = open(".gpg-id", O_RDONLY);
+
+  if (fd < 0){
+    return NULL;
+  }
+
+  int len = read(fd, key_id, 512);
+  if (len == 0){
+    return NULL;
+  }
+
+  key_id[len-1] = '\0';
+
+  return key_id;
+  #elif defined(_WIN32) || defined (WIN32)
   HANDLE hFile;
   hFile = CreateFile(".gpg-id",
                      GENERIC_READ,
@@ -560,6 +577,7 @@ char *file_io_get_gpgid(){
 
   CloseHandle(hFile);
   return ret;
+  #endif
 }
 
 const char *file_io_decrypt_password(const char *file){

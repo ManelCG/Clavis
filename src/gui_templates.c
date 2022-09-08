@@ -1738,28 +1738,19 @@ void button_refresh_keys_handler(GtkWidget *widget, gpointer data){
 }
 
 void menu_button_export_gpg_handler(GtkWidget *w, gpointer data){
-  #ifdef __unix__
-  char key_id[512];
-  int fd = open(".gpg-id", O_RDONLY);
-
-  if (fd < 0){
+  char *gpgid = file_io_get_gpgid();
+  if (gpgid == NULL){
     return;
   }
-
-  int len = read(fd, key_id, 512);
-  if (len == 0){
-    return;
-  }
-
-  key_id[len-1] = '\0';
 
   const char *widname = gtk_widget_get_name(w);
   if (strcmp(widname, CLAVIS_BUTTON_EXPORT_PUBLIC_KEY_NAME) == 0){
-    gui_templates_export_key_handler(key_id, false);
+    gui_templates_export_key_handler(gpgid, false);
   } else if (strcmp(widname, CLAVIS_BUTTON_EXPORT_PRIVATE_KEY_NAME) == 0){
-    gui_templates_export_key_handler(key_id, true);
+    gui_templates_export_key_handler(gpgid, true);
   }
-  #endif
+
+  free(gpgid);
 }
 
 int gui_templates_initialize_password_store(){
