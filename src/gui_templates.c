@@ -938,8 +938,10 @@ void file_button_handler(GtkWidget *widget, gpointer data){
   const char *name = gtk_widget_get_name(widget);
   if (file_io_string_is_file(name)){
     const char *pass = file_io_decrypt_password(name);
-    gtk_entry_set_text(GTK_ENTRY(label), pass);
-    free((char *) pass);
+    if (pass != NULL){
+      gtk_entry_set_text(GTK_ENTRY(label), pass);
+      free((char *) pass);
+    }
   }
 }
 

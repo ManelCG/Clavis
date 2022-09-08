@@ -522,7 +522,7 @@ int file_io_encrypt_password(const char *password, const char *path){
                        NULL);
 
     if (hFile == INVALID_HANDLE_VALUE){
-      return;
+      return -1;
     }
 
     char c;
@@ -623,7 +623,81 @@ const char *file_io_decrypt_password(const char *file){
 
 
   #elif defined(_WIN32) || defined (WIN32)
-    printf("Decryption in Windows is still WIP\n");
+    char *gpgid = file_io_get_gpgid();
+    if (gpgid == NULL){
+      return NULL;
+    }
+
+    HANDLE child_OUT_rd = NULL;
+    HANDLE child_OUT_wr = NULL;
+
+    SECURITY_ATTRIBUTES saAttr;
+    saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+    saAttr.bInheritHandle = true;
+    saAttr.lpSecurityDescriptor = NULL;
+
+    CreatePipe(&child_OUT_rd, &child_OUT_wr, &saAttr, 0);
+    SetHandleInformation(child_OUT_rd, HANDLE_FLAG_INHERIT, 0);
+
+    PROCESS_INFORMATION piProcInfo;
+    STARTUPINFO siStartInfo;
+    ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+    ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+    siStartInfo.cb = sizeof(STARTUPINFO);
+    siStartInfo.hStdError = NULL;
+    siStartInfo.hStdOutput = child_OUT_wr;
+    siStartInfo.hStdInput = NULL;
+    siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+    char gpg_parms[strlen(file) + 64];
+    sprintf(gpg_parms, "gpg.exe --decrypt \"%s\"", file);
+
+    printf("DECRYPTING %s\n", file);
+    printf("%s\n", gpg_parms);
+
+    CreateProcessA("C:\\Program Files (x86)\\GnuPG\\bin\\gpg.exe",
+                   gpg_parms,
+                   NULL,
+                   NULL,
+                   true,
+                   0,
+                   NULL,
+                   NULL,
+                   &siStartInfo,
+                   &piProcInfo);
+
+    CloseHandle(piProcInfo.hProcess);
+    CloseHandle(piProcInfo.hThread);
+    CloseHandle(child_OUT_wr);
+
+    size_t passlen = DEFAULT_PASSWORD_SIZE;
+    int index = 0;
+    char *decrypted_password = malloc(sizeof(char) * passlen);
+    char c;
+
+    while (ReadFile(child_OUT_rd, &c, 1, NULL, NULL)){
+      if (c != '\0' && c != '\n'){
+        if (index == passlen){
+          passlen *= 2;
+          decrypted_password = realloc(decrypted_password, passlen);
+        }
+
+        decrypted_password[index] = c;
+        index++;
+      } else {
+        break;
+      }
+    }
+    CloseHandle(child_OUT_rd);
+
+    if (index == passlen){
+      passlen += 2;
+      decrypted_password = realloc(decrypted_password, passlen);
+    }
+    decrypted_password[index] = '\0';
+
+    free(gpgid);
+    return decrypted_password;
   #endif
 }
 
