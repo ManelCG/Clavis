@@ -992,8 +992,8 @@ char **file_io_get_gpg_keys(int *num, _Bool secret){
   #endif
 }
 
-#ifdef __unix__
 void file_io_init_password_store(const char *key){
+#ifdef __unix__
   int pid;
   pid = fork();
   if (pid < 0){
@@ -1005,18 +1005,28 @@ void file_io_init_password_store(const char *key){
   }
   wait(NULL);
 
-  // pid = fork();
-  // if (pid < 0){
-  //   perror("Could not fork");
-  // }
-  // if (pid == 0){
-  //   execlp("pass", "pass", "git", "init", NULL);
-  // }
-  // wait(NULL);
+#elif defined(_WIN32) || defined (WIN32)
+  HANDLE hFile;
+  hFile = CreateFile(".gpg-id",
+                     GENERIC_WRITE,
+                     0,
+                     NULL,
+                     CREATE_ALWAYS,
+                     FILE_ATTRIBUTE_NORMAL,
+                     NULL);
 
+  if (hFile == INVALID_HANDLE_VALUE){
+    return;
+  }
+
+  WriteFile(hFile, key, strlen(key), NULL, NULL);
+
+  CloseHandle(hFile);
+#endif
 }
 
 void file_io_gpg_trust_key(const char *key){
+#ifdef __unix__
   int pid;
   int p[2];
   if (pipe(p) < 0){
@@ -1042,8 +1052,63 @@ void file_io_gpg_trust_key(const char *key){
   write(p[1], "5\ny\n", 4);
   close(p[1]);
   wait(NULL);
-}
+#elif defined(_WIN32) || defined (WIN32)
+  HANDLE child_SYNC_rd = NULL;
+  HANDLE child_SYNC_wr = NULL;
+
+  HANDLE child_IN_rd = NULL;
+  HANDLE child_IN_wr = NULL;
+
+  SECURITY_ATTRIBUTES saAttr;
+  saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+  saAttr.bInheritHandle = true;
+  saAttr.lpSecurityDescriptor = NULL;
+
+  CreatePipe(&child_SYNC_rd, &child_SYNC_wr, &saAttr, 0);
+  SetHandleInformation(child_SYNC_rd, HANDLE_FLAG_INHERIT, 0);
+
+  CreatePipe(&child_IN_rd, &child_IN_wr, &saAttr, 0);
+  SetHandleInformation(child_IN_wr, HANDLE_FLAG_INHERIT, 0);
+
+  PROCESS_INFORMATION piProcInfo;
+  STARTUPINFO siStartInfo;
+  ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+  ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+  siStartInfo.cb = sizeof(STARTUPINFO);
+  siStartInfo.hStdError = NULL;
+  siStartInfo.hStdOutput = child_SYNC_wr;
+  siStartInfo.hStdInput = child_IN_rd;
+  siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+  char gpg_parms[strlen(key) + 128];
+  sprintf(gpg_parms, "gpg.exe --command-fd 0 --expert --edit-key \"%s\" trust", key);
+  printf("%s\n", gpg_parms);
+
+  CreateProcessA("C:\\Program Files (x86)\\GnuPG\\bin\\gpg.exe",
+                 gpg_parms,
+                 NULL,
+                 NULL,
+                 true,
+                 0,
+                 NULL,
+                 NULL,
+                 &siStartInfo,
+                 &piProcInfo);
+
+  CloseHandle(piProcInfo.hProcess);
+  CloseHandle(piProcInfo.hThread);
+  CloseHandle(child_SYNC_wr);
+  CloseHandle(child_IN_rd);
+
+  WriteFile(child_IN_wr, "5\ny\n", 4, NULL, NULL);
+  CloseHandle(child_IN_wr);
+
+  char blackhole;
+  while(ReadFile(child_SYNC_rd, &blackhole, 1, NULL, NULL)){
+  }
+  CloseHandle(child_SYNC_rd);
 #endif
+}
 
 void file_io_export_gpg_keys(const char *key, const char *path, _Bool private){
 #ifdef __unix__

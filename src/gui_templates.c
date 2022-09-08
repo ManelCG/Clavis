@@ -1340,6 +1340,7 @@ void gui_templates_import_key_handler(){
   char blackhole;
   while(ReadFile(child_SYNC_rd, &blackhole, 1, NULL, NULL)){
   }
+  CloseHandle(child_SYNC_rd);
 
   free((char *) cwd);
   #endif
@@ -1963,14 +1964,14 @@ int gui_templates_initialize_password_store(){
     return 1;
   }
 
-  #ifdef __unix__
+  // #ifdef __unix__
+
   char *key = malloc(sizeof(char) * (strlen(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(key_combo_box)))+1));
   strcpy(key, gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(key_combo_box)));
 
   file_io_gpg_trust_key(key);
 
   if (! gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle_git_server))){
-    printf("Here\n");
     file_io_init_password_store(key);
   } else {
     user_git_name  = gtk_entry_get_text(GTK_ENTRY(entry_username));
@@ -1987,12 +1988,13 @@ int gui_templates_initialize_password_store(){
   }
 
   free(key);
-  #elif defined(_WIN32) || defined (WIN32)
-  char *key = malloc(sizeof(char) * (strlen(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(key_combo_box)))+1));
-  strcpy(key, gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(key_combo_box)));
 
-  printf("Initializing for %s\n", key);
-  #endif
+  // #elif defined(_WIN32) || defined (WIN32)
+  // char *key = malloc(sizeof(char) * (strlen(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(key_combo_box)))+1));
+  // strcpy(key, gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(key_combo_box)));
+
+  // printf("Initializing for %s\n", key);
+  // #endif
 
   destroy(dialog, dialog);
   return 0;
