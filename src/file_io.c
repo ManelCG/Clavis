@@ -1066,19 +1066,6 @@ void file_io_export_gpg_keys(const char *key, const char *path, _Bool private){
   }
   return;
 #elif defined(_WIN32) || defined (WIN32)
-  HANDLE hFile;
-  hFile = CreateFile(path,
-                     GENERIC_WRITE,
-                     0,
-                     NULL,
-                     CREATE_ALWAYS,
-                     FILE_ATTRIBUTE_NORMAL,
-                     NULL);
-
-  if (hFile == INVALID_HANDLE_VALUE){
-    return;
-  }
-
   HANDLE child_OUT_rd = NULL;
   HANDLE child_OUT_wr = NULL;
 
@@ -1102,11 +1089,10 @@ void file_io_export_gpg_keys(const char *key, const char *path, _Bool private){
 
   char gpg_parms[strlen(key) + 64];
   if (private){
-    sprintf(gpg_parms, "gpg.exe --export-secret-key -a 'Clavis test key'");
+    sprintf(gpg_parms, "gpg.exe --export-secret-key -a '%s'", key);
   } else {
     sprintf(gpg_parms, "gpg.exe --export -a '%s'", key);
   }
-  printf("%s\n", gpg_parms);
 
   CreateProcessA("C:\\Program Files (x86)\\GnuPG\\bin\\gpg.exe",
                  gpg_parms,
@@ -1122,6 +1108,19 @@ void file_io_export_gpg_keys(const char *key, const char *path, _Bool private){
   CloseHandle(piProcInfo.hProcess);
   CloseHandle(piProcInfo.hThread);
   CloseHandle(child_OUT_wr);
+
+  HANDLE hFile;
+  hFile = CreateFile(path,
+                     GENERIC_WRITE,
+                     0,
+                     NULL,
+                     CREATE_ALWAYS,
+                     FILE_ATTRIBUTE_NORMAL,
+                     NULL);
+
+  if (hFile == INVALID_HANDLE_VALUE){
+    return;
+  }
 
 
   char c;

@@ -1173,21 +1173,6 @@ void gui_templates_export_key_handler(const char *key, _Bool private){
     token[0] = ']';
   }
 
-  token = strchr(key, '<');
-  if (token[0] == '<'){
-    token[0] = ' ';
-  }
-  token = strchr(key, '>');
-  if (token[0] == '>'){
-    token[0] = ' ';
-  }
-
-  if (private){
-    strcat(filename, ".sec");
-  } else {
-    strcat(filename, ".pub");
-  }
-
   OPENFILENAMEA ofn;
   memset(&ofn, 0, sizeof(ofn));
   ofn.lStructSize = sizeof(ofn);
@@ -1205,6 +1190,13 @@ void gui_templates_export_key_handler(const char *key, _Bool private){
     return;
   }
   chdir(cwd);
+
+  if (private){
+    strcat(filename, ".sec");
+  } else {
+    strcat(filename, ".pub");
+  }
+
 
   file_io_export_gpg_keys(key, filename, private);
 
@@ -1996,7 +1988,10 @@ int gui_templates_initialize_password_store(){
 
   free(key);
   #elif defined(_WIN32) || defined (WIN32)
+  char *key = malloc(sizeof(char) * (strlen(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(key_combo_box)))+1));
+  strcpy(key, gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(key_combo_box)));
 
+  printf("Initializing for %s\n", key);
   #endif
 
   destroy(dialog, dialog);
