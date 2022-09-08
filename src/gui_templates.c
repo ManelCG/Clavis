@@ -34,9 +34,11 @@ void destroy(GtkWidget *w, gpointer data){
 }
 
 void gui_templates_window_set_clavis_icon(GtkWindow *window){
+  #ifdef __unix__
   GdkPixbuf *window_icon = gdk_pixbuf_new_from_file(ABOUT_PICTURE_PNG, NULL);
   window_icon = gdk_pixbuf_scale_simple(window_icon, 16, 16, GDK_INTERP_NEAREST);
   gtk_window_set_icon(window, window_icon);
+  #endif
 }
 
 
@@ -1328,7 +1330,7 @@ void gui_templates_import_key_handler(){
                  NULL,
                  NULL,
                  true,
-                 0,
+                 CREATE_NO_WINDOW,
                  NULL,
                  NULL,
                  &siStartInfo,
@@ -1702,7 +1704,7 @@ int gui_templates_create_key_handler(){
                  NULL,
                  NULL,
                  true,
-                 0,
+                 CREATE_NO_WINDOW,
                  NULL,
                  NULL,
                  &siStartInfo,
