@@ -33,6 +33,8 @@ void file_io_export_gpg_keys(const char *key, const char *path, _Bool private);
 void file_io_gpg_trust_key(const char *key);
 void file_io_init_password_store(const char *key);
 
+char *file_io_get_gpgid();
+
 #ifdef __unix__
 int file_io_remove_password(const char *path);
 #elif defined(_WIN32) || defined (WIN32)

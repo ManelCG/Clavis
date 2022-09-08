@@ -457,8 +457,109 @@ int file_io_encrypt_password(const char *password, const char *path){
 
     return 0;
   #elif defined(_WIN32) || defined (WIN32)
-    printf("Password encryption is still WIP for Windows.\n");
+    char *gpgid = file_io_get_gpgid();
+    if (gpgid == NULL){
+      return -1;
+    }
+
+    HANDLE child_IN_rd = NULL;
+    HANDLE child_IN_wr = NULL;
+
+    HANDLE child_OUT_rd = NULL;
+    HANDLE child_OUT_wr = NULL;
+
+    SECURITY_ATTRIBUTES saAttr;
+    saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+    saAttr.bInheritHandle = true;
+    saAttr.lpSecurityDescriptor = NULL;
+
+    CreatePipe(&child_IN_rd, &child_IN_wr, &saAttr, 0);
+    SetHandleInformation(child_IN_wr, HANDLE_FLAG_INHERIT, 0);
+
+    CreatePipe(&child_OUT_rd, &child_OUT_wr, &saAttr, 0);
+    SetHandleInformation(child_OUT_rd, HANDLE_FLAG_INHERIT, 0);
+
+    PROCESS_INFORMATION piProcInfo;
+    STARTUPINFO siStartInfo;
+    ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+    ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+    siStartInfo.cb = sizeof(STARTUPINFO);
+    siStartInfo.hStdError = NULL;
+    siStartInfo.hStdOutput = child_OUT_wr;
+    siStartInfo.hStdInput = child_IN_rd;
+    siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+    char gpg_parms[strlen(gpgid) + 64];
+    sprintf(gpg_parms, "gpg.exe --encrypt --armor -r \"%s\"", gpgid);
+    printf("%s\n", gpg_parms);
+
+    CreateProcessA("C:\\Program Files (x86)\\GnuPG\\bin\\gpg.exe",
+                   gpg_parms,
+                   NULL,
+                   NULL,
+                   true,
+                   0,
+                   NULL,
+                   NULL,
+                   &siStartInfo,
+                   &piProcInfo);
+
+    CloseHandle(piProcInfo.hProcess);
+    CloseHandle(piProcInfo.hThread);
+    CloseHandle(child_OUT_wr);
+    CloseHandle(child_IN_rd);
+
+    WriteFile(child_IN_wr, password, strlen(password), NULL, NULL);
+    CloseHandle(child_IN_wr);
+
+    HANDLE hFile;
+    hFile = CreateFile(path,
+                       GENERIC_WRITE,
+                       0,
+                       NULL,
+                       CREATE_ALWAYS,
+                       FILE_ATTRIBUTE_NORMAL,
+                       NULL);
+
+    if (hFile == INVALID_HANDLE_VALUE){
+      return;
+    }
+
+    char c;
+    while (ReadFile(child_OUT_rd, &c, 1, NULL, NULL)){
+      WriteFile(hFile, &c, 1, NULL, NULL);
+    }
+    CloseHandle(child_OUT_rd);
+    CloseHandle(hFile);
+
+    free(gpgid);
+
+    return 0;
   #endif
+}
+
+char *file_io_get_gpgid(){
+  HANDLE hFile;
+  hFile = CreateFile(".gpg-id",
+                     GENERIC_READ,
+                     FILE_SHARE_READ,
+                     NULL,
+                     OPEN_EXISTING,
+                     FILE_ATTRIBUTE_NORMAL,
+                     NULL);
+
+  if (hFile == INVALID_HANDLE_VALUE){
+    return NULL;
+  }
+
+  DWORD bread;
+  char *ret = malloc(sizeof(char) * 4096);
+
+  ReadFile(hFile, ret, 4095, &bread, NULL);
+  ret[bread] = '\0';
+
+  CloseHandle(hFile);
+  return ret;
 }
 
 const char *file_io_decrypt_password(const char *file){

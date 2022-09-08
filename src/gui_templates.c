@@ -1320,7 +1320,6 @@ void gui_templates_import_key_handler(){
 
   char gpg_parms[strlen(filename) + 64];
   sprintf(gpg_parms, "gpg.exe --import \"%s\"", filename);
-  printf("%s\n", gpg_parms);
 
   CreateProcessA("C:\\Program Files (x86)\\GnuPG\\bin\\gpg.exe",
                  gpg_parms,
