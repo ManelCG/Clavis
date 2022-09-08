@@ -43,9 +43,10 @@ release: $(OBJ)
 	$(CC) -o $(BDIR)/clavis $^ $(CFLAGS) $(LIBS)
 
 windows: $(OBJ)
+	windres __windows__/my.rc -O coff $(ODIR)/my.res
 	mkdir -p $(BDIR)
 	mkdir -p $(ODIR)
-	$(CC) -o $(BDIR)/clavis $^ $(CFLAGS) $(LIBS)
+	$(CC) -o $(BDIR)/clavis $^ $(CFLAGS) $(LIBS) $(ODIR)/my.res
 	ldd build/clavis.exe | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" build/
 
 debug: $(OBJ)
