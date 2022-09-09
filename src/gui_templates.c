@@ -663,7 +663,15 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
       if (valid_password){
         const char *password = gtk_entry_get_text(GTK_ENTRY(entry_password));
         const char *name = folderstate_file_get_full_path_from_string(fs, gtk_entry_get_text(GTK_ENTRY(entry_passname)));
+
+        #ifdef __unix__
         file_io_encrypt_password(password, name);
+        #elif defined(_WIN32) || defined (WIN32)
+        char *extended_name = malloc(sizeof(char) * (strlen(name)+5));
+        strcpy(extended_name, name);
+        strcat(extended_name, ".gpg");
+        file_io_encrypt_password(password, extended_name);
+        #endif
       }
     }
   }
