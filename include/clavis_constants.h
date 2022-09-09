@@ -24,14 +24,14 @@
 #define CLAVIS_BUTTON_EXPORT_PUBLIC_KEY_NAME "Export Public Key"
 #define CLAVIS_BUTTON_EXPORT_PRIVATE_KEY_NAME "Export Private Key"
 
-#define CLAVIS_REGEX_HTTPS "(http(s)?:\\/\\/.)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)"
-#define CLAVIS_REGEX_SSH "/^\\w+\\@(\\w|\\.)+\\:(\\/\\w+)*$/"
-#define CLAVIS_REGEX_GIT "/(?:git|ssh|https?|git@[-\\w.]+):(\\/\\/)?(.*?)(\\.git)(\\/?|\\#[-\\d\\w._]+?)$/"
+#define CLAVIS_GIT_NONE 0
+#define CLAVIS_GIT_AUTH_SSH 1
+#define CLAVIS_GIT_AUTH_HTTPS 2
 
-#if defined(_WIN32) || defined (WIN32)
-#define CLAVIS_WINDOWS_MAIN_DIR "Clavis"
-#define CLAVIS_WINDOWS_KEYS_DIR "Keys"
-#define CLAVIS_WINDOWS_PASS_DIR "Passwords"
-#endif //WIN32
+#ifdef __unix__
+#define CLAVIS_ERROR_PIPE -1
+#define CLAVIS_ERROR_FORK -2
+#define CLAVIS_ERROR_EXECLP -3
+#endif
 
 #endif //_CLAVIS_CONSTANTS_

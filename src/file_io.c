@@ -359,6 +359,108 @@ int file_io_get_file_count(const char *path, _Bool recursive){
   }
 }
 
+int file_io_get_git_auth_method(){
+  char buffer_git[4096];
+  buffer_git[0] = '\0';
+
+  #ifdef __unix__
+  int p[2];
+  int pid;
+  if (pipe(p) < 0){
+    perror("Could not pipe");
+    return CLAVIS_ERROR_PIPE;
+  }
+
+  pid = fork();
+  if (pid < 0){
+    perror("Could not fork");
+    return CLAVIS_ERROR_FORK;
+  }
+
+  if (pid == 0){
+    close(1);
+    dup(p[1]);
+    close(p[1]);
+    close(p[0]);
+
+    execlp("git", "git", "remote", "show", "origin", NULL);
+    return CLAVIS_ERROR_EXECLP;
+  }
+
+  close(p[1]);
+  size_t bytes = read(p[0], buffer_git, 4096);
+  buffer_git[bytes] = '\0';
+  #elif defined(_WIN32) || defined (WIN32)
+  HANDLE child_OUT_rd = NULL;
+  HANDLE child_OUT_wr = NULL;
+
+  SECURITY_ATTRIBUTES saAttr;
+  saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+  saAttr.bInheritHandle = true;
+  saAttr.lpSecurityDescriptor = NULL;
+
+  CreatePipe(&child_OUT_rd, &child_OUT_wr, &saAttr, 0);
+  SetHandleInformation(child_OUT_rd, HANDLE_FLAG_INHERIT, 0);
+
+  PROCESS_INFORMATION piProcInfo;
+  STARTUPINFO siStartInfo;
+  ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+  ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+  siStartInfo.cb = sizeof(STARTUPINFO);
+  siStartInfo.hStdError = NULL;
+  siStartInfo.hStdOutput = child_OUT_wr;
+  siStartInfo.hStdInput = NULL;
+  siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+  CreateProcessA("C:\\Program Files\\Git\\cmd\\git.exe",
+                 "git.exe remote show origin",
+                 NULL,
+                 NULL,
+                 true,
+                 CREATE_NO_WINDOW,
+                 NULL,
+                 NULL,
+                 &siStartInfo,
+                 &piProcInfo);
+
+  CloseHandle(piProcInfo.hProcess);
+  CloseHandle(piProcInfo.hThread);
+  CloseHandle(child_OUT_wr);
+
+  int index = 0;
+  while(ReadFile(child_OUT_wr, &buffer_git[index], 1, NULL, NULL)){
+    index++;
+  }
+  #endif
+
+  if (strlen(buffer_git) == 0){
+    return CLAVIS_GIT_NONE;
+  }
+
+  char *token;
+  char *substring = strstr(buffer_git, "Fetch URL:");
+  char comp_buffer[5];
+
+  if (strlen(buffer_git) == 0){
+    return CLAVIS_GIT_NONE;
+  }
+
+  substring = strstr(buffer_git, ":");
+  substring += 2;
+
+  token = strstr(substring, "\n");
+  token[0] = '\0';
+
+  strncpy(comp_buffer, substring, 4);
+  if (strcmp(comp_buffer, "git@") == 0 || strcmp(comp_buffer, "git:") == 0){
+    return CLAVIS_GIT_AUTH_SSH;
+  } else if (strcmp(comp_buffer, "http") == 0){
+    return CLAVIS_GIT_AUTH_HTTPS;
+  }
+
+  return CLAVIS_GIT_NONE;
+}
+
 #ifdef __unix__
 int file_io_remove_password(const char *path){
   char filepath[strlen(path)+1];
