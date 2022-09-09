@@ -89,8 +89,8 @@ void type_entry_with_keyboard_handler(GtkWidget *widget, gpointer data){
   GtkWidget *entry = (GtkWidget *) data;
   const char *pw = gtk_entry_get_text(GTK_ENTRY(entry));
   if (strlen(pw) != 0){
+    gtk_main_quit();
     #ifdef __unix__
-      gtk_main_quit();
       int p[2];
       if (pipe(p) < 0){
         perror("Could not pipe");
@@ -117,7 +117,30 @@ void type_entry_with_keyboard_handler(GtkWidget *widget, gpointer data){
       close(p[1]);
 
     #elif defined(_WIN32) || defined (WIN32)
-      printf("Autotyping in Windows is still WIP!\n");
+      HWND wd;
+
+      wd = GetActiveWindow();
+      CloseWindow(wd);
+      sleep(2);
+
+      wd = GetActiveWindow();
+      SetForegroundWindow(wd);
+      SetFocus(wd);
+
+      INPUT vec[strlen(pw)*2];
+      for (int i = 0; i < strlen(pw); i++){
+        INPUT input = {0};
+        input.type = INPUT_KEYBOARD;
+        input.ki.dwFlags = KEYEVENTF_UNICODE;
+        input.ki.wScan = pw[i];
+
+        vec[(i*2)] = input;
+
+        input.ki.dwFlags |= KEYEVENTF_KEYUP;
+        vec[(i*2)+1] = input;
+      }
+
+      SendInput(strlen(pw)*2, vec, sizeof(INPUT));
     #endif
   }
 }
