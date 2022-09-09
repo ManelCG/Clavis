@@ -211,6 +211,83 @@ void gui_templates_sync_repo(){
   gui_templates_push_to_repo();
 }
 
+const char *gui_templates_ask_for_git_credentials(){
+  GtkWidget *dialog;
+  int response;
+
+  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Please provid Git credentials");
+
+  GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  #ifdef __unix__
+  { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+  #endif
+  GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Confirm");
+  #ifdef __unix__
+  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+  #endif
+
+  GtkAccelGroup *accel_group = gtk_accel_group_new();
+  gtk_window_add_accel_group(GTK_WINDOW(dialog), accel_group);
+  gtk_widget_add_accelerator(dialog_button_ok, "clicked", accel_group, GDK_KEY_Return, 0, GTK_ACCEL_VISIBLE);
+  gtk_widget_add_accelerator(dialog_button_cancel, "clicked", accel_group, GDK_KEY_Escape, 0, GTK_ACCEL_VISIBLE);
+
+
+  GtkWindow *window = GTK_WINDOW(dialog);
+  gtk_window_set_title(window, "Git credentials");
+  gtk_window_set_resizable(window, false);
+  gtk_container_set_border_width(GTK_CONTAINER(window), 10);
+  gtk_window_set_default_size(GTK_WINDOW(window), 0, 0);
+  gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+
+  GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+
+  GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  GtkWidget *vbox1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  GtkWidget *vbox2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+
+  GtkWidget *label_1 = gtk_label_new("Username:");
+  GtkWidget *label_2 = gtk_label_new("Password:");
+
+  GtkWidget *user_entry = gtk_entry_new();
+  gtk_entry_set_placeholder_text(GTK_ENTRY(user_entry), "Username");
+
+  GtkWidget *pass_entry = gtk_entry_new();
+  gtk_entry_set_placeholder_text(GTK_ENTRY(pass_entry), "Password");
+
+  gtk_box_pack_start(GTK_BOX(vbox1), label_1, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(vbox1), user_entry, true, true, 0);
+
+  gtk_box_pack_start(GTK_BOX(vbox2), label_2, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(vbox2), pass_entry, true, true, 0);
+
+  gtk_box_pack_start(GTK_BOX(hbox), vbox1, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(hbox), vbox2, true, true, 0);
+
+  gtk_box_pack_start(GTK_BOX(vbox), hbox, true, true, 0);
+
+  gtk_box_pack_start(GTK_BOX(dialog_box), vbox, false, false, 0);
+
+  gtk_widget_show_all(GTK_WIDGET(window));
+  response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+  if (response != GTK_RESPONSE_OK){
+    destroy(dialog, dialog);
+    return NULL;
+  }
+
+  const char *user = gtk_entry_get_text(GTK_ENTRY(user_entry));
+  const char *pass = gtk_entry_get_text(GTK_ENTRY(pass_entry));
+  char *credentials = malloc(sizeof(char) * (strlen(user) + strlen(pass) + 3));
+  sprintf(credentials, "%s\n%s\n", user, pass);
+
+  destroy(dialog, dialog);
+  return credentials;
+}
+
 int gui_templates_git_config_window(){
   GtkWidget *dialog;
   int response;
@@ -1812,8 +1889,8 @@ int gui_templates_initialize_password_store(){
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
 
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-  GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
   #ifdef __unix__
+  GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
   #endif
