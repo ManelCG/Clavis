@@ -74,7 +74,14 @@ void copy_entry_to_clipboard_handler(GtkWidget *widget, gpointer data){
       close(p[1]);
 
     #elif defined(_WIN32) || defined (WIN32)
-      printf("Clipboard in Windows is still WIP!\n");
+      const size_t len = strlen(pw) + 1;
+      HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, len);
+      memcpy(GlobalLock(hMem), pw, len);
+      GlobalUnlock(hMem);
+      OpenClipboard(0);
+      EmptyClipboard();
+      SetClipboardData(CF_TEXT, hMem);
+      CloseClipboard();
     #endif
   }
 }
