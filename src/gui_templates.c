@@ -237,6 +237,7 @@ int gui_templates_git_config_window(){
   gtk_window_set_resizable(window, false);
   gtk_container_set_border_width(GTK_CONTAINER(window), 10);
   gtk_window_set_default_size(GTK_WINDOW(window), 0, 0);
+  gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
 
   //GTK Widgets
   GtkWidget *dialog_box;
@@ -473,6 +474,8 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
   { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
 
+  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+
   //Boxes
   GtkWidget *main_hbox;
 
@@ -688,6 +691,7 @@ void button_newfolder_handler(GtkWidget *widget, gpointer data){
 
   GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "New folder name:");
   gtk_window_set_title(GTK_WINDOW(dialog), "New folder");
+  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
@@ -780,6 +784,7 @@ void button_rename_handler(GtkWidget *widget, gpointer data){
   GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
 
   GtkWidget *entry = gtk_entry_new();
   gtk_entry_set_text(GTK_ENTRY(entry), name);
@@ -871,6 +876,7 @@ void button_delete_handler(GtkWidget *widget, gpointer data){
     sprintf(dialog_prompt, "Folder %s contains %d files. Remove anyways?", path, file_io_folder_get_file_n(path, ""));
     GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
     gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
 
     GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
     { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
@@ -906,6 +912,7 @@ void button_delete_handler(GtkWidget *widget, gpointer data){
     sprintf(dialog_prompt, "Remove file '%s'? This cannot be undone!", path);
     GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
     gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
 
     GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
     { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
@@ -1126,6 +1133,7 @@ int gui_templates_password_store_init_handler(){
     gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Accept");
     { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
     gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
     // GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
 
@@ -1800,6 +1808,7 @@ int gui_templates_initialize_password_store(){
   //Chose key
   dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Choose a GPG key, import one or create a new one.");
   gtk_window_set_title(GTK_WINDOW(dialog), "Select your Clavis Master Key");
+  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
 
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
@@ -2039,6 +2048,7 @@ void gui_templates_show_password_store_info_window(GtkWidget *w, gpointer data){
   gtk_window_set_resizable(window, false);
   gtk_container_set_border_width(GTK_CONTAINER(window), 10);
   gtk_window_set_default_size(GTK_WINDOW(window), 320, 0);
+  gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
 
   //Boxes
   GtkWidget *main_vbox;
@@ -2067,6 +2077,7 @@ void gui_templates_show_about_window(GtkWidget *w, gpointer data){
   gtk_window_set_resizable(window, false);
   gtk_container_set_border_width(GTK_CONTAINER(window), 10);
   gtk_window_set_default_size(GTK_WINDOW(window), 420, 0);
+  gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
 
   GtkAccelGroup *accel_group;
 
