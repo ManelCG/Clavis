@@ -20,6 +20,7 @@
 #include <file_io.h>
 #include <algorithms.h>
 #include <clavis_constants.h>
+#include <gui_templates.h>
 
 const char *get_password_store_path(){
   int homelen;
@@ -321,6 +322,113 @@ int file_io_init_git_server(const char *username, const char *email, const char 
   }
   return 0;
   #elif defined(_WIN32) || defined (WIN32)
+  if (repo_url != NULL){
+    if (!create_new){
+      char git_params[strlen(repo_url) + 64];
+      sprintf(git_params, "git.exe clone \"%s\" .", repo_url);
+
+      perform_git_command(git_params);
+    }
+  }
+
+  if (create_new){
+    perform_git_command("git.exe init .");
+  }
+
+  if (email != NULL){
+    char git_params[strlen(email) + 64];
+    sprintf(git_params, "git.exe config user.email \"%s\"", email);
+
+    perform_git_command(git_params);
+  }
+
+  if (username != NULL){
+    char git_params[strlen(username) + 64];
+    sprintf(git_params, "git.exe config user.name \"%s\"", username);
+
+    perform_git_command(git_params);
+  }
+
+
+
+  if (create_new){
+    perform_git_command("git.exe add *");
+    perform_git_command("git.exe add .gpg-id");
+    perform_git_command("git.exe commit -m \"Added current contents of password store\"");
+
+    if (!refactor_git){
+      char git_params[strlen(repo_url) + 128];
+      sprintf(git_params, "git.exe remote add origin \"%s\"", repo_url);
+      perform_git_command(git_params);
+    } else {
+      char git_params[strlen(repo_url) + 128];
+      sprintf(git_params, "git.exe remote set-url origin \"%s\"", repo_url);
+      perform_git_command(git_params);
+    }
+
+    perform_git_command("git.exe config pull.rebase false");
+    int authmethod = file_io_get_git_auth_method();
+    if (authmethod == CLAVIS_GIT_AUTH_SSH){
+      perform_git_command("git.exe push --set-upstream origin master");
+    } else if (authmethod == CLAVIS_GIT_AUTH_HTTPS){
+      char *gitcredentials = gui_templates_ask_for_git_credentials();
+
+      SECURITY_ATTRIBUTES saAttr;
+      saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+      saAttr.bInheritHandle = true;
+      saAttr.lpSecurityDescriptor = NULL;
+
+      HANDLE child_SYNC_rd = NULL;
+      HANDLE child_SYNC_wr = NULL;
+
+      HANDLE child_IN_rd = NULL;
+      HANDLE child_IN_wr = NULL;
+
+      CreatePipe(&child_SYNC_rd, &child_SYNC_wr, &saAttr, 0);
+      SetHandleInformation(child_SYNC_rd, HANDLE_FLAG_INHERIT, 0);
+
+      CreatePipe(&child_IN_rd, &child_IN_wr, &saAttr, 0);
+      SetHandleInformation(child_IN_wr, HANDLE_FLAG_INHERIT, 0);
+
+      PROCESS_INFORMATION piProcInfo;
+      STARTUPINFO siStartInfo;
+      ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+      ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+      siStartInfo.cb = sizeof(STARTUPINFO);
+      siStartInfo.hStdError = NULL;
+      siStartInfo.hStdOutput = child_SYNC_wr;
+      siStartInfo.hStdInput = child_IN_rd;
+      siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+      CreateProcessA("C:\\Program Files\\Git\\cmd\\git.exe",
+                     "git.exe push --set-upstream origin master",
+                     NULL,
+                     NULL,
+                     true,
+                     CREATE_NO_WINDOW,
+                     NULL,
+                     NULL,
+                     &siStartInfo,
+                     &piProcInfo);
+
+      CloseHandle(piProcInfo.hProcess);
+      CloseHandle(piProcInfo.hThread);
+      CloseHandle(child_SYNC_wr);
+      CloseHandle(child_IN_rd);
+
+      WriteFile(child_IN_wr, gitcredentials, strlen(gitcredentials), NULL, NULL);
+      CloseHandle(child_IN_wr);
+
+      char blackhole;
+      while(ReadFile(child_SYNC_rd, &blackhole, 1, NULL, NULL)){
+      }
+      CloseHandle(child_SYNC_rd);
+
+      if (gitcredentials != NULL){
+        free(gitcredentials);
+      }
+    }
+  }
   return 0;
   #endif
 }
@@ -359,7 +467,44 @@ int file_io_get_file_count(const char *path, _Bool recursive){
   }
 }
 
+int file_io_get_git_auth_method_from_string(const char *url){
+  printf("Get auth method from string\n");
+
+  char *substring;
+  char buffer_git[strlen(url)+2];
+  char comp_buffer[5];
+  strcpy(buffer_git, url);
+
+  if (strlen(buffer_git) == 0){
+    printf("None\n");
+    return CLAVIS_GIT_NONE;
+  }
+
+  strncpy(comp_buffer, buffer_git, 4);
+
+  printf("%s\n", comp_buffer);
+  if (strcmp(comp_buffer, "git@") == 0 || strcmp(comp_buffer, "git:") == 0){
+    return CLAVIS_GIT_AUTH_SSH;
+  }
+
+  substring = strstr(buffer_git, "github.com");
+  char github_buffer[11];
+  strncpy(github_buffer, substring, 10);
+
+  if (strcmp(github_buffer, "github.com") == 0){
+    printf("Github!!\n");
+    return CLAVIS_GIT_AUTH_HTTPS_GITHUB;
+  }
+
+  if (strcmp(comp_buffer, "http") == 0){
+    return CLAVIS_GIT_AUTH_HTTPS;
+  }
+
+  return CLAVIS_GIT_NONE;
+}
+
 int file_io_get_git_auth_method(){
+  printf("Get auth method\n");
   char buffer_git[4096];
   buffer_git[0] = '\0';
 
@@ -428,12 +573,14 @@ int file_io_get_git_auth_method(){
   CloseHandle(child_OUT_wr);
 
   int index = 0;
-  while(ReadFile(child_OUT_wr, &buffer_git[index], 1, NULL, NULL)){
+  while(ReadFile(child_OUT_rd, &buffer_git[index], 1, NULL, NULL)){
     index++;
   }
+  CloseHandle(child_OUT_rd);
   #endif
 
   if (strlen(buffer_git) == 0){
+    printf("None\n");
     return CLAVIS_GIT_NONE;
   }
 
@@ -442,6 +589,7 @@ int file_io_get_git_auth_method(){
   char comp_buffer[5];
 
   if (strlen(buffer_git) == 0){
+    printf("None2\n");
     return CLAVIS_GIT_NONE;
   }
 
@@ -451,10 +599,25 @@ int file_io_get_git_auth_method(){
   token = strstr(substring, "\n");
   token[0] = '\0';
 
+  printf("%s\n", substring);
+
   strncpy(comp_buffer, substring, 4);
+
+  printf("%s\n", comp_buffer);
   if (strcmp(comp_buffer, "git@") == 0 || strcmp(comp_buffer, "git:") == 0){
     return CLAVIS_GIT_AUTH_SSH;
-  } else if (strcmp(comp_buffer, "http") == 0){
+  }
+
+  substring = strstr(buffer_git, "github.com");
+  char github_buffer[11];
+  strncpy(github_buffer, substring, 10);
+
+  if (strcmp(github_buffer, "github.com") == 0){
+    printf("Github!!\n");
+    return CLAVIS_GIT_AUTH_HTTPS_GITHUB;
+  }
+
+  if (strcmp(comp_buffer, "http") == 0){
     return CLAVIS_GIT_AUTH_HTTPS;
   }
 
@@ -1491,4 +1654,68 @@ void file_io_export_gpg_keys(const char *key, const char *path, _Bool private){
   CloseHandle(hFile);
   return;
 #endif
+}
+
+void perform_git_command(char *args){
+  #if defined(_WIN32) || defined (WIN32)
+  SECURITY_ATTRIBUTES saAttr;
+  saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+  saAttr.bInheritHandle = true;
+  saAttr.lpSecurityDescriptor = NULL;
+
+  HANDLE child_SYNC_rd = NULL;
+  HANDLE child_SYNC_wr = NULL;
+
+  HANDLE child_ERR_rd = NULL;
+  HANDLE child_ERR_wr = NULL;
+
+  CreatePipe(&child_SYNC_rd, &child_SYNC_wr, &saAttr, 0);
+  SetHandleInformation(child_SYNC_rd, HANDLE_FLAG_INHERIT, 0);
+
+  CreatePipe(&child_ERR_rd, &child_ERR_wr, &saAttr, 0);
+  SetHandleInformation(child_ERR_rd, HANDLE_FLAG_INHERIT, 0);
+
+  PROCESS_INFORMATION piProcInfo;
+  STARTUPINFO siStartInfo;
+  ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+  ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+  siStartInfo.cb = sizeof(STARTUPINFO);
+  siStartInfo.hStdError = child_ERR_wr;
+  siStartInfo.hStdOutput = child_SYNC_wr;
+  siStartInfo.hStdInput = NULL;
+  siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+  printf("Performing %s\n", args);
+  CreateProcessA("C:\\Program Files\\Git\\cmd\\git.exe",
+                 args,
+                 NULL,
+                 NULL,
+                 true,
+                 CREATE_NO_WINDOW,
+                 NULL,
+                 NULL,
+                 &siStartInfo,
+                 &piProcInfo);
+
+  CloseHandle(piProcInfo.hProcess);
+  CloseHandle(piProcInfo.hThread);
+  CloseHandle(child_SYNC_wr);
+  CloseHandle(child_ERR_wr);
+
+  WaitForSingleObject(piProcInfo.hProcess, INFINITE);
+
+  char blackhole;
+  printf("STDOUT:\n");
+  while(ReadFile(child_SYNC_rd, &blackhole, 1, NULL, NULL)){
+    printf("%c", blackhole);
+  }
+  printf("STDERR:\n");
+  while(ReadFile(child_ERR_rd, &blackhole, 1, NULL, NULL)){
+    printf("%c", blackhole);
+  }
+
+  printf("Finished syncing %s\n", args);
+  CloseHandle(child_SYNC_rd);
+  CloseHandle(child_ERR_rd);
+  #endif
 }

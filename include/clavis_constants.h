@@ -27,6 +27,7 @@
 #define CLAVIS_GIT_NONE 0
 #define CLAVIS_GIT_AUTH_SSH 1
 #define CLAVIS_GIT_AUTH_HTTPS 2
+#define CLAVIS_GIT_AUTH_HTTPS_GITHUB 3
 
 #ifdef __unix__
 #define CLAVIS_ERROR_PIPE -1

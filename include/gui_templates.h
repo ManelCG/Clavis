@@ -52,7 +52,7 @@ void gui_templates_push_to_repo();
 void gui_templates_sync_repo();
 
 int gui_templates_git_config_window();
-const char *gui_templates_ask_for_git_credentials();
+char *gui_templates_ask_for_git_credentials();
 
 //Extra functionalities
 void gui_templates_synthesize_button(GtkWidget *w, gpointer data);

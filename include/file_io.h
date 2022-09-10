@@ -25,6 +25,8 @@ int cp(const char *from, const char *to);
 const char *file_io_get_git_config_field(const char *field);
 int file_io_init_git_server(const char *username, const char *email, const char *repo_url, _Bool createnew, _Bool refactor_git);
 int file_io_get_git_auth_method();
+int file_io_get_git_auth_method_from_string(const char *s);
+void perform_git_command(char *args);
 
 
 char **file_io_get_full_gpg_keys(int *num);
