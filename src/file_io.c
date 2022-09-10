@@ -709,6 +709,15 @@ int file_io_encrypt_password(const char *password, const char *path){
       return -1;
     }
 
+    char *token = strchr(gpgid, '\n');
+    if (token != NULL){
+      token[0] = '\0';
+    }
+    token = strchr(gpgid, '\r');
+    if (token != NULL){
+      token[0] = '\0';
+    }
+
     HANDLE child_IN_rd = NULL;
     HANDLE child_IN_wr = NULL;
 
@@ -740,7 +749,7 @@ int file_io_encrypt_password(const char *password, const char *path){
     sprintf(gpg_parms, "gpg.exe --encrypt --armor -r \"%s\"", gpgid);
     printf("%s\n", gpg_parms);
 
-    CreateProcessA("C:\\Program Files (x86)\\GnuPG\\bin\\gpg.exe",
+    CreateProcess("C:\\Program Files (x86)\\GnuPG\\bin\\gpg.exe",
                    gpg_parms,
                    NULL,
                    NULL,
@@ -773,6 +782,7 @@ int file_io_encrypt_password(const char *password, const char *path){
     }
 
     char c;
+    printf("Stderr:\n");
     while (ReadFile(child_OUT_rd, &c, 1, NULL, NULL)){
       WriteFile(hFile, &c, 1, NULL, NULL);
     }

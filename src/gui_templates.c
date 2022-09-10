@@ -764,11 +764,6 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
         sprintf(git_args, "git.exe commit -m \"Added password for %s to store\"", name);
         perform_git_command(git_args);
         #endif
-
-        //Clear password
-        for (int i = 0; i < strlen(password); i++){
-          password[i] = '\0';
-        }
       }
     }
   }
@@ -1134,13 +1129,9 @@ void file_button_handler(GtkWidget *widget, gpointer data){
   GtkWidget *label = (GtkWidget *) data;
   const char *name = gtk_widget_get_name(widget);
   if (file_io_string_is_file(name)){
-    char *pass = (char *) file_io_decrypt_password(name);
+    const char *pass = file_io_decrypt_password(name);
     if (pass != NULL){
       gtk_entry_set_text(GTK_ENTRY(label), pass);
-      //Clear password and free
-      for (int i = 0; i < strlen(pass); i++){
-        pass[i] = '\0';
-      }
       free((char *) pass);
     }
   }
