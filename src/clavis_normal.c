@@ -34,6 +34,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   GtkWidget *folder_vbox;
   GtkWidget *bottom_hbox;
   GtkWidget *folder_scrollbox;
+  GtkWidget *folder_label_scrollbox;
 
   //Misc
   GtkWidget *entry_filter;
@@ -239,7 +240,11 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
 
   // --- PACKING ---
   //topbar hbox (info, buttons)
+  folder_label_scrollbox = gtk_scrolled_window_new(NULL, NULL);
   folder_label = gtk_label_new(folder_label_text);
+  gtk_container_add(GTK_CONTAINER(folder_label_scrollbox), folder_label);
+  gtk_scrolled_window_set_min_content_height(GTK_SCROLLED_WINDOW(folder_label_scrollbox), 0);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(folder_label_scrollbox), GTK_POLICY_EXTERNAL, GTK_POLICY_NEVER);
 
   #ifdef __unix__
   button_newfolder = gtk_button_new();
@@ -281,7 +286,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   gtk_box_pack_start(GTK_BOX(topbar_hbox), button_newpassword, false, false, 0);
   gtk_box_pack_start(GTK_BOX(topbar_hbox), button_reload, false, false, 0);
   #ifdef __unix__
-  gtk_box_pack_start(GTK_BOX(topbar_hbox), folder_label, true, false, 0);
+  gtk_box_pack_start(GTK_BOX(topbar_hbox), folder_label_scrollbox, true, true, 0);
   #endif
 
 
@@ -351,7 +356,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
    gtk_box_pack_start(GTK_BOX(folder_vbox), separator, false, false, 0);}
   #if defined(_WIN32) || defined (WIN32)
-  gtk_box_pack_start(GTK_BOX(folder_vbox), folder_label, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(folder_vbox), folder_label_scrollbox, false, false, 0);
   #endif
   gtk_box_pack_start(GTK_BOX(folder_vbox), entry_filter, false, false, 0);
   {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
