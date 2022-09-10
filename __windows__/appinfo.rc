@@ -1,6 +1,6 @@
 1 VERSIONINFO
-FILEVERSION     1,1,0
-PRODUCTVERSION  1,1,0
+FILEVERSION     1,2,0
+PRODUCTVERSION  1,2,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
@@ -8,12 +8,12 @@ BEGIN
     BEGIN
       VALUE "CompanyName", "Manel Castillo Gimenez"
       VALUE "FileDescription", "Clavis"
-      VALUE "FileVersion", "1.1.0"
+      VALUE "FileVersion", "1.2.0"
       VALUE "InternalName", "clavis"
       VALUE "LegalCopyright", "Manel Castillo Gimenez"
       VALUE "OriginalFilename", "clavis.exe"
       VALUE "ProductName", "Clavis"
-      VALUE "ProductVersion", "1.1.0"
+      VALUE "ProductVersion", "1.2.0"
     END
   END
   BLOCK "VarFileInfo"
