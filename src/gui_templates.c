@@ -174,67 +174,7 @@ void gui_templates_pull_from_repo(){
   close(p_sync[0]);
   return;
   #elif defined(_WIN32) || defined (WIN32)
-  int authmethod = file_io_get_git_auth_method();
-  if (authmethod == CLAVIS_GIT_AUTH_SSH || authmethod == CLAVIS_GIT_AUTH_HTTPS_GITHUB){
-    perform_git_command("git.exe pull --ff --no-edit");
-  } else if (authmethod == CLAVIS_GIT_AUTH_HTTPS){
-    char *gitcredentials = gui_templates_ask_for_git_credentials();
-
-    SECURITY_ATTRIBUTES saAttr;
-    saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-    saAttr.bInheritHandle = true;
-    saAttr.lpSecurityDescriptor = NULL;
-
-    HANDLE child_SYNC_rd = NULL;
-    HANDLE child_SYNC_wr = NULL;
-
-    HANDLE child_IN_rd = NULL;
-    HANDLE child_IN_wr = NULL;
-
-    CreatePipe(&child_SYNC_rd, &child_SYNC_wr, &saAttr, 0);
-    SetHandleInformation(child_SYNC_rd, HANDLE_FLAG_INHERIT, 0);
-
-    CreatePipe(&child_IN_rd, &child_IN_wr, &saAttr, 0);
-    SetHandleInformation(child_IN_wr, HANDLE_FLAG_INHERIT, 0);
-
-    PROCESS_INFORMATION piProcInfo;
-    STARTUPINFO siStartInfo;
-    ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
-    ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
-    siStartInfo.cb = sizeof(STARTUPINFO);
-    siStartInfo.hStdError = NULL;
-    siStartInfo.hStdOutput = child_SYNC_wr;
-    siStartInfo.hStdInput = child_IN_rd;
-    siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
-
-    CreateProcessA("C:\\Program Files\\Git\\cmd\\git.exe",
-                   "git.exe pull --ff --no-edit",
-                   NULL,
-                   NULL,
-                   true,
-                   CREATE_NO_WINDOW,
-                   NULL,
-                   NULL,
-                   &siStartInfo,
-                   &piProcInfo);
-
-    CloseHandle(piProcInfo.hProcess);
-    CloseHandle(piProcInfo.hThread);
-    CloseHandle(child_SYNC_wr);
-    CloseHandle(child_IN_rd);
-
-    WriteFile(child_IN_wr, gitcredentials, strlen(gitcredentials), NULL, NULL);
-    CloseHandle(child_IN_wr);
-
-    char blackhole;
-    while(ReadFile(child_SYNC_rd, &blackhole, 1, NULL, NULL)){
-    }
-    CloseHandle(child_SYNC_rd);
-
-    if (gitcredentials != NULL){
-      free(gitcredentials);
-    }
-  }
+  perform_git_command("git.exe pull --ff --no-edit");
   #endif
 }
 void gui_templates_push_to_repo(){
@@ -263,67 +203,7 @@ void gui_templates_push_to_repo(){
   close(p_sync[0]);
   return;
   #elif defined(_WIN32) || defined (WIN32)
-  int authmethod = file_io_get_git_auth_method();
-  if (authmethod == CLAVIS_GIT_AUTH_SSH || authmethod == CLAVIS_GIT_AUTH_HTTPS_GITHUB){
-    perform_git_command("git.exe push");
-  } else if (authmethod == CLAVIS_GIT_AUTH_HTTPS){
-    char *gitcredentials = gui_templates_ask_for_git_credentials();
-
-    SECURITY_ATTRIBUTES saAttr;
-    saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-    saAttr.bInheritHandle = true;
-    saAttr.lpSecurityDescriptor = NULL;
-
-    HANDLE child_SYNC_rd = NULL;
-    HANDLE child_SYNC_wr = NULL;
-
-    HANDLE child_IN_rd = NULL;
-    HANDLE child_IN_wr = NULL;
-
-    CreatePipe(&child_SYNC_rd, &child_SYNC_wr, &saAttr, 0);
-    SetHandleInformation(child_SYNC_rd, HANDLE_FLAG_INHERIT, 0);
-
-    CreatePipe(&child_IN_rd, &child_IN_wr, &saAttr, 0);
-    SetHandleInformation(child_IN_wr, HANDLE_FLAG_INHERIT, 0);
-
-    PROCESS_INFORMATION piProcInfo;
-    STARTUPINFO siStartInfo;
-    ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
-    ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
-    siStartInfo.cb = sizeof(STARTUPINFO);
-    siStartInfo.hStdError = NULL;
-    siStartInfo.hStdOutput = child_SYNC_wr;
-    siStartInfo.hStdInput = child_IN_rd;
-    siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
-
-    CreateProcessA("C:\\Program Files\\Git\\cmd\\git.exe",
-                   "git.exe push",
-                   NULL,
-                   NULL,
-                   true,
-                   CREATE_NO_WINDOW,
-                   NULL,
-                   NULL,
-                   &siStartInfo,
-                   &piProcInfo);
-
-    CloseHandle(piProcInfo.hProcess);
-    CloseHandle(piProcInfo.hThread);
-    CloseHandle(child_SYNC_wr);
-    CloseHandle(child_IN_rd);
-
-    WriteFile(child_IN_wr, gitcredentials, strlen(gitcredentials), NULL, NULL);
-    CloseHandle(child_IN_wr);
-
-    char blackhole;
-    while(ReadFile(child_SYNC_rd, &blackhole, 1, NULL, NULL)){
-    }
-    CloseHandle(child_SYNC_rd);
-
-    if (gitcredentials != NULL){
-      free(gitcredentials);
-    }
-  }
+  perform_git_command("git.exe push");
   #endif
 }
 void gui_templates_sync_repo(){
@@ -1056,6 +936,54 @@ void button_rename_handler(GtkWidget *widget, gpointer data){
         gtk_dialog_run(GTK_DIALOG(dialog));
 
         destroy(dialog, dialog);
+      } else {
+        #ifdef __unix__
+        int pid;
+        if ((pid = fork()) < 0){
+          perror("Could not fork");
+          return;
+        }
+        if (pid == 0){
+          execlp("git", "git", "rm", oldpath, NULL);
+          return;
+        }
+        waitpid(pid, NULL, 0);
+        if ((pid = fork()) < 0){
+          perror("Could not fork");
+          return;
+        }
+        if (pid == 0){
+          execlp("git", "git", "add", path, NULL);
+          return;
+        }
+        waitpid(pid, NULL, 0);
+
+        char args_commit[strlen(path) + strlen(oldpath) + 64];
+        sprintf(args_commit, "git.exe commit -m \"Renamed password %s to %s\"", oldpath, path);
+
+        if ((pid = fork()) < 0){
+          perror("Could not fork");
+          return;
+        }
+        if (pid == 0){
+          execlp("git", "git", "commit", "-m", args_commit, NULL);
+          return;
+        }
+        waitpid(pid, NULL, 0);
+
+        #elif defined(_WIN32) || defined (WIN32)
+        char args_rm[strlen(oldpath) + 64];
+        sprintf(args_rm, "git.exe rm %s", oldpath);
+        perform_git_command(args_rm);
+
+        char args_add[strlen(path)+64];
+        sprintf(args_add, "git.exe add %s", path);
+        perform_git_command(args_add);
+
+        char args_commit[strlen(path) + strlen(oldpath) + 64];
+        sprintf(args_commit, "git.exe commit -m \"Renamed password %s to %s\"", oldpath, path);
+        perform_git_command(args_commit);
+        #endif
       }
     }
 
@@ -1135,6 +1063,14 @@ void button_delete_handler(GtkWidget *widget, gpointer data){
       file_io_remove_password(path);
       #elif defined(_WIN32) || defined (WIN32)
       remove(path);
+
+      char args_git[strlen(path) + 64];
+
+      sprintf(args_git, "git.exe rm %s", path);
+      perform_git_command(args_git);
+
+      sprintf(args_git, "git.exe commit -m \"Removed password %s\"", path);
+      perform_git_command(args_git);
       #endif
       deleted = true;
     }

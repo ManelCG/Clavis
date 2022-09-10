@@ -233,8 +233,9 @@ int file_io_init_git_server(const char *username, const char *email, const char 
   #ifdef __unix__
   int pid;
 
-  if (repo_url != NULL){
-    if (! create_new){
+  if (repo_url != NULL && !create_new){
+    int authmethod = file_io_get_git_auth_method_from_string(repo_url);
+    if (authmethod == CLAVIS_GIT_AUTH_SSH){
       if ((pid = fork()) < 0){
         perror("Could not fork");
         return -1;
@@ -244,6 +245,36 @@ int file_io_init_git_server(const char *username, const char *email, const char 
         return -1;
       }
       waitpid(pid, NULL, 0);
+    } else if (authmethod != CLAVIS_GIT_NONE) {
+      char *credentials = gui_templates_ask_for_git_credentials();
+      if (credentials != NULL){
+        int p[2];
+        if (pipe(p) < 0){
+          perror("Could not pipe");
+          return CLAVIS_ERROR_PIPE;
+        }
+        if ((pid = fork()) < 0){
+          perror("Could not fork");
+          return CLAVIS_ERROR_FORK;
+        }
+        if (pid == 0){
+          close(0);
+          dup(p[0]);
+          close(p[1]);
+          close(p[0]);
+
+          execlp("git", "git", "clone", repo_url, ".", NULL);
+          return CLAVIS_ERROR_EXECLP;
+        }
+        close(p[0]);
+
+        wait(NULL);
+        printf("Writing credentials:\n%s\n", credentials);
+        write(p[1], credentials, strlen(credentials));
+        printf("Done\n");
+        close(p[1]);
+        free(credentials);
+      }
     }
   }
 
@@ -367,67 +398,7 @@ int file_io_init_git_server(const char *username, const char *email, const char 
     }
 
     perform_git_command("git.exe config pull.rebase false");
-    int authmethod = file_io_get_git_auth_method();
-    if (authmethod == CLAVIS_GIT_AUTH_SSH){
-      perform_git_command("git.exe push --set-upstream origin master");
-    } else if (authmethod == CLAVIS_GIT_AUTH_HTTPS){
-      char *gitcredentials = gui_templates_ask_for_git_credentials();
-
-      SECURITY_ATTRIBUTES saAttr;
-      saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-      saAttr.bInheritHandle = true;
-      saAttr.lpSecurityDescriptor = NULL;
-
-      HANDLE child_SYNC_rd = NULL;
-      HANDLE child_SYNC_wr = NULL;
-
-      HANDLE child_IN_rd = NULL;
-      HANDLE child_IN_wr = NULL;
-
-      CreatePipe(&child_SYNC_rd, &child_SYNC_wr, &saAttr, 0);
-      SetHandleInformation(child_SYNC_rd, HANDLE_FLAG_INHERIT, 0);
-
-      CreatePipe(&child_IN_rd, &child_IN_wr, &saAttr, 0);
-      SetHandleInformation(child_IN_wr, HANDLE_FLAG_INHERIT, 0);
-
-      PROCESS_INFORMATION piProcInfo;
-      STARTUPINFO siStartInfo;
-      ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
-      ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
-      siStartInfo.cb = sizeof(STARTUPINFO);
-      siStartInfo.hStdError = NULL;
-      siStartInfo.hStdOutput = child_SYNC_wr;
-      siStartInfo.hStdInput = child_IN_rd;
-      siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
-
-      CreateProcessA("C:\\Program Files\\Git\\cmd\\git.exe",
-                     "git.exe push --set-upstream origin master",
-                     NULL,
-                     NULL,
-                     true,
-                     CREATE_NO_WINDOW,
-                     NULL,
-                     NULL,
-                     &siStartInfo,
-                     &piProcInfo);
-
-      CloseHandle(piProcInfo.hProcess);
-      CloseHandle(piProcInfo.hThread);
-      CloseHandle(child_SYNC_wr);
-      CloseHandle(child_IN_rd);
-
-      WriteFile(child_IN_wr, gitcredentials, strlen(gitcredentials), NULL, NULL);
-      CloseHandle(child_IN_wr);
-
-      char blackhole;
-      while(ReadFile(child_SYNC_rd, &blackhole, 1, NULL, NULL)){
-      }
-      CloseHandle(child_SYNC_rd);
-
-      if (gitcredentials != NULL){
-        free(gitcredentials);
-      }
-    }
+    perform_git_command("git.exe push --set-upstream origin master");
   }
   return 0;
   #endif
@@ -472,34 +443,45 @@ int file_io_get_git_auth_method_from_string(const char *url){
 
   char *substring;
   char buffer_git[strlen(url)+2];
-  char comp_buffer[5];
+  char comp_buffer[6];
   strcpy(buffer_git, url);
+  buffer_git[strlen(url)+1] = '\0';
 
   if (strlen(buffer_git) == 0){
-    printf("None\n");
     return CLAVIS_GIT_NONE;
   }
 
   strncpy(comp_buffer, buffer_git, 4);
+  comp_buffer[4] = '\0';
 
   printf("%s\n", comp_buffer);
+
   if (strcmp(comp_buffer, "git@") == 0 || strcmp(comp_buffer, "git:") == 0){
+    printf("ssh\n");
     return CLAVIS_GIT_AUTH_SSH;
   }
 
+
   substring = strstr(buffer_git, "github.com");
   char github_buffer[11];
-  strncpy(github_buffer, substring, 10);
+  if (substring != NULL){
+    strncpy(github_buffer, substring, 10);
+    github_buffer[10] = '\0';
 
-  if (strcmp(github_buffer, "github.com") == 0){
-    printf("Github!!\n");
-    return CLAVIS_GIT_AUTH_HTTPS_GITHUB;
+    printf("here\n%s\n", github_buffer);
+
+    if (strcmp(github_buffer, "github.com") == 0){
+      printf("Github\n");
+      return CLAVIS_GIT_AUTH_HTTPS_GITHUB;
+    }
   }
 
   if (strcmp(comp_buffer, "http") == 0){
+    printf("Https\n");
     return CLAVIS_GIT_AUTH_HTTPS;
   }
 
+  printf("Suka\n");
   return CLAVIS_GIT_NONE;
 }
 
@@ -1478,6 +1460,7 @@ void file_io_init_password_store(const char *key){
   }
 
   WriteFile(hFile, key, strlen(key), NULL, NULL);
+  WriteFile(hFile, "\n", 1, NULL, NULL);
 
   CloseHandle(hFile);
 #endif
@@ -1509,7 +1492,7 @@ void file_io_gpg_trust_key(const char *key){
   close(p[0]);
   write(p[1], "5\ny\n", 4);
   close(p[1]);
-  wait(NULL);
+  waitpid(pid, NULL, 0);
 #elif defined(_WIN32) || defined (WIN32)
   HANDLE child_SYNC_rd = NULL;
   HANDLE child_SYNC_wr = NULL;
