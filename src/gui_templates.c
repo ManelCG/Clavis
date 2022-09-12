@@ -218,16 +218,14 @@ char *gui_templates_ask_for_git_credentials(){
   dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Please provid Git credentials");
 
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
-  #ifdef __unix__
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
-  #endif
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
   gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Confirm");
-  #ifdef __unix__
-  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
-  #endif
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
 
   GtkAccelGroup *accel_group = gtk_accel_group_new();
   gtk_window_add_accel_group(GTK_WINDOW(dialog), accel_group);
@@ -303,10 +301,12 @@ int gui_templates_git_config_window(){
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
   gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Apply");
-  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
 
   GtkWindow *window = GTK_WINDOW(dialog);
 
@@ -388,16 +388,19 @@ int gui_templates_git_config_window(){
   button_info = gtk_button_new_with_label("Help");
   { GtkWidget *icon = gtk_image_new_from_icon_name("system-help", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_info), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(button_info), true);
 
   button_cancel = gtk_button_new_with_label("Cancel");
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_cancel), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(button_cancel), true);
   g_signal_connect(button_cancel, "activate", G_CALLBACK(destroy), (gpointer) window);
   g_signal_connect(button_cancel, "pressed", G_CALLBACK(destroy), (gpointer) window);
 
   button_confirm = gtk_button_new_with_label("Confirm");
-  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_confirm), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(button_confirm), true);
 
   lower_buttons_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   gtk_box_pack_start(GTK_BOX(lower_buttons_hbox), button_info, true, true, 0);
@@ -552,10 +555,13 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
+
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
   gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Add password");
-  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
 
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
 
@@ -598,12 +604,8 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle_visibility), true);
   g_signal_connect(toggle_visibility, "toggled", G_CALLBACK(toggle_visibility_handler), (gpointer) entry_password);
 
-  #ifdef __unix__
   button_generate = gtk_button_new();
-  #elif defined(_WIN32) || defined (WIN32)
-  button_generate = gtk_button_new_with_label("Generate");
-  #endif
-  { GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh", GTK_ICON_SIZE_MENU);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_generate), icon); }
   gtk_widget_set_tooltip_text(button_generate, "Generate password with options");
   g_signal_connect(button_generate, "clicked", G_CALLBACK(passgen_button_handler), (gpointer) pg);
@@ -790,11 +792,13 @@ void button_newfolder_handler(GtkWidget *widget, gpointer data){
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
 
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
   gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Create");
-  { GtkWidget *icon = gtk_image_new_from_icon_name("folder-new", GTK_ICON_SIZE_MENU);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("folder-new-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
 
   GtkAccelGroup *accel_group = gtk_accel_group_new();
   gtk_window_add_accel_group(GTK_WINDOW(dialog), accel_group);
@@ -817,15 +821,20 @@ void button_newfolder_handler(GtkWidget *widget, gpointer data){
       sprintf(dialog_prompt, "%s already exists. Replace?", path);
       GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
       gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+      gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
 
       GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
       { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
       gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+      gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
 
       GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
       gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Replace");
-      { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+      { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
       gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+      gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
+      GtkStyleContext *context = gtk_widget_get_style_context(dialog_button_ok);
+      gtk_style_context_add_class(context, "destructive-action");
 
       GtkAccelGroup *accel_group = gtk_accel_group_new();
       gtk_window_add_accel_group(GTK_WINDOW(dialog), accel_group);
@@ -882,11 +891,13 @@ void button_rename_handler(GtkWidget *widget, gpointer data){
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
 
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
   gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Rename");
   { GtkWidget *icon = gtk_image_new_from_icon_name("document-edit", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
 
   GtkAccelGroup *accel_group = gtk_accel_group_new();
   gtk_window_add_accel_group(GTK_WINDOW(dialog), accel_group);
@@ -907,16 +918,21 @@ void button_rename_handler(GtkWidget *widget, gpointer data){
 
       sprintf(dialog_prompt, "%s already exists. Replace?", path);
       GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
+      gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
       gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
 
       GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
       { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
       gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+      gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
 
       GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
       gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Replace");
-      { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+      { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
       gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+      gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
+      GtkStyleContext *context = gtk_widget_get_style_context(dialog_button_ok);
+      gtk_style_context_add_class(context, "destructive-action");
 
       GtkAccelGroup *accel_group = gtk_accel_group_new();
       gtk_window_add_accel_group(GTK_WINDOW(dialog), accel_group);
@@ -1018,9 +1034,11 @@ void button_delete_handler(GtkWidget *widget, gpointer data){
     GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
     { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
     gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+    gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
 
     GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
     gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Delete");
+    gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
     // { GtkWidget *icon = gtk_image_new_from_icon_name("edit-delete", GTK_ICON_SIZE_MENU);
     // gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
     GtkStyleContext *context = gtk_widget_get_style_context(dialog_button_ok);
@@ -1054,6 +1072,7 @@ void button_delete_handler(GtkWidget *widget, gpointer data){
     GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
     { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
     gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+    gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
 
     GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
     gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Delete");
@@ -1169,20 +1188,23 @@ GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate 
       //gtk_style_context_add_class(context, "suggested-action");
 
       //Add folder icon to button
-      { GtkWidget *icon = gtk_image_new_from_icon_name("folder", GTK_ICON_SIZE_MENU);
+      { GtkWidget *icon = gtk_image_new_from_icon_name("folder-symbolic", GTK_ICON_SIZE_MENU);
       gtk_button_set_image(GTK_BUTTON(folder_button), icon); }
+      gtk_button_set_always_show_image(GTK_BUTTON(folder_button), true);
     } else if (file_io_string_is_file(file_fullpath)){
       g_signal_connect(folder_button, "activate", G_CALLBACK(file_button_handler), (gpointer) output_widget);
       g_signal_connect(folder_button, "pressed", G_CALLBACK(file_button_handler), (gpointer) output_widget);
       files_section = true;
       //Add folder icon to button
       if (strlen(file_fullpath) > 4 && strcmp(&file_fullpath[strlen(file_fullpath)-4], ".gpg") == 0){
-        { GtkWidget *icon = gtk_image_new_from_icon_name("channel-secure", GTK_ICON_SIZE_MENU);
+        { GtkWidget *icon = gtk_image_new_from_icon_name("channel-secure-symbolic", GTK_ICON_SIZE_MENU);
         gtk_button_set_image(GTK_BUTTON(folder_button), icon); }
+        gtk_button_set_always_show_image(GTK_BUTTON(folder_button), true);
       } else {
 
-        { GtkWidget *icon = gtk_image_new_from_icon_name("text-x-generic", GTK_ICON_SIZE_MENU);
+        { GtkWidget *icon = gtk_image_new_from_icon_name("text-x-generic-symbolic", GTK_ICON_SIZE_MENU);
         gtk_button_set_image(GTK_BUTTON(folder_button), icon); }
+        gtk_button_set_always_show_image(GTK_BUTTON(folder_button), true);
       }
     }
 
@@ -1195,25 +1217,19 @@ GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate 
     if (editmode){
       GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
 
-      #ifdef __unix__
       GtkWidget *button_rename = gtk_button_new();
-      #elif defined(_WIN32) || defined (WIN32)
-      GtkWidget *button_rename = gtk_button_new_with_label("Rename");
-      #endif
       gtk_widget_set_tooltip_text(button_rename, "Rename file");
       { GtkWidget *icon = gtk_image_new_from_icon_name("document-edit", GTK_ICON_SIZE_MENU);
       gtk_button_set_image(GTK_BUTTON(button_rename), icon); }
+      gtk_button_set_always_show_image(GTK_BUTTON(button_rename), true);
       gtk_widget_set_name(button_rename, file_list[i]);
       g_signal_connect(button_rename, "pressed", G_CALLBACK(button_rename_handler), (gpointer) fs);
 
-      #ifdef __unix__
       GtkWidget *button_delete = gtk_button_new();
-      #elif defined(_WIN32) || defined (WIN32)
-      GtkWidget *button_delete = gtk_button_new_with_label("Delete");
-      #endif
       gtk_widget_set_tooltip_text(button_delete, "Delete");
       { GtkWidget *icon = gtk_image_new_from_icon_name("edit-delete", GTK_ICON_SIZE_MENU);
       gtk_button_set_image(GTK_BUTTON(button_delete), icon); }
+      gtk_button_set_always_show_image(GTK_BUTTON(button_delete), true);
       gtk_widget_set_name(button_delete, file_list[i]);
       g_signal_connect(button_delete, "pressed", G_CALLBACK(button_delete_handler), (gpointer) fs);
 
@@ -1224,13 +1240,14 @@ GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate 
       gtk_box_pack_start(GTK_BOX(button_hbox), separator, false, false, 5);
 
       if (file_io_string_is_file(file_fullpath)){
-        #ifdef __unix__
         GtkWidget *button_edit = gtk_button_new();
+        #ifdef __unix__
         { GtkWidget *icon = gtk_image_new_from_icon_name("format-text-direction-ltr", GTK_ICON_SIZE_MENU);
-        gtk_button_set_image(GTK_BUTTON(button_edit), icon); }
         #elif defined(_WIN32) || defined (WIN32)
-        GtkWidget *button_edit = gtk_button_new_with_label("Edit");
+        { GtkWidget *icon = gtk_image_new_from_icon_name("edit-select-symbolic", GTK_ICON_SIZE_MENU);
         #endif
+        gtk_button_set_image(GTK_BUTTON(button_edit), icon); }
+        gtk_button_set_always_show_image(GTK_BUTTON(button_edit), true);
         gtk_widget_set_name(button_edit, file_list[i]);
         gtk_widget_set_tooltip_text(button_edit, "Edit password");
         g_signal_connect(button_edit, "pressed", G_CALLBACK(button_newpassword_handler), (gpointer) fs);
@@ -1274,10 +1291,13 @@ int gui_templates_password_store_init_handler(){
     GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
     { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
     gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+    gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
+
     GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
     gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Accept");
-    { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+    { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
     gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+    gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
     gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
     // GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
@@ -1551,8 +1571,11 @@ int gui_templates_create_key_handler(){
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
   gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Create key");
-  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
+  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
 
 
   //Boxes
@@ -1957,17 +1980,15 @@ int gui_templates_initialize_password_store(){
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
 
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-  #ifdef __unix__
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
-  #endif
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
   gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Confirm selection");
-  #ifdef __unix__
-  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok", GTK_ICON_SIZE_MENU);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
-  #endif
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
 
   //Boxes
   GtkWidget *main_vbox;
@@ -2008,28 +2029,25 @@ int gui_templates_initialize_password_store(){
   key_combo_box = gtk_combo_box_text_new();
 
   button_import = gtk_button_new_with_label("Import key");
-  #ifdef __unix__
-  { GtkWidget *icon = gtk_image_new_from_icon_name("insert-object", GTK_ICON_SIZE_MENU);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("insert-object-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_import), icon); }
-  #endif
+  gtk_button_set_always_show_image(GTK_BUTTON(button_import), true);
   g_signal_connect(button_import, "pressed", G_CALLBACK(gui_templates_import_key_handler), NULL);
   g_signal_connect(button_import, "activate", G_CALLBACK(gui_templates_import_key_handler), NULL);
   g_signal_connect(button_import, "pressed", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
   g_signal_connect(button_import, "activate", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
 
   button_export = gtk_button_new_with_label("Export key");
-  #ifdef __unix__
-  { GtkWidget *icon = gtk_image_new_from_icon_name("document-save-as", GTK_ICON_SIZE_MENU);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("document-save-as-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_export), icon); }
-  #endif
+  gtk_button_set_always_show_image(GTK_BUTTON(button_export), true);
   g_signal_connect(button_export, "pressed", G_CALLBACK(gui_templates_export_key_handler_combobox), (gpointer) key_combo_box);
   g_signal_connect(button_export, "activate", G_CALLBACK(gui_templates_export_key_handler_combobox), (gpointer) key_combo_box);
 
   button_create = gtk_button_new_with_label("Create new key");
-  #ifdef __unix__
-  { GtkWidget *icon = gtk_image_new_from_icon_name("document-new", GTK_ICON_SIZE_MENU);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("document-new-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_create), icon); }
-  #endif
+  gtk_button_set_always_show_image(GTK_BUTTON(button_create), true);
   g_signal_connect(button_create, "pressed", G_CALLBACK(gui_templates_create_key_handler), NULL);
   g_signal_connect(button_create, "activate", G_CALLBACK(gui_templates_create_key_handler), NULL);
   g_signal_connect(button_create, "pressed", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
@@ -2040,12 +2058,9 @@ int gui_templates_initialize_password_store(){
   // gtk_label_set_width_chars(GTK_LABEL(key_combo_box), 5);
 
   button_refresh = gtk_button_new();
-  #ifdef __unix__
-  { GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh", GTK_ICON_SIZE_MENU);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_refresh), icon); }
-  #elif defined (_WIN32) || defined (WIN32)
-  gtk_button_set_label(GTK_BUTTON(button_refresh), "Refresh");
-  #endif
+  gtk_button_set_always_show_image(GTK_BUTTON(button_refresh), true);
   g_signal_connect(button_refresh, "pressed", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
   g_signal_connect(button_refresh, "activate", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
 

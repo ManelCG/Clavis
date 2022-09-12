@@ -15,6 +15,7 @@ release: BDIR = build
 
 windows: CC = $(CCCMD) -O2 -DCLAVIS_VERSION=\"$(CLAVIS_VERSION)\" -mwindows
 windows: BDIR = build
+windows_GTKENV: BDIR = build
 
 install: CC = $(CCCMD) -O2	-DMAKE_INSTALL -DCLAVIS_VERSION=\"$(CLAVIS_VERSION)\"
 install: CLAVIS_DIR = /usr/lib/clavis
@@ -48,7 +49,11 @@ windows: $(OBJ)
 	mkdir -p $(BDIR)
 	mkdir -p $(ODIR)
 	$(CC) -o $(BDIR)/clavis $^ $(CFLAGS) $(LIBS) $(ODIR)/my.res $(ODIR)/appinfo.res
-	ldd build/clavis.exe | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" build/
+
+windows_GTKENV: windows
+	ldd $(BDIR)/clavis.exe | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" $(BDIR)/
+	cp -ru __windows__/windows_assets/* $(BDIR)/
+
 
 debug: $(OBJ)
 	mkdir -p $(BDIR)

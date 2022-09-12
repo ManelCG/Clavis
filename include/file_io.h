@@ -13,6 +13,7 @@ int file_io_get_file_count(const char *s, _Bool recursive);
 
 int file_io_folder_get_file_n(const char *folder, const char *filter);
 char **file_io_folder_get_file_list(const char *folder, int nfiles, const char *filter);
+_Bool file_io_folder_has_gpgid(const char *path);
 
 const char *file_io_decrypt_password(const char *path);
 int file_io_encrypt_password(const char *password, const char *path);

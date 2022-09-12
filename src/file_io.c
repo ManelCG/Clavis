@@ -191,6 +191,13 @@ _Bool file_io_rm_rf(const char *path){
     if (file_io_remove_password(path) == 0){
     #elif defined(_WIN32) || defined (WIN32)
     if (remove(path) == 0){
+      char args_git[strlen(path) + 64];
+
+      sprintf(args_git, "git.exe rm %s", path);
+      perform_git_command(args_git);
+
+      sprintf(args_git, "git.exe commit -m \"Removed password %s\"", path);
+      perform_git_command(args_git);
     #endif
       removed = true;
     }
@@ -1456,6 +1463,41 @@ void file_io_init_password_store(const char *key){
   wait(NULL);
 
 #elif defined(_WIN32) || defined (WIN32)
+  void re_encrypt_file(const char *path){
+    printf("Re encrypting %s\n", path);
+    const char *pw = file_io_decrypt_password(path);
+    if (pw != NULL){
+      file_io_encrypt_password(pw, path);
+      free((char *) pw);
+    }
+  }
+
+  void re_encrypt_folder(const char *path){
+    DIR *d;
+    struct dirent *dir;
+    d = opendir(path);
+
+    if (d){
+      while ((dir = readdir(d)) != NULL){
+        char fullpath[strlen(dir->d_name) + strlen(path) + 2];
+        sprintf(fullpath, "%s\\%s", path, dir->d_name);
+        if (file_io_string_is_file(fullpath)){
+          if (strcmp(dir->d_name, ".gpg-id") != 0){
+            re_encrypt_file(fullpath);
+          }
+        } else if (file_io_string_is_folder(fullpath)){
+          if (dir->d_name[0] != '.'){
+            if (!file_io_folder_has_gpgid(fullpath)){
+              re_encrypt_folder(fullpath);
+            }
+          }
+        }
+      }
+
+      closedir(d);
+    }
+  }
+
   HANDLE hFile;
   hFile = CreateFile(".gpg-id",
                      GENERIC_WRITE,
@@ -1473,6 +1515,9 @@ void file_io_init_password_store(const char *key){
   WriteFile(hFile, "\n", 1, NULL, NULL);
 
   CloseHandle(hFile);
+
+  const char *cwd = _getcwd(NULL, 0);
+  re_encrypt_folder(cwd);
 #endif
 }
 
@@ -1647,6 +1692,25 @@ void file_io_export_gpg_keys(const char *key, const char *path, _Bool private){
   CloseHandle(hFile);
   return;
 #endif
+}
+
+_Bool file_io_folder_has_gpgid(const char *path){
+  DIR *d;
+  struct dirent *dir;
+  d = opendir(path);
+  _Bool has_gpgid = false;
+
+  if (d){
+    while ((dir = readdir(d)) != NULL){
+      if (strcmp(dir->d_name, ".gpg-id") == 0){
+        has_gpgid = true;
+      }
+    }
+
+    closedir(d);
+  }
+
+  return has_gpgid;
 }
 
 void perform_git_command(char *args){
