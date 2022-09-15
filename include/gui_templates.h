@@ -34,6 +34,9 @@ void menu_button_export_gpg_handler(GtkWidget *, gpointer);
 void gui_templates_show_password_store_info_window(GtkWidget *, gpointer);
 void gui_templates_show_about_window(GtkWidget *, gpointer);
 
+_Bool gui_templates_overwrite_confirmation(const char *path);
+void gui_templates_message_dialog(const char *message);
+
 //GPG keys
 void gui_templates_export_key_handler_combobox(GtkWidget *wid, gpointer data);
 void gui_templates_export_key_handler_entry(GtkWidget *wid, gpointer data);

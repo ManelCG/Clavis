@@ -85,6 +85,49 @@ void copy_entry_to_clipboard_handler(GtkWidget *widget, gpointer data){
     #endif
   }
 }
+void gui_templates_message_dialog(const char *message){
+  GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, message);
+  gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+  gtk_dialog_run(GTK_DIALOG(dialog));
+
+  destroy(dialog, dialog);
+}
+_Bool gui_templates_overwrite_confirmation(const char *path){
+  char dialog_prompt[strlen(path) + 32];
+
+  sprintf(dialog_prompt, "%s already exists. Overwrite?", path);
+  GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
+  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+  gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+
+  GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
+
+  GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Replace");
+  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
+  GtkStyleContext *context = gtk_widget_get_style_context(dialog_button_ok);
+  gtk_style_context_add_class(context, "destructive-action");
+
+  GtkAccelGroup *accel_group = gtk_accel_group_new();
+  gtk_window_add_accel_group(GTK_WINDOW(dialog), accel_group);
+  gtk_widget_add_accelerator(dialog_button_ok, "clicked", accel_group, GDK_KEY_Return, 0, GTK_ACCEL_VISIBLE);
+  gtk_widget_add_accelerator(dialog_button_cancel, "clicked", accel_group, GDK_KEY_Escape, 0, GTK_ACCEL_VISIBLE);
+
+  int response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+  destroy(dialog, dialog);
+
+  if (response == GTK_RESPONSE_OK){
+    return true;
+  } else {
+    return false;
+  }
+}
 void type_entry_with_keyboard_handler(GtkWidget *widget, gpointer data){
   GtkWidget *entry = (GtkWidget *) data;
   const char *pw = gtk_entry_get_text(GTK_ENTRY(entry));
@@ -749,23 +792,37 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
 
 
       if (valid_password){
+        _Bool should_create = true;
         char *password = (char *) gtk_entry_get_text(GTK_ENTRY(entry_password));
         const char *name = folderstate_file_get_full_path_from_string(fs, gtk_entry_get_text(GTK_ENTRY(entry_passname)));
 
-        #ifdef __unix__
-        file_io_encrypt_password(password, name);
-        #elif defined(_WIN32) || defined (WIN32)
-        char *extended_name = malloc(sizeof(char) * (strlen(name)+5));
+        char extended_name[strlen(name)+5];
         strcpy(extended_name, name);
         strcat(extended_name, ".gpg");
-        file_io_encrypt_password(password, extended_name);
 
-        char git_args[strlen(extended_name) + 64];
-        sprintf(git_args, "git.exe add %s", extended_name);
-        perform_git_command(git_args);
-        sprintf(git_args, "git.exe commit -m \"Added password for %s to store\"", name);
-        perform_git_command(git_args);
-        #endif
+        if (file_io_string_is_file(extended_name) || file_io_string_is_folder(extended_name)){
+          should_create = false;
+
+          _Bool response = gui_templates_overwrite_confirmation(extended_name);
+
+          if (response){
+            should_create = true;
+          }
+        }
+
+        if (should_create){
+          #ifdef __unix__
+          file_io_encrypt_password(password, name);
+          #elif defined(_WIN32) || defined (WIN32)
+          file_io_encrypt_password(password, extended_name);
+
+          char git_args[strlen(extended_name) + 64];
+          sprintf(git_args, "git.exe add %s", extended_name);
+          perform_git_command(git_args);
+          sprintf(git_args, "git.exe commit -m \"Added password for %s to store\"", name);
+          perform_git_command(git_args);
+          #endif
+        }
       }
     }
   }
@@ -775,7 +832,6 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
   folderstate_reload(fs);
   GtkWidget *parent = gtk_widget_get_toplevel(widget);
   draw_main_window_handler(parent, fs);
-
 }
 void button_newfolder_handler(GtkWidget *widget, gpointer data){
   folderstate *fs = (folderstate *) data;
@@ -812,54 +868,25 @@ void button_newfolder_handler(GtkWidget *widget, gpointer data){
 
   if (response == GTK_RESPONSE_OK && strcmp(text, "") != 0){
     const char *path = folderstate_file_get_full_path_from_string(fs, text);
-    char dialog_prompt[strlen(path) + 128];
     _Bool should_create = true;
 
     if (file_io_string_is_file(path) || file_io_string_is_folder(path)){
       should_create = false;
 
-      sprintf(dialog_prompt, "%s already exists. Replace?", path);
-      GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
-      gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
-      gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+      _Bool response = gui_templates_overwrite_confirmation(path);
 
-      GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
-      { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
-      gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
-      gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
-
-      GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Replace");
-      { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
-      gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
-      gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
-      GtkStyleContext *context = gtk_widget_get_style_context(dialog_button_ok);
-      gtk_style_context_add_class(context, "destructive-action");
-
-      GtkAccelGroup *accel_group = gtk_accel_group_new();
-      gtk_window_add_accel_group(GTK_WINDOW(dialog), accel_group);
-      gtk_widget_add_accelerator(dialog_button_ok, "clicked", accel_group, GDK_KEY_Return, 0, GTK_ACCEL_VISIBLE);
-      gtk_widget_add_accelerator(dialog_button_cancel, "clicked", accel_group, GDK_KEY_Escape, 0, GTK_ACCEL_VISIBLE);
-
-      int response = gtk_dialog_run(GTK_DIALOG(dialog));
-
-      if (response == GTK_RESPONSE_OK){
+      if (response){
         if (file_io_rm_rf(path)){
           should_create = true;
         }
       }
-
-      destroy(dialog, dialog);
     }
 
     if (should_create){
       if (mkdir_handler(path) != 0){
+        char dialog_prompt[strlen(path) + 32];
         sprintf(dialog_prompt, "Could not overwrite %s.", path);
-        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, dialog_prompt);
-        gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
-        gtk_dialog_run(GTK_DIALOG(dialog));
-
-        destroy(dialog, dialog);
+        gui_templates_message_dialog(dialog_prompt);
       }
     }
 
@@ -911,53 +938,26 @@ void button_rename_handler(GtkWidget *widget, gpointer data){
 
   if (response == GTK_RESPONSE_OK && strcmp(text, "") != 0 && strcmp(text, name) != 0){
     const char *path = folderstate_file_get_full_path_from_string(fs, text);
+
     _Bool should_rename = true;
 
     if (file_io_string_is_file(path) || file_io_string_is_folder(path)){
       should_rename = false;
 
-      sprintf(dialog_prompt, "%s already exists. Replace?", path);
-      GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
-      gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
-      gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+      _Bool response = gui_templates_overwrite_confirmation(path);
 
-      GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
-      { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
-      gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
-      gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
-
-      GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Replace");
-      { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
-      gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
-      gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
-      GtkStyleContext *context = gtk_widget_get_style_context(dialog_button_ok);
-      gtk_style_context_add_class(context, "destructive-action");
-
-      GtkAccelGroup *accel_group = gtk_accel_group_new();
-      gtk_window_add_accel_group(GTK_WINDOW(dialog), accel_group);
-      gtk_widget_add_accelerator(dialog_button_ok, "clicked", accel_group, GDK_KEY_Return, 0, GTK_ACCEL_VISIBLE);
-      gtk_widget_add_accelerator(dialog_button_cancel, "clicked", accel_group, GDK_KEY_Escape, 0, GTK_ACCEL_VISIBLE);
-
-      int response = gtk_dialog_run(GTK_DIALOG(dialog));
-
-      if (response == GTK_RESPONSE_OK){
+      if (response){
         if (file_io_rm_rf(path)){
           should_rename = true;
         }
       }
-
-      destroy(dialog, dialog);
     }
 
     if (should_rename){
       if (rename(oldpath, path) != 0){
+        char dialog_prompt[strlen(path) + 32];
         sprintf(dialog_prompt, "Could not overwrite %s.", path);
-        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, dialog_prompt);
-        gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
-        gtk_dialog_run(GTK_DIALOG(dialog));
-
-        destroy(dialog, dialog);
+        gui_templates_message_dialog(dialog_prompt);
       } else {
         #ifdef __unix__
         int pid;
@@ -981,7 +981,7 @@ void button_rename_handler(GtkWidget *widget, gpointer data){
         waitpid(pid, NULL, 0);
 
         char args_commit[strlen(path) + strlen(oldpath) + 64];
-        sprintf(args_commit, "git.exe commit -m \"Renamed password %s to %s\"", oldpath, path);
+        sprintf(args_commit, "git commit -m \"Renamed password %s to %s\"", oldpath, path);
 
         if ((pid = fork()) < 0){
           perror("Could not fork");
