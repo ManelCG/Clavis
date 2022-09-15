@@ -383,6 +383,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
 
   gtk_container_add(GTK_CONTAINER(window), main_vbox);
   gtk_widget_show_all(window);
+  gtk_widget_grab_focus(entry_filter);
 }
 
 int clavis_normal_main(int argc, char *argv[]){
