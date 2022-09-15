@@ -306,9 +306,6 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   if (filter_text != NULL){
     gtk_entry_set_text(GTK_ENTRY(entry_filter), filter_text);
   }
-  g_signal_connect(entry_filter, "key-release-event", G_CALLBACK(entry_filter_keyrelease_handler), (gpointer) fs);
-  g_signal_connect(entry_filter, "changed", G_CALLBACK(entry_filter_changed_handler), (gpointer) fs);
-
   //Password output entry
   GtkWidget *password_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   password_output = gtk_entry_new();
@@ -340,6 +337,17 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
 
   folder_scrollbox = gtk_scrolled_window_new(NULL, NULL);
   gui_templates_get_folder_scrollbox(folder_scrollbox, fs, true, password_output);
+
+  //Search bar config
+  gpointer *scrollbox_refresh_data = malloc(sizeof(gpointer) * 3);
+  scrollbox_refresh_data[0] = fs;
+  scrollbox_refresh_data[1] = folder_scrollbox;
+  scrollbox_refresh_data[2] = password_output;
+
+  gtk_widget_set_name(folder_scrollbox, CLAVIS_NORMAL_MODE_NAME);
+
+  g_signal_connect(entry_filter, "changed", G_CALLBACK(entry_filter_changed_handler), (gpointer) scrollbox_refresh_data);
+
 
   folder_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 

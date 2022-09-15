@@ -530,15 +530,22 @@ void entry_filter_keyrelease_handler(GtkWidget *widget, GdkEventKey *event, gpoi
   }
 }
 void entry_filter_changed_handler(GtkWidget *widget, gpointer data){
-  if (strcmp(gtk_entry_get_text(GTK_ENTRY(widget)), "") == 0){
-    folderstate *fs = (folderstate *) data;
-    folderstate_set_filter(fs, "");
-    folderstate_reload(fs);
+  gpointer *srd = (gpointer *) data;
+  folderstate *fs = srd[0];
+  GtkWidget *scrollbox = srd[1];
+  GtkWidget *output = srd[2];
 
+  _Bool editmode = false;;
 
-    GtkWidget *parent = gtk_widget_get_toplevel(widget);
-    draw_main_window_handler(parent, fs);
+  if (strcmp(gtk_widget_get_name(scrollbox), CLAVIS_NORMAL_MODE_NAME) == 0){
+    editmode = true;
   }
+
+  folderstate_set_filter(fs, gtk_entry_get_text(GTK_ENTRY(widget)));
+  folderstate_reload(fs);
+
+  gui_templates_clear_container(scrollbox);
+  gui_templates_get_folder_scrollbox(scrollbox, fs, editmode, output);
 }
 void passgen_button_handler(GtkWidget *widget, gpointer data){
   char *pw = (char *) passgen_generate_new_password((passgen *) data);
