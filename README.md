@@ -111,6 +111,10 @@ Clavis' backend source code has been purposefuly written to maximize both time a
 
 ## Installation
 
+### On Windows
+
+Simply run the installer from the latest release, or run in portable mode.
+
 ### On any Linux Distribution
 
 Clone the repository, and from within its main folder, run the command ```sudo make install```
@@ -124,7 +128,3 @@ Just install ```clavis``` from your favourite AUR helper. For example, with YaY:
 If you want to always have the latest changes and bleeding-edge functionality, the ```clavis-git``` package is also available, although user caution is adviced, as it might contain bugs
 
 The ```clavis``` package is thoroughly tested for bugs, so it should be safe to use.
-
-## Further development
-
-* Full Windows compatibility is one of the first things on the list.
