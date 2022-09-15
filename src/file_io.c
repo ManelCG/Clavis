@@ -187,18 +187,7 @@ const char *file_io_get_git_config_field(const char *field){
 _Bool file_io_rm_rf(const char *path){
   _Bool removed = false;
   if (file_io_string_is_file(path)){
-    #ifdef __unix__
     if (file_io_remove_password(path) == 0){
-    #elif defined(_WIN32) || defined (WIN32)
-    if (remove(path) == 0){
-      char args_git[strlen(path) + 64];
-
-      sprintf(args_git, "git.exe rm %s", path);
-      perform_git_command(args_git);
-
-      sprintf(args_git, "git.exe commit -m \"Removed password %s\"", path);
-      perform_git_command(args_git);
-    #endif
       removed = true;
     }
   } else if (file_io_string_is_folder(path)){
@@ -210,11 +199,7 @@ _Bool file_io_rm_rf(const char *path){
         char filepath[strlen(path) + strlen(files[i]) + 8];
         sprintf(filepath, "%s/%s", path, files[i]);
         if (file_io_string_is_file(filepath)){
-          #ifdef __unix__
           if (file_io_remove_password(filepath) == 0){
-          #elif defined(_WIN32) || defined (WIN32)
-          if (remove(filepath) == 0){
-          #endif
             removed = true;
           }
         } else if (file_io_string_is_folder(filepath)){
@@ -613,8 +598,8 @@ int file_io_get_git_auth_method(){
   return CLAVIS_GIT_NONE;
 }
 
-#ifdef __unix__
 int file_io_remove_password(const char *path){
+  #ifdef __unix__
   char filepath[strlen(path)+1];
   strcpy(filepath, path);
   if (strlen(filepath) > 4 && strcmp(&filepath[strlen(filepath)-4], ".gpg") == 0){
@@ -660,8 +645,24 @@ int file_io_remove_password(const char *path){
   close(p_sync[0]);
 
   return 0;
+  #elif defined(_WIN32) || defined (WIN32)
+  int ret;
+  ret =remove(path);
+  if (ret != 0){
+    return ret;
+  }
+
+  char args_git[strlen(path) + 64];
+
+  sprintf(args_git, "git.exe rm %s", path);
+  perform_git_command(args_git);
+
+  sprintf(args_git, "git.exe commit -m \"Removed password %s\"", path);
+  perform_git_command(args_git);
+
+  return 0;
+  #endif
 }
-#endif
 
 int file_io_encrypt_password(const char *password, const char *path){
   #ifdef __unix__

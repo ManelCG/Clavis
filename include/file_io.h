@@ -39,9 +39,7 @@ void file_io_init_password_store(const char *key);
 
 char *file_io_get_gpgid();
 
-#ifdef __unix__
 int file_io_remove_password(const char *path);
-#elif defined(_WIN32) || defined (WIN32)
 
 #endif
 
