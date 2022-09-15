@@ -518,17 +518,6 @@ void toggle_visibility_handler(GtkWidget *widget, gpointer data){
 void password_decrypt_handler(GtkWidget *widget, gpointer data){
   printf("Decrypting\n");
 }
-void entry_filter_keyrelease_handler(GtkWidget *widget, GdkEventKey *event, gpointer data){
-  if (strcmp(gdk_keyval_name (event->keyval), "Return") == 0){
-    folderstate *fs = (folderstate *) data;
-    folderstate_set_filter(fs, gtk_entry_get_text(GTK_ENTRY(widget)));
-    folderstate_reload(fs);
-
-
-    GtkWidget *parent = gtk_widget_get_toplevel(widget);
-    draw_main_window_handler(parent, fs);
-  }
-}
 void entry_filter_changed_handler(GtkWidget *widget, gpointer data){
   gpointer *srd = (gpointer *) data;
   folderstate *fs = srd[0];
