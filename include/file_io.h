@@ -1,10 +1,6 @@
 #ifndef __FILE_IO_H_
 #define __FILE_IO_H_
 
-#if defined(_WIN32) || defined (WIN32)
-
-#endif
-
 _Bool file_io_string_is_folder(const char *s);
 _Bool file_io_string_is_file(const char *s);
 
@@ -40,7 +36,5 @@ void file_io_init_password_store(const char *key);
 char *file_io_get_gpgid();
 
 int file_io_remove_password(const char *path);
-
-#endif
 
 #endif //_FILE_IO_H_
