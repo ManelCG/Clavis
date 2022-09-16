@@ -1816,6 +1816,37 @@ char *file_io_get_gtk_settings_ini_file(){
 }
 
 int file_io_get_gtk_theme(){
+  {
+    char *appdata = getenv("APPDATA");
+    char themefile[strlen(appdata) + strlen("Clavis\\clavis_use_darktheme") + 8];
+    sprintf(themefile, "%s\\%s", appdata, "Clavis\\clavis_use_darktheme");
+
+    if (file_io_string_is_file(themefile)){
+      HANDLE hFile;
+      hFile = CreateFile(themefile,
+                         GENERIC_READ,
+                         FILE_SHARE_READ,
+                         NULL,
+                         OPEN_EXISTING,
+                         FILE_ATTRIBUTE_NORMAL,
+                         NULL);
+
+      if (hFile != INVALID_HANDLE_VALUE){
+        DWORD bread;
+        char c;
+
+        ReadFile(hFile, &c, 1, &bread, NULL);
+        CloseHandle(hFile);
+
+        if (c == '1'){
+          return CLAVIS_THEME_DARK;
+        } else if (c == '0'){
+          return CLAVIS_THEME_LIGHT;
+        }
+      }
+
+    }
+  }
   char *f_ini = file_io_get_gtk_settings_ini_file();
 
   HANDLE hFile;

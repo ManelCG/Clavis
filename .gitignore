@@ -2,3 +2,5 @@
 build
 debug
 releases/
+*Thumbs.db
+*Thumbs.db:encryptable

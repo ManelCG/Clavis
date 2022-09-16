@@ -191,127 +191,164 @@ void type_entry_with_keyboard_handler(GtkWidget *widget, gpointer data){
 }
 #if defined (_WIN32) || defined (WIN32)
 void change_theme_handler(GtkWidget *widget, gpointer data){
-  char *f_ini = file_io_get_gtk_settings_ini_file();
+  char *appdata = getenv("APPDATA");
+  char themefile[strlen(appdata) + strlen("Clavis\\clavis_use_darktheme") + 8];
+  sprintf(themefile, "%s\\%s", appdata, "Clavis\\clavis_use_darktheme");
 
-  HANDLE hFile;
-  hFile = CreateFile(f_ini,
-                     GENERIC_READ,
-                     FILE_SHARE_READ,
-                     NULL,
-                     OPEN_EXISTING,
-                     FILE_ATTRIBUTE_NORMAL,
-                     NULL);
+  if (file_io_string_is_file(themefile)){
+    int theme = file_io_get_gtk_theme();
+    HANDLE hFile;
+    hFile = CreateFile(themefile,
+                       GENERIC_WRITE,
+                       0,
+                       NULL,
+                       CREATE_ALWAYS,
+                       FILE_ATTRIBUTE_NORMAL,
+                       NULL);
 
-  if (hFile == INVALID_HANDLE_VALUE){
-    return;
-  }
+    if (hFile == INVALID_HANDLE_VALUE){
+      return;
+    }
 
-  DWORD bread;
-  char *buffer = malloc(sizeof(char) * 4096);
+    char *newtheme = "0\n";
+    switch(theme){
+      case CLAVIS_THEME_DARK:
+        newtheme = "0\n";
+        g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", false, NULL);
+        break;
+      case CLAVIS_THEME_LIGHT:
+        newtheme = "1\n";
+        g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", true, NULL);
+        break;
+    }
 
-  ReadFile(hFile, buffer, 4095, &bread, NULL);
-  buffer[bread] = '\0';
+    WriteFile(hFile, newtheme, 2, NULL, NULL);
+    CloseHandle(hFile);
+  } else {
+    char *f_ini = file_io_get_gtk_settings_ini_file();
 
-  CloseHandle(hFile);
+    HANDLE hFile;
+    hFile = CreateFile(f_ini,
+                       GENERIC_READ,
+                       FILE_SHARE_READ,
+                       NULL,
+                       OPEN_EXISTING,
+                       FILE_ATTRIBUTE_NORMAL,
+                       NULL);
 
-  hFile = CreateFile(f_ini,
-                     GENERIC_WRITE,
-                     0,
-                     NULL,
-                     CREATE_ALWAYS,
-                     FILE_ATTRIBUTE_NORMAL,
-                     NULL);
+    if (hFile == INVALID_HANDLE_VALUE){
+      return;
+    }
 
-  if (hFile == INVALID_HANDLE_VALUE){
-    return;
-  }
+    DWORD bread;
+    char *buffer = malloc(sizeof(char) * 4096);
 
-  unsigned int line_buff_size = 4096;
-  char line_buffer[line_buff_size];
-  char *token = buffer;
-  char *last_token;
-  long long int len;
+    ReadFile(hFile, buffer, 4095, &bread, NULL);
+    buffer[bread] = '\0';
 
-  char *conf = "gtk-application-prefer-dark-theme";
+    CloseHandle(hFile);
 
-  while (1 && buffer[0] != '\0'){
-    last_token = token;
-    token = strchr(token, '\n');
-    len = token - last_token;
+    hFile = CreateFile(f_ini,
+                       GENERIC_WRITE,
+                       0,
+                       NULL,
+                       CREATE_ALWAYS,
+                       FILE_ATTRIBUTE_NORMAL,
+                       NULL);
 
-    if (len > 0){
-      snprintf(line_buffer, len+1, last_token);
-      char *conf_token = strstr(line_buffer, conf);
-      if (conf_token != NULL){
-        char *value;
-        value = strstr(line_buffer, "false");
-        if (value != NULL){
-          char buffer_write[64];
-          sprintf(buffer_write, "%s = true\n", conf);
+    if (hFile == INVALID_HANDLE_VALUE){
+      return;
+    }
+
+    unsigned int line_buff_size = 4096;
+    char line_buffer[line_buff_size];
+    char *token = buffer;
+    char *last_token;
+    long long int len;
+
+    char *conf = "gtk-application-prefer-dark-theme";
+
+    while (1 && buffer[0] != '\0'){
+      last_token = token;
+      token = strchr(token, '\n');
+      len = token - last_token;
+
+      if (len > 0){
+        snprintf(line_buffer, len+1, last_token);
+        char *conf_token = strstr(line_buffer, conf);
+        if (conf_token != NULL){
+          char *value;
+          value = strstr(line_buffer, "false");
+          if (value != NULL){
+            char buffer_write[64];
+            sprintf(buffer_write, "%s = true\n", conf);
+            WriteFile(hFile, buffer_write, strlen(buffer_write), NULL, NULL);
+            g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", true, NULL);
+          }
+          value = strstr(line_buffer, "true");
+          if (value != NULL){
+            char buffer_write[64];
+            sprintf(buffer_write, "%s = false\n", conf);
+            g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", false, NULL);
+            WriteFile(hFile, buffer_write, strlen(buffer_write), NULL, NULL);
+          }
+        } else {
+          char buffer_write[strlen(line_buffer)+8];
+          sprintf(buffer_write, "%s\n", line_buffer);
           WriteFile(hFile, buffer_write, strlen(buffer_write), NULL, NULL);
         }
-        value = strstr(line_buffer, "true");
-        if (value != NULL){
-          char buffer_write[64];
-          sprintf(buffer_write, "%s = false\n", conf);
-          WriteFile(hFile, buffer_write, strlen(buffer_write), NULL, NULL);
-        }
-      } else {
-        char buffer_write[strlen(line_buffer)+8];
-        sprintf(buffer_write, "%s\n", line_buffer);
-        WriteFile(hFile, buffer_write, strlen(buffer_write), NULL, NULL);
+      }
+
+      if (token[0] == '\n'){
+        token++;
+      }
+      if (token[0] == '\0'){
+        break;
       }
     }
 
-    if (token[0] == '\n'){
-      token++;
-    }
-    if (token[0] == '\0'){
-      break;
-    }
+    CloseHandle(hFile);
+    free(f_ini);
+    free(buffer);
   }
-
-  CloseHandle(hFile);
-  free(f_ini);
-  free(buffer);
 
   GtkWidget *dialog;
 
-  //Reload?
-  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Theme changed. Reload Clavis?");
-  gtk_window_set_title(GTK_WINDOW(dialog), "Clavis Theme Manager");
-  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
-  gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+  ////Reload?
+  //dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Theme changed. Reload Clavis?");
+  //gtk_window_set_title(GTK_WINDOW(dialog), "Clavis Theme Manager");
+  //gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+  //gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
 
-  int response = gtk_dialog_run(GTK_DIALOG(dialog));
+  //int response = gtk_dialog_run(GTK_DIALOG(dialog));
 
-  destroy(dialog, dialog);
+  //destroy(dialog, dialog);
 
-  if (response == GTK_RESPONSE_OK){
-    gtk_main_quit();
-    PROCESS_INFORMATION piProcInfo;
-    STARTUPINFO siStartInfo;
-    ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
-    ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
-    siStartInfo.cb = sizeof(STARTUPINFO);
-    siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+  //if (response == GTK_RESPONSE_OK){
+  //  gtk_main_quit();
+  //  PROCESS_INFORMATION piProcInfo;
+  //  STARTUPINFO siStartInfo;
+  //  ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+  //  ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+  //  siStartInfo.cb = sizeof(STARTUPINFO);
+  //  siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 
-    CreateProcessA(file_io_get_clavis_executable(),
-                   "clavis.exe",
-                   NULL,
-                   NULL,
-                   true,
-                   0,
-                   NULL,
-                   NULL,
-                   &siStartInfo,
-                   &piProcInfo);
+  //  CreateProcessA(file_io_get_clavis_executable(),
+  //                 "clavis.exe",
+  //                 NULL,
+  //                 NULL,
+  //                 true,
+  //                 0,
+  //                 NULL,
+  //                 NULL,
+  //                 &siStartInfo,
+  //                 &piProcInfo);
 
-    CloseHandle(piProcInfo.hProcess);
-    CloseHandle(piProcInfo.hThread);
-    return;
-  }
-  return;
+  //  CloseHandle(piProcInfo.hProcess);
+  //  CloseHandle(piProcInfo.hThread);
+  //  return;
+  //}
+  //return;
 }
 #endif
 void gui_templates_synthesize_button(GtkWidget *w, gpointer data){

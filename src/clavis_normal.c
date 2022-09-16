@@ -233,6 +233,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
       icon = gtk_image_new_from_icon_name("weather-clear-night-symbolic", 16);
     }
     g_signal_connect(menu_button_theme, "activate", G_CALLBACK(change_theme_handler), NULL);
+    g_signal_connect(menu_button_theme, "activate", G_CALLBACK(gui_templates_synthesize_button), (gpointer) button_reload);
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_theme), icon);
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(menu_button_theme), true);
 
@@ -422,6 +423,18 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
 
 int clavis_normal_main(int argc, char *argv[]){
   gtk_init(&argc, &argv);
+
+  #if defined(_WIN32) || defined (WIN32)
+  switch(file_io_get_gtk_theme()){
+    case CLAVIS_THEME_DARK:
+      g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", true, NULL);
+      break;
+    case CLAVIS_THEME_LIGHT:
+      g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", false, NULL);
+      break;
+  }
+  #endif
+
   GtkWidget *window_root = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(window_root), "Clavis");
   gui_templates_window_set_clavis_icon(GTK_WINDOW(window_root));
