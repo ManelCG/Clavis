@@ -12,6 +12,8 @@ const char *folderstate_get_filter(folderstate *fs);
 
 int folderstate_get_nfiles(folderstate *);
 int folderstate_get_state(folderstate *);
+void folderstate_increase_state(folderstate *);
+void folderstate_decrease_state(folderstate *);
 const char *folderstate_get_path(folderstate *);
 const char *folderstate_get_path_shortname(folderstate *);
 const char **folderstate_get_files(folderstate *);

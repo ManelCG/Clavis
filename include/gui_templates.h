@@ -12,10 +12,13 @@ void gui_templates_window_set_clavis_icon(GtkWindow *window);
 void gui_templates_clear_container(GtkWidget *widget);
 
 void gui_templates_get_string(char **dest, const char *name);
-void entry_filter_keyrelease_handler(GtkWidget *widget, GdkEventKey *event, gpointer data);
+_Bool entry_filter_keyrelease_handler(GtkWidget *widget, GdkEventKey *event, gpointer data);
 void entry_filter_changed_handler(GtkWidget *widget, gpointer data);
 void password_decrypt_handler(GtkWidget *widget, gpointer data);
 void toggle_visibility_handler(GtkWidget *widget, gpointer data);
+void folderstate_change_state_handler(GtkWidget *widget, gpointer data);
+
+_Bool gui_templates_folder_button_from_string(GtkWidget *widget, const char *s, folderstate *fs);
 
 //pass init
 int gui_templates_password_store_init_handler();

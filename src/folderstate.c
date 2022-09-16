@@ -108,6 +108,18 @@ const char **folderstate_get_files(folderstate *fs){
 int folderstate_get_state(folderstate *fs){
   return fs->state;
 }
+void folderstate_increase_state(folderstate *fs){
+  fs->state++;
+  if (fs->state == fs->nfiles){
+    fs->state = 0;
+  }
+}
+void folderstate_decrease_state(folderstate *fs){
+  fs->state--;
+  if (fs->state == -1){
+    fs->state = fs->nfiles -1;
+  }
+}
 
 const char *folderstate_get_path(folderstate *fs){
   return fs->path;

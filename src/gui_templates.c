@@ -518,6 +518,46 @@ void toggle_visibility_handler(GtkWidget *widget, gpointer data){
 void password_decrypt_handler(GtkWidget *widget, gpointer data){
   printf("Decrypting\n");
 }
+
+_Bool entry_filter_keyrelease_handler(GtkWidget *widget, GdkEventKey *event, gpointer data){
+  gpointer *srd = (gpointer *) data;
+  folderstate *fs = srd[0];
+  GtkWidget *scrollbox = srd[1];
+  GtkWidget *output = srd[2];
+
+  _Bool editmode = false;;
+  if (strcmp(gtk_widget_get_name(scrollbox), CLAVIS_NORMAL_MODE_NAME) == 0){
+    editmode = true;
+  }
+
+  if (event == NULL){
+    return false;
+  }
+  if (strcmp(gdk_keyval_name(event->keyval), "Up") == 0){
+    folderstate_decrease_state(fs);
+  } else if (strcmp(gdk_keyval_name(event->keyval), "Down") == 0){
+    folderstate_increase_state(fs);
+  } else if (strcmp(gdk_keyval_name(event->keyval), "Return") == 0){
+    const char *name = folderstate_get_files(fs)[folderstate_get_state(fs)];
+    gui_templates_folder_button_from_string(output, name, fs);
+
+    return true;
+  } else if (strcmp(gdk_keyval_name(event->keyval), "Escape") == 0){
+    if (strcmp(folderstate_get_path(fs), ".") != 0){
+      button_goup_handler(output, (gpointer)  fs);
+
+      return true;
+    }
+  } else {
+    return false;
+  }
+
+  gui_templates_clear_container(scrollbox);
+  gui_templates_get_folder_scrollbox(scrollbox, fs, editmode, output);
+
+  return true;
+}
+
 void entry_filter_changed_handler(GtkWidget *widget, gpointer data){
   gpointer *srd = (gpointer *) data;
   folderstate *fs = srd[0];
@@ -532,6 +572,27 @@ void entry_filter_changed_handler(GtkWidget *widget, gpointer data){
 
   folderstate_set_filter(fs, gtk_entry_get_text(GTK_ENTRY(widget)));
   folderstate_reload(fs);
+
+  gui_templates_clear_container(scrollbox);
+  gui_templates_get_folder_scrollbox(scrollbox, fs, editmode, output);
+}
+void folderstate_change_state_handler(GtkWidget *widget, gpointer data){
+  gpointer *srd = (gpointer *) data;
+  folderstate *fs = srd[0];
+  GtkWidget *scrollbox = srd[1];
+  GtkWidget *output = srd[2];
+
+  if (strcmp(gtk_widget_get_name(widget), CLAVIS_BUTTON_INCREASE_STATE) == 0){
+    folderstate_increase_state(fs);
+  } else if (strcmp(gtk_widget_get_name(widget), CLAVIS_BUTTON_DECREASE_STATE) == 0){
+    folderstate_decrease_state(fs);
+  }
+
+  _Bool editmode = false;;
+
+  if (strcmp(gtk_widget_get_name(scrollbox), CLAVIS_NORMAL_MODE_NAME) == 0){
+    editmode = true;
+  }
 
   gui_templates_clear_container(scrollbox);
   gui_templates_get_folder_scrollbox(scrollbox, fs, editmode, output);
@@ -1123,6 +1184,28 @@ void draw_main_window_handler(GtkWidget *window, folderstate *fs){
   }
 }
 
+_Bool gui_templates_folder_button_from_string(GtkWidget *widget, const char *s, folderstate *fs){
+  char pressed_fullpath[strlen(folderstate_get_path(fs)) + strlen(s) + 8];
+  strcpy(pressed_fullpath, folderstate_get_path(fs));
+  strcat(pressed_fullpath, "/");
+  strcat(pressed_fullpath, s);
+
+  if (file_io_string_is_folder(pressed_fullpath)){
+    folderstate_chdir(fs, s);
+
+    GtkWidget *parent = gtk_widget_get_toplevel(widget);
+    draw_main_window_handler(parent, fs);
+    return true;
+  } else if (file_io_string_is_file(pressed_fullpath)){
+    const char *pass = file_io_decrypt_password(pressed_fullpath);
+    if (pass != NULL){
+      gtk_entry_set_text(GTK_ENTRY(widget), pass);
+      free((char *) pass);
+    }
+  }
+  return false;
+}
+
 void folder_button_handler(GtkWidget *widget, gpointer data){
   folderstate *fs = (folderstate *) data;
   const char *pressed = gtk_button_get_label(GTK_BUTTON(widget));
@@ -1167,6 +1250,8 @@ GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate 
   _Bool first_file = true;
   _Bool has_folders = false;
 
+  int selected = folderstate_get_state(fs);
+
   GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
   for (int i = 0; i < nfiles; i++){
@@ -1202,6 +1287,11 @@ GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate 
         gtk_button_set_image(GTK_BUTTON(folder_button), icon); }
         gtk_button_set_always_show_image(GTK_BUTTON(folder_button), true);
       }
+    }
+
+    if (selected == i){
+      GtkStyleContext *context = gtk_widget_get_style_context(folder_button);
+      gtk_style_context_add_class(context, "suggested-action");
     }
 
     if (files_section && first_file && has_folders){

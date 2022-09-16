@@ -93,9 +93,10 @@ void clavis_popup_draw_main_window(GtkWidget *window, gpointer data){
   scrollbox_refresh_data[1] = folder_scrollbox;
   scrollbox_refresh_data[2] = password_output;
 
-  gtk_widget_set_name(folder_scrollbox, CLAVIS_NORMAL_MODE_NAME);
+  gtk_widget_set_name(folder_scrollbox, CLAVIS_POPUP_MODE_NAME);
 
   g_signal_connect(entry_filter, "changed", G_CALLBACK(entry_filter_changed_handler), (gpointer) scrollbox_refresh_data);
+  g_signal_connect(entry_filter, "key_press_event", G_CALLBACK(entry_filter_keyrelease_handler), (gpointer) scrollbox_refresh_data);
 
   main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
   gtk_box_pack_start(GTK_BOX(main_vbox), entry_filter, false, false, 0);
