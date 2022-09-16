@@ -1926,6 +1926,10 @@ char *file_io_get_clavis_folder(){
   readlink("/proc/self/exe", ret, 1023);
   char *token = strrchr(ret, '/');
   if (token[0] == '/'){
+    token[0] = '\0';
+  }
+  token = strrchr(ret, '/');
+  if (token[0] == '/'){
     token[1] = '\0';
   }
   return ret;
