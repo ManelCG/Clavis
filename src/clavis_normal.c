@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+
 #include <stdio.h>
 #include <string.h>
 
@@ -69,6 +70,9 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   GtkWidget *menu_button_upload_git;
   GtkWidget *menu_button_sync_git;
   GtkWidget *menu_button_edit_gpg;
+  #if defined(_WIN32) || defined (WIN32)
+  GtkWidget *menu_button_theme;
+  #endif
 
   //Help menu
   GtkWidget *menu_helpmenu;
@@ -98,7 +102,11 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   {
     menu_button_pass_stats = gtk_image_menu_item_new_with_label("Password Store data");
     g_signal_connect(menu_button_pass_stats, "activate", G_CALLBACK(gui_templates_show_password_store_info_window), NULL);
+    #ifdef __unix__
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    #elif defined(_WIN32) || defined (WIN32)
     GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    #endif
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_pass_stats), icon);
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(menu_button_pass_stats), true);
   }
@@ -214,6 +222,26 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(menu_config_git), true);
   }
 
+  #if defined(_WIN32) || defined (WIN32)
+  if (file_io_get_gtk_theme() != CLAVIS_THEME_UNDEFINED) {
+    GtkWidget *icon;
+    if (file_io_get_gtk_theme() == CLAVIS_THEME_DARK){
+      menu_button_theme = gtk_image_menu_item_new_with_label("Light theme");
+      icon = gtk_image_new_from_icon_name("weather-clear-symbolic", 16);
+    } else {
+      menu_button_theme = gtk_image_menu_item_new_with_label("Dark theme");
+      icon = gtk_image_new_from_icon_name("weather-clear-night-symbolic", 16);
+    }
+    g_signal_connect(menu_button_theme, "activate", G_CALLBACK(change_theme_handler), NULL);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_theme), icon);
+    gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(menu_button_theme), true);
+
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_button_theme);
+    {GtkWidget *separator = gtk_separator_menu_item_new();
+     gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), separator);}
+  }
+  #endif
+
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_button_upload_git);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_button_download_git);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_button_sync_git);
@@ -221,6 +249,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
    gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), separator);}
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_config_git);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_button_edit_gpg);
+
 
   //Help submenu
   menu_helpMi = gtk_menu_item_new_with_label("Help");
@@ -230,7 +259,11 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   {
     menu_button_help = gtk_image_menu_item_new_with_label("Help");
     // g_signal_connect(menu_button_help, "activate", G_CALLBACK(gui_templates_show_help_window), NULL);
+    #ifdef __unix__
+    GtkWidget *icon = gtk_image_new_from_icon_name("help-contents", 16);
+    #elif defined(_WIN32) || defined (WIN32)
     GtkWidget *icon = gtk_image_new_from_icon_name("help-contents-symbolic", 16);
+    #endif
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_help), icon);
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(menu_button_help), true);
   }
@@ -404,7 +437,6 @@ int clavis_normal_main(int argc, char *argv[]){
 
   gtk_widget_show_all(window_root);
   clavis_normal_draw_main_window(window_root, NULL);
-
 
   gtk_main();
   return 0;

@@ -63,4 +63,8 @@ char *gui_templates_ask_for_git_credentials();
 //Extra functionalities
 void gui_templates_synthesize_button(GtkWidget *w, gpointer data);
 
+#if defined (_WIN32) || defined (WIN32)
+void change_theme_handler(GtkWidget *widget, gpointer data);
+#endif
+
 #endif //_GUI_TEMPLATES_H_

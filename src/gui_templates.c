@@ -21,8 +21,10 @@
 
 #ifdef MAKE_INSTALL
   #define ABOUT_PICTURE_PNG "/usr/lib/clavis/assets/inapp_assets/about_picture.png"
-#else
-  #define ABOUT_PICTURE_PNG "assets/inapp_assets/about_picture.png"
+#elif defined __unix__
+  #define ABOUT_PICTURE_PNG file_io_get_about_picture_png()
+#elif defined(_WIN32) || defined (WIN32)
+  #define ABOUT_PICTURE_PNG file_io_get_about_picture_png()
 #endif
 
 
@@ -187,6 +189,131 @@ void type_entry_with_keyboard_handler(GtkWidget *widget, gpointer data){
     #endif
   }
 }
+#if defined (_WIN32) || defined (WIN32)
+void change_theme_handler(GtkWidget *widget, gpointer data){
+  char *f_ini = file_io_get_gtk_settings_ini_file();
+
+  HANDLE hFile;
+  hFile = CreateFile(f_ini,
+                     GENERIC_READ,
+                     FILE_SHARE_READ,
+                     NULL,
+                     OPEN_EXISTING,
+                     FILE_ATTRIBUTE_NORMAL,
+                     NULL);
+
+  if (hFile == INVALID_HANDLE_VALUE){
+    return;
+  }
+
+  DWORD bread;
+  char *buffer = malloc(sizeof(char) * 4096);
+
+  ReadFile(hFile, buffer, 4095, &bread, NULL);
+  buffer[bread] = '\0';
+
+  CloseHandle(hFile);
+
+  hFile = CreateFile(f_ini,
+                     GENERIC_WRITE,
+                     0,
+                     NULL,
+                     CREATE_ALWAYS,
+                     FILE_ATTRIBUTE_NORMAL,
+                     NULL);
+
+  if (hFile == INVALID_HANDLE_VALUE){
+    return;
+  }
+
+  unsigned int line_buff_size = 4096;
+  char line_buffer[line_buff_size];
+  char *token = buffer;
+  char *last_token;
+  long long int len;
+
+  char *conf = "gtk-application-prefer-dark-theme";
+
+  while (1 && buffer[0] != '\0'){
+    last_token = token;
+    token = strchr(token, '\n');
+    len = token - last_token;
+
+    if (len > 0){
+      snprintf(line_buffer, len+1, last_token);
+      char *conf_token = strstr(line_buffer, conf);
+      if (conf_token != NULL){
+        char *value;
+        value = strstr(line_buffer, "false");
+        if (value != NULL){
+          char buffer_write[64];
+          sprintf(buffer_write, "%s = true\n", conf);
+          WriteFile(hFile, buffer_write, strlen(buffer_write), NULL, NULL);
+        }
+        value = strstr(line_buffer, "true");
+        if (value != NULL){
+          char buffer_write[64];
+          sprintf(buffer_write, "%s = false\n", conf);
+          WriteFile(hFile, buffer_write, strlen(buffer_write), NULL, NULL);
+        }
+      } else {
+        char buffer_write[strlen(line_buffer)+8];
+        sprintf(buffer_write, "%s\n", line_buffer);
+        WriteFile(hFile, buffer_write, strlen(buffer_write), NULL, NULL);
+      }
+    }
+
+    if (token[0] == '\n'){
+      token++;
+    }
+    if (token[0] == '\0'){
+      break;
+    }
+  }
+
+  CloseHandle(hFile);
+  free(f_ini);
+  free(buffer);
+
+  GtkWidget *dialog;
+
+  //Reload?
+  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Theme changed. Reload Clavis?");
+  gtk_window_set_title(GTK_WINDOW(dialog), "Clavis Theme Manager");
+  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+  gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+
+  int response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+  destroy(dialog, dialog);
+
+  if (response == GTK_RESPONSE_OK){
+    gtk_main_quit();
+    PROCESS_INFORMATION piProcInfo;
+    STARTUPINFO siStartInfo;
+    ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+    ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+    siStartInfo.cb = sizeof(STARTUPINFO);
+    siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+    CreateProcessA(file_io_get_clavis_executable(),
+                   "clavis.exe",
+                   NULL,
+                   NULL,
+                   true,
+                   0,
+                   NULL,
+                   NULL,
+                   &siStartInfo,
+                   &piProcInfo);
+
+    CloseHandle(piProcInfo.hProcess);
+    CloseHandle(piProcInfo.hThread);
+    return;
+  }
+  return;
+}
+#endif
 void gui_templates_synthesize_button(GtkWidget *w, gpointer data){
   GtkWidget *button = (GtkWidget *) data;
   g_signal_emit_by_name(button, "clicked");

@@ -36,6 +36,10 @@
 #define CLAVIS_ERROR_PIPE -1
 #define CLAVIS_ERROR_FORK -2
 #define CLAVIS_ERROR_EXECLP -3
+#elif defined(_WIN32) || defined (WIN32)
+#define CLAVIS_THEME_UNDEFINED 0
+#define CLAVIS_THEME_LIGHT 1
+#define CLAVIS_THEME_DARK 2
 #endif
 
 #endif //_CLAVIS_CONSTANTS_

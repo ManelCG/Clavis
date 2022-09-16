@@ -1777,3 +1777,150 @@ void perform_git_command(char *args){
   CloseHandle(child_ERR_rd);
   #endif
 }
+
+#ifdef __unix__
+#ifndef MAKE_INSTALL
+char *file_io_get_about_picture_png(){
+  char *assetspath = file_io_get_clavis_folder();
+  char *about_picture_subpath = "assets/inapp_assets/about_picture.png";
+
+  char *ret = malloc(strlen(assetspath) + strlen(about_picture_subpath) + 8);
+  sprintf(ret, "%s/%s", assetspath, about_picture_subpath);
+
+  free(assetspath);
+  return ret;
+}
+#endif
+#endif
+#if defined(_WIN32) || defined (WIN32)
+char *file_io_get_about_picture_png(){
+  char *assetspath = file_io_get_clavis_folder();
+  char *about_picture_subpath = "assets\\inapp_assets\\about_picture.png";
+
+  char *ret = malloc(strlen(assetspath) + strlen(about_picture_subpath) + 8);
+  sprintf(ret, "%s\\%s", assetspath, about_picture_subpath);
+
+  free(assetspath);
+  return ret;
+}
+
+char *file_io_get_gtk_settings_ini_file(){
+  char *assetspath = file_io_get_clavis_folder();
+  char *about_picture_subpath = "etc\\gtk-3.0\\settings.ini";
+
+  char *ret = malloc(strlen(assetspath) + strlen(about_picture_subpath) + 8);
+  sprintf(ret, "%s\\%s", assetspath, about_picture_subpath);
+
+  free(assetspath);
+  return ret;
+}
+
+int file_io_get_gtk_theme(){
+  char *f_ini = file_io_get_gtk_settings_ini_file();
+
+  HANDLE hFile;
+  hFile = CreateFile(f_ini,
+                     GENERIC_READ,
+                     FILE_SHARE_READ,
+                     NULL,
+                     OPEN_EXISTING,
+                     FILE_ATTRIBUTE_NORMAL,
+                     NULL);
+
+  if (hFile == INVALID_HANDLE_VALUE){
+    return CLAVIS_THEME_UNDEFINED;
+  }
+
+  DWORD bread;
+  char *buffer = malloc(sizeof(char) * 4096);
+
+  ReadFile(hFile, buffer, 4095, &bread, NULL);
+  buffer[bread] = '\0';
+
+  CloseHandle(hFile);
+  free(f_ini);
+
+  unsigned int line_buff_size = 4096;
+  char line_buffer[line_buff_size];
+  char aux_buffer[64];
+  char *token = buffer;
+  char *last_token;
+  long long int len;
+
+  int theme = CLAVIS_THEME_UNDEFINED;
+
+  while (1 && buffer[0] != '\0'){
+    last_token = token;
+    token = strchr(token, '\n');
+    len = token - last_token;
+
+    if (len < line_buff_size && len > 34){
+      snprintf(line_buffer, len+1, last_token);
+      snprintf(aux_buffer, 34, line_buffer);
+      if (strcmp(aux_buffer, "gtk-application-prefer-dark-theme") == 0){
+        char *value;
+        value = strstr(line_buffer, "false");
+        if (value != NULL){
+          theme = CLAVIS_THEME_LIGHT;
+        }
+        value = strstr(line_buffer, "true");
+        if (value != NULL){
+          theme = CLAVIS_THEME_DARK;
+        }
+      }
+    }
+
+    if (token[0] == '\n'){
+      token++;
+    }
+    if (token[0] == '\0'){
+      break;
+    }
+  }
+
+  free(buffer);
+
+  return theme;
+}
+#endif
+
+char *file_io_get_clavis_folder(){
+  char *ret;
+  #ifdef MAKE_INSTALL
+  ret = malloc(strlen("/usr/lib/clavis/") + 2);
+  strcpy(ret, "/usr/lib/clavis/");
+  return ret;
+  #elif defined __unix__
+  ret = malloc(sizeof(char) * 1024);
+  readlink("/proc/self/exe", ret, 1023);
+  char *token = strrchr(ret, '/');
+  if (token[0] == '/'){
+    token[1] = '\0';
+  }
+  return ret;
+  #elif defined(_WIN32) || defined (WIN32)
+  int size = MAX_PATH;
+  ret = malloc(sizeof(char) * MAX_PATH);
+  GetModuleFileName(NULL, ret, size - 1);
+  char *token = strrchr(ret, '\\');
+  if (token[0] == '\\'){
+    token[1] = '\0';
+  }
+  return ret;
+  #endif
+  return NULL;
+}
+
+char *file_io_get_clavis_executable(){
+  char *ret;
+  #if defined __unix__
+  ret = malloc(sizeof(char) * 1024);
+  readlink("/proc/self/exe", ret, 1023);
+  return ret;
+  #elif defined(_WIN32) || defined (WIN32)
+  int size = MAX_PATH;
+  ret = malloc(sizeof(char) * MAX_PATH);
+  GetModuleFileName(NULL, ret, size - 1);
+  return ret;
+  #endif
+}

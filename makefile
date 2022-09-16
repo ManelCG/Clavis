@@ -53,6 +53,7 @@ windows: $(OBJ)
 windows_GTKENV: windows
 	ldd $(BDIR)/clavis.exe | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" $(BDIR)/
 	cp -ru __windows__/windows_assets/* $(BDIR)/
+	cp -ru assets $(BDIR)/
 
 
 debug: $(OBJ)

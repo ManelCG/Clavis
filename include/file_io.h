@@ -37,4 +37,18 @@ char *file_io_get_gpgid();
 
 int file_io_remove_password(const char *path);
 
+char *file_io_get_clavis_executable();
+char *file_io_get_clavis_folder();
+
+#ifdef __unix__
+#ifndef MAKE_INSTALL
+char *file_io_get_about_picture_png();
+#endif
+#endif
+#if defined(_WIN32) || defined (WIN32)
+char *file_io_get_about_picture_png();
+char *file_io_get_gtk_settings_ini_file();
+int file_io_get_gtk_theme();
+#endif
+
 #endif //_FILE_IO_H_
