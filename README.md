@@ -87,7 +87,7 @@ Once the password has been added to the repository, it will automatically be dis
 Clicking on a password in Clavis' main window will attempt to retrieve its content, prompting the user for their Master password, and decrypting the selected password.
 
 * When a password has been retrieved and decrypted, the user is allowed to view it and automatically copy it to the system's clipboard.
-* On top of that, clicking the "Automatically Write" button [Only on Clavis Popup Mode] will close Clavis' interface, and automatically write it to the last place where the user had focus. This is the safest option, as password will not be stored in the clipboard.
+* On top of that, clicking the "Automatically Write" button will close Clavis' interface, and automatically write it to the last place where the user had focus. This is the safest option, as password will not be stored in the clipboard.
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/98960550/188272865-ca0b39e7-e4e3-48a7-b005-254adec11d00.png">
