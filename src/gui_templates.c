@@ -1341,6 +1341,12 @@ void button_reload_handler(GtkWidget *widget, gpointer data){
 
 void draw_main_window_handler(GtkWidget *window, folderstate *fs){
   const char *widgetname = gtk_widget_get_name(window);
+
+
+  int *sigid = ((int *) g_object_get_data(G_OBJECT(window), CLAVIS_SIGNAL_KEYRELEASE_HANDLER_KEYNAV));
+  g_signal_handler_disconnect(G_OBJECT(window), *sigid);
+  free(sigid);
+
   if (strcmp(widgetname, CLAVIS_NORMAL_MODE_NAME) == 0){
     clavis_normal_draw_main_window(window, (gpointer) fs);
   } else if (strcmp(widgetname, CLAVIS_POPUP_MODE_NAME) == 0){
@@ -1358,10 +1364,6 @@ _Bool gui_templates_folder_button_from_string(GtkWidget *widget, const char *s, 
     folderstate_chdir(fs, s);
 
     GtkWidget *parent = gtk_widget_get_toplevel(widget);
-
-    int *sigid = ((int *) g_object_get_data(G_OBJECT(parent), CLAVIS_SIGNAL_KEYRELEASE_HANDLER_KEYNAV));
-    g_signal_handler_disconnect(G_OBJECT(parent), *sigid);
-    free(sigid);
 
     draw_main_window_handler(parent, fs);
     return true;
@@ -1388,10 +1390,6 @@ void folder_button_handler(GtkWidget *widget, gpointer data){
 
     GtkWidget *parent = gtk_widget_get_toplevel(widget);
 
-    int *sigid = ((int *) g_object_get_data(G_OBJECT(parent), CLAVIS_SIGNAL_KEYRELEASE_HANDLER_KEYNAV));
-    g_signal_handler_disconnect(G_OBJECT(parent), *sigid);
-    free(sigid);
-
     draw_main_window_handler(parent, fs);
   }
 
@@ -1413,10 +1411,6 @@ void button_goup_handler(GtkWidget *widget, gpointer data){
   folderstate *fs = (folderstate *) data;
   folderstate_chdir(fs, "..");
   GtkWidget *parent = gtk_widget_get_toplevel(widget);
-
-  int *sigid = ((int *) g_object_get_data(G_OBJECT(parent), CLAVIS_SIGNAL_KEYRELEASE_HANDLER_KEYNAV));
-  g_signal_handler_disconnect(G_OBJECT(parent), *sigid);
-  free(sigid);
 
   draw_main_window_handler(parent, fs);
 }
