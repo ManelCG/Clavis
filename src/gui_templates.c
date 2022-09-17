@@ -703,13 +703,13 @@ _Bool entry_filter_keyrelease_handler(GtkWidget *widget, GdkEventKey *event, gpo
     folderstate_increase_state(fs);
   } else if (strcmp(gdk_keyval_name(event->keyval), "Return") == 0){
     const char *name = folderstate_get_files(fs)[folderstate_get_state(fs)];
-    gui_templates_folder_button_from_string(output, name, fs);
 
+    gui_templates_folder_button_from_string(output, name, fs);
     return true;
   } else if (strcmp(gdk_keyval_name(event->keyval), "Escape") == 0){
     if (strcmp(folderstate_get_path(fs), ".") != 0){
-      button_goup_handler(output, (gpointer)  fs);
 
+      button_goup_handler(output, (gpointer)  fs);
       return true;
     }
   } else {
@@ -1358,6 +1358,11 @@ _Bool gui_templates_folder_button_from_string(GtkWidget *widget, const char *s, 
     folderstate_chdir(fs, s);
 
     GtkWidget *parent = gtk_widget_get_toplevel(widget);
+
+    int *sigid = ((int *) g_object_get_data(G_OBJECT(parent), CLAVIS_SIGNAL_KEYRELEASE_HANDLER_KEYNAV));
+    g_signal_handler_disconnect(G_OBJECT(parent), *sigid);
+    free(sigid);
+
     draw_main_window_handler(parent, fs);
     return true;
   } else if (file_io_string_is_file(pressed_fullpath)){
@@ -1382,6 +1387,11 @@ void folder_button_handler(GtkWidget *widget, gpointer data){
     folderstate_chdir(fs, pressed);
 
     GtkWidget *parent = gtk_widget_get_toplevel(widget);
+
+    int *sigid = ((int *) g_object_get_data(G_OBJECT(parent), CLAVIS_SIGNAL_KEYRELEASE_HANDLER_KEYNAV));
+    g_signal_handler_disconnect(G_OBJECT(parent), *sigid);
+    free(sigid);
+
     draw_main_window_handler(parent, fs);
   }
 
@@ -1403,6 +1413,10 @@ void button_goup_handler(GtkWidget *widget, gpointer data){
   folderstate *fs = (folderstate *) data;
   folderstate_chdir(fs, "..");
   GtkWidget *parent = gtk_widget_get_toplevel(widget);
+
+  int *sigid = ((int *) g_object_get_data(G_OBJECT(parent), CLAVIS_SIGNAL_KEYRELEASE_HANDLER_KEYNAV));
+  g_signal_handler_disconnect(G_OBJECT(parent), *sigid);
+  free(sigid);
 
   draw_main_window_handler(parent, fs);
 }

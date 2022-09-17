@@ -381,7 +381,9 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   gtk_widget_set_name(folder_scrollbox, CLAVIS_NORMAL_MODE_NAME);
 
   g_signal_connect(entry_filter, "changed", G_CALLBACK(entry_filter_changed_handler), (gpointer) scrollbox_refresh_data);
-  g_signal_connect(entry_filter, "key_press_event", G_CALLBACK(entry_filter_keyrelease_handler), (gpointer) scrollbox_refresh_data);
+  int *sigid = malloc(sizeof(int));
+  *sigid = g_signal_connect(window, "key_press_event", G_CALLBACK(entry_filter_keyrelease_handler), (gpointer) scrollbox_refresh_data);
+  g_object_set_data(G_OBJECT(window), CLAVIS_SIGNAL_KEYRELEASE_HANDLER_KEYNAV, (gpointer) sigid);
 
 
   folder_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
