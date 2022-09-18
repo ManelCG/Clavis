@@ -168,7 +168,7 @@ msgstr "Расшифрованный пароль"
 #: src/gui_templates.c:687
 #, c-format
 msgid "Decrypting\n"
-msgstr "Расшифровка"
+msgstr "Расшифровка\n"
 
 #: src/gui_templates.c:1265 src/gui_templates.c:1303 src/gui_templates.c:1491
 msgid "Delete"
@@ -446,7 +446,7 @@ msgstr "RSA и DSA (По умолчанию)"
 #: src/gui_templates.c:1292
 #, c-format
 msgid "Remove file '%s'? This cannot be undone!"
-msgstr "Удалить файл '%s'? Это действие нельзя будет отменить!""
+msgstr "Удалить файл '%s'? Это действие нельзя будет отменить!"
 
 #: src/gui_templates.c:1149
 msgid "Rename"
@@ -456,7 +456,7 @@ msgstr "Переименовать"
 #: src/gui_templates.c:1133
 #, c-format
 msgid "Rename %s:\n"
-msgstr "Переименовать %s:"
+msgstr "Переименовать %s:\n"
 
 #: src/gui_templates.c:1483
 msgid "Rename file"
