@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Clavis 1.2.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-18 19:17+0200\n"
+"POT-Creation-Date: 2022-09-18 19:26+0200\n"
 "PO-Revision-Date: 2022-09-18 17:47+0200\n"
 "Last-Translator: Hrad <manelcg@protonmail.com>\n"
 "Language-Team: Spanish <es@tp.org.es>\n"
@@ -17,47 +17,52 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/gui_templates.c:1555
+#: src/gui_templates.c:1558
 msgid "Accept"
 msgstr "Aceptar"
 
-#: src/gui_templates.c:1877
+#. Chose key
+#: src/gui_templates.c:2238
+msgid "Choose a GPG key, import one or create a new one."
+msgstr "Elija una clave GPG, importe una, o cree una nueva."
+
+#: src/gui_templates.c:1880
 msgid "Choose key type:"
 msgstr "Elija tipo de clave:"
 
-#: src/gui_templates.c:1822
+#: src/gui_templates.c:1825
 msgid "Clavis Master Key creation"
 msgstr "Creación de Clave Maestra de Clavis"
 
-#: src/gui_templates.c:1925
+#: src/gui_templates.c:1928
 msgid "Comment (Optional)"
 msgstr "Comentario (Opcional)"
 
-#: src/gui_templates.c:1821
+#: src/gui_templates.c:1824
 msgid "Configure your new GPG key:"
 msgstr "Configura tu nueva clave GPG:"
 
-#: src/gui_templates.c:2245
+#: src/gui_templates.c:2248
 msgid "Confirm selection"
 msgstr "Confirmar selección"
 
-#: src/gui_templates.c:1831
+#: src/gui_templates.c:1834
 msgid "Create key"
 msgstr "Crear clave"
 
-#: src/gui_templates.c:2305
+#: src/gui_templates.c:2308
 msgid "Create new key"
 msgstr "Crear nueva clave"
 
-#: src/gui_templates.c:2380
+#: src/gui_templates.c:2383
 msgid "Create new repo"
 msgstr "Crear nuevo repositorio"
 
-#: src/gui_templates.c:1875
+#: src/gui_templates.c:1878
 msgid "DSA and ElGamal"
 msgstr "DSA y ElGamal"
 
-#: src/gui_templates.c:1903
+#: src/gui_templates.c:1906
 msgid "Days"
 msgstr "Días"
 
@@ -65,36 +70,35 @@ msgstr "Días"
 msgid "Decrypted password:"
 msgstr "Contraseña descifrada:"
 
-#: src/gui_templates.c:867 src/gui_templates.c:1938
-#, fuzzy
+#: src/gui_templates.c:870 src/gui_templates.c:1941
 msgid "Display password"
-msgstr "Contraseña descifrada:"
+msgstr "Mostrar contraseña"
 
-#: src/gui_templates.c:2298
+#: src/gui_templates.c:2301
 msgid "Export key"
 msgstr "Exportar clave"
 
-#: src/gui_templates.c:554 src/gui_templates.c:558
+#: src/gui_templates.c:557 src/gui_templates.c:561
 msgid "Git email"
 msgstr "Email de Git"
 
 #. Repo config
-#: src/gui_templates.c:584 src/gui_templates.c:586
+#: src/gui_templates.c:587 src/gui_templates.c:589
 msgid "Git repo URL"
 msgstr "URL del repositorio de Git"
 
 #. Toggle for git
-#: src/gui_templates.c:2396
+#: src/gui_templates.c:2399
 msgid "Git server settings"
 msgstr "Opciones del servidor de Git"
 
 #. Instance
 #. User Config
-#: src/gui_templates.c:553 src/gui_templates.c:556
+#: src/gui_templates.c:556 src/gui_templates.c:559
 msgid "Git username"
 msgstr "Usuario de Git"
 
-#: src/gui_templates.c:1546
+#: src/gui_templates.c:1549
 msgid ""
 "Hey! It seems this is your first time running Clavis.\n"
 "Initialize Password Store?"
@@ -102,80 +106,78 @@ msgstr ""
 "Hola! Parece que es la primera vez que ejecutas Clavis.\n"
 "Inicializar el almacén de contraseñas?"
 
-#: src/gui_templates.c:2289
+#: src/gui_templates.c:2292
 msgid "Import key"
 msgstr "Importar clave"
 
-#: src/gui_templates.c:1884
+#: src/gui_templates.c:1887
 msgid "Key length"
 msgstr "Longitud de la clave"
 
-#: src/gui_templates.c:1924
+#: src/gui_templates.c:1927
 msgid "Key name"
 msgstr "Nombre de la clave"
 
-#: src/gui_templates.c:1887
+#: src/gui_templates.c:1890
 msgid "Key size:"
 msgstr "Tamaño de la clave:"
 
-#: src/gui_templates.c:1905
+#: src/gui_templates.c:1908
 msgid "Months"
 msgstr "Meses"
 
-#: src/gui_templates.c:864 src/gui_templates.c:1947
+#: src/gui_templates.c:867 src/gui_templates.c:1950
 msgid "Password"
 msgstr "Contraseña"
 
 #. PERSONAL INFO
-#: src/gui_templates.c:1919
+#: src/gui_templates.c:1922
 msgid "Personal information:"
 msgstr "Información personal:"
 
-#: src/gui_templates.c:1874
+#: src/gui_templates.c:1877
 msgid "RSA and DSA (default)"
 msgstr "RSA y DSA (default)"
 
-#: src/gui_templates.c:1953
-#, fuzzy
+#: src/gui_templates.c:1956
 msgid "Repeat password"
-msgstr "Contraseña descifrada:"
+msgstr "Repetir contraseña"
 
-#: src/gui_templates.c:2236
+#: src/gui_templates.c:2239
 msgid "Select your Clavis Master Key"
 msgstr "Selecciona tu Clave Maestra de Clavis"
 
 #. EXPIRATION
-#: src/gui_templates.c:1897
+#: src/gui_templates.c:1900
 msgid "Set expiration (0 = eternal)"
 msgstr "Caducidad (0 = eterna)"
 
-#: src/gui_templates.c:1955
-#, fuzzy
+#: src/gui_templates.c:1958
 msgid "Set key's password:"
-msgstr "Contraseña descifrada:"
+msgstr "Contraseña de la clave:"
 
 #. Advanced frame
-#: src/gui_templates.c:1962
+#: src/gui_templates.c:1965
 msgid "Show advanced configuration"
 msgstr "Mostrar configuración avanzada"
 
 #. Toggles
-#: src/gui_templates.c:2379
+#: src/gui_templates.c:2382
 msgid "Use git server"
 msgstr "Utilizar servidor de Git"
 
-#: src/gui_templates.c:1904
+#: src/gui_templates.c:1907
 msgid "Weeks"
 msgstr "Semanas"
 
-#: src/gui_templates.c:1547
+#: src/gui_templates.c:1550
 msgid "Welcome to Clavis!"
 msgstr "Bienvenid@ a Clavis!"
 
-#: src/gui_templates.c:1906
+#: src/gui_templates.c:1909
 msgid "Years"
 msgstr "Años"
 
-#: src/gui_templates.c:1923
+#: src/gui_templates.c:1926
 msgid "Your name"
 msgstr "Tu nombre"

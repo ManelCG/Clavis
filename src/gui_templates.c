@@ -2337,12 +2337,12 @@ int gui_templates_initialize_password_store(){
 
   //Git config
   //User Config
-  label_username = gtk_label_new("Git username");
-  label_email = gtk_label_new("Git email");
+  label_username = gtk_label_new(_("Git username"));
+  label_email = gtk_label_new(_("Git email"));
   entry_username = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_username), "Git username");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_username), _("Git username"));
   entry_email = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_email), "Git email");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_email), _("Git email"));
 
   user_git_name = file_io_get_git_config_field("user.name");
   user_git_email = file_io_get_git_config_field("user.email");
@@ -2368,9 +2368,9 @@ int gui_templates_initialize_password_store(){
   gtk_box_pack_start(GTK_BOX(name_email_hbox), mail_vbox, true, true, 0);
 
   //Repo config
-  label_repo_url = gtk_label_new("Git repo URL");
+  label_repo_url = gtk_label_new(_("Git repo URL"));
   entry_repo_url = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_repo_url), "Git repo URL");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_repo_url), _("Git repo URL"));
 
   user_git_repo = file_io_get_git_config_field("remote.origin.url");
   if (user_git_repo != NULL){
