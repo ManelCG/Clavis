@@ -550,12 +550,12 @@ int gui_templates_git_config_window(){
 
   //Instance
   //User Config
-  label_username = gtk_label_new("Git username");
-  label_email = gtk_label_new("Git email");
+  label_username = gtk_label_new(_("Git username"));
+  label_email = gtk_label_new(_("Git email"));
   entry_username = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_username), "Git username");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_username), _("Git username"));
   entry_email = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_email), "Git email");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_email), _("Git email"));
 
   user_git_name = file_io_get_git_config_field("user.name");
   user_git_email = file_io_get_git_config_field("user.email");
@@ -581,9 +581,9 @@ int gui_templates_git_config_window(){
   gtk_box_pack_start(GTK_BOX(name_email_hbox), mail_vbox, false, false, 0);
 
   //Repo config
-  label_repo_url = gtk_label_new("Git repo URL");
+  label_repo_url = gtk_label_new(_("Git repo URL"));
   entry_repo_url = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_repo_url), "Git repo URL");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_repo_url), _("Git repo URL"));
 
   user_git_repo = file_io_get_git_config_field("remote.origin.url");
   if (user_git_repo != NULL){
@@ -861,10 +861,10 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
 
   //Password hbox
   entry_password = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password), "Password");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password), _("Password"));
   passgen_set_output_entry(pg, entry_password);
 
-  toggle_visibility = gtk_check_button_new_with_label("Display password");
+  toggle_visibility = gtk_check_button_new_with_label(_("Display password"));
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle_visibility), true);
   g_signal_connect(toggle_visibility, "toggled", G_CALLBACK(toggle_visibility_handler), (gpointer) entry_password);
 
@@ -1543,8 +1543,8 @@ int gui_templates_password_store_init_handler(){
     GtkWidget *dialog;
     int response;
 
-    dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Hey! It seems this is your first time running Clavis.\nInitialize Password Store?");
-    gtk_window_set_title(GTK_WINDOW(dialog), "Welcome to Clavis!");
+    dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, _("Hey! It seems this is your first time running Clavis.\nInitialize Password Store?"));
+    gtk_window_set_title(GTK_WINDOW(dialog), _("Welcome to Clavis!"));
     gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
     GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
     { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
@@ -1552,7 +1552,7 @@ int gui_templates_password_store_init_handler(){
     gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
 
     GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Accept");
+    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Accept"));
     { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
     gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
     gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
@@ -1818,8 +1818,8 @@ void gui_templates_import_key_handler(){
   #endif
 }
 int gui_templates_create_key_handler(){
-  GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Configure your new GPG key:");
-  gtk_window_set_title(GTK_WINDOW(dialog), "Clavis Master Key creation");
+  GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, _("Configure your new GPG key:"));
+  gtk_window_set_title(GTK_WINDOW(dialog), _("Clavis Master Key creation"));
 
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
 
@@ -1828,7 +1828,7 @@ int gui_templates_create_key_handler(){
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Create key");
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Create key"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
@@ -1871,20 +1871,20 @@ int gui_templates_create_key_handler(){
   //Pack
   //KEY TYPE VBOX
   combo_keytype = gtk_combo_box_text_new();
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_keytype), NULL, "RSA and DSA (default)");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_keytype), NULL, "DSA and ElGamal");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_keytype), NULL, _("RSA and DSA (default)"));
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_keytype), NULL, _("DSA and ElGamal"));
   gtk_combo_box_set_active(GTK_COMBO_BOX(combo_keytype), 0);
-  GtkWidget *label_keytype = gtk_label_new("Choose key type:");
+  GtkWidget *label_keytype = gtk_label_new(_("Choose key type:"));
   keytype_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
   gtk_box_pack_start(GTK_BOX(keytype_vbox), label_keytype, true, true, 0);
   gtk_box_pack_start(GTK_BOX(keytype_vbox), combo_keytype, true, true, 0);
 
   //KEY LENGTH VBOX
   entry_keylen = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_keylen), "Key length");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_keylen), _("Key length"));
   gtk_entry_set_text(GTK_ENTRY(entry_keylen), "4096");
   gtk_entry_set_width_chars(GTK_ENTRY(entry_keylen), 6);
-  GtkWidget *label_keylen = gtk_label_new("Key size:");
+  GtkWidget *label_keylen = gtk_label_new(_("Key size:"));
   keylen_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
   gtk_box_pack_start(GTK_BOX(keylen_vbox), label_keylen, true, true, 0);
   gtk_box_pack_start(GTK_BOX(keylen_vbox), entry_keylen, true, true, 0);
@@ -1894,16 +1894,16 @@ int gui_templates_create_key_handler(){
   gtk_box_pack_start(GTK_BOX(top_hbox), keylen_vbox, true, true, 0);
 
   //EXPIRATION
-  GtkWidget *label_expiration = gtk_label_new("Set expiration (0 = eternal)");
+  GtkWidget *label_expiration = gtk_label_new(_("Set expiration (0 = eternal)"));
 
   entry_expiration_n = gtk_entry_new();
   gtk_entry_set_text(GTK_ENTRY(entry_expiration_n), "0");
 
   combo_expiration_type = gtk_combo_box_text_new();
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, "Days");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, "Weeks");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, "Months");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, "Years");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, _("Days"));
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, _("Weeks"));
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, _("Months"));
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, _("Years"));
   gtk_combo_box_set_active(GTK_COMBO_BOX(combo_expiration_type), 3);
 
   expiration_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
@@ -1916,13 +1916,13 @@ int gui_templates_create_key_handler(){
 
 
   //PERSONAL INFO
-  GtkWidget *label_personal = gtk_label_new("Personal information:");
+  GtkWidget *label_personal = gtk_label_new(_("Personal information:"));
   entry_name = gtk_entry_new();
   entry_email = gtk_entry_new();
   entry_comment = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_name), "Your name");
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_email), "Key name");
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_comment), "Comment (Optional)");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_name), _("Your name"));
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_email), _("Key name"));
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_comment), _("Comment (Optional)"));
 
   name_email_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   gtk_box_pack_start(GTK_BOX(name_email_hbox), entry_name, true, true, 0);
@@ -1935,7 +1935,7 @@ int gui_templates_create_key_handler(){
 
   //KEY PASSWORD
   GtkWidget *display_password_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-  check_password_visibility = gtk_check_button_new_with_label("Display password");
+  check_password_visibility = gtk_check_button_new_with_label(_("Display password"));
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_password_visibility), false);
   gtk_box_pack_start(GTK_BOX(display_password_hbox), check_password_visibility, true, false, 0);
   password_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
@@ -1944,22 +1944,22 @@ int gui_templates_create_key_handler(){
   gtk_entry_set_visibility(GTK_ENTRY(entry_password_1), false);
   g_signal_connect(check_password_visibility, "toggled", G_CALLBACK(toggle_visibility_handler), (gpointer) entry_password_1);
   gtk_box_pack_start(GTK_BOX(password_hbox), entry_password_1, true, true, 0);
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password_1), "Password");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password_1), _("Password"));
 
   entry_password_2 = gtk_entry_new();
   gtk_entry_set_visibility(GTK_ENTRY(entry_password_2), false);
   g_signal_connect(check_password_visibility, "toggled", G_CALLBACK(toggle_visibility_handler), (gpointer) entry_password_2);
   gtk_box_pack_start(GTK_BOX(password_hbox), entry_password_2, true, true, 0);
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password_2), "Repeat password");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password_2), _("Repeat password"));
 
-  GtkWidget *password_label = gtk_label_new("Set key's password:");
+  GtkWidget *password_label = gtk_label_new(_("Set key's password:"));
   password_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
   gtk_box_pack_start(GTK_BOX(password_vbox), password_label, false, false, 0);
   gtk_box_pack_start(GTK_BOX(password_vbox), password_hbox, false, false, 0);
   gtk_box_pack_start(GTK_BOX(password_vbox), display_password_hbox, false, false, 0);
 
   //Advanced frame
-  show_advanced_config = gtk_check_button_new_with_label("Show advanced configuration");
+  show_advanced_config = gtk_check_button_new_with_label(_("Show advanced configuration"));
   GtkWidget *frame_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
   GtkWidget *advanced_check_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   gtk_box_pack_start(GTK_BOX(advanced_check_hbox), show_advanced_config, true, false, 0);
@@ -2232,8 +2232,8 @@ int gui_templates_initialize_password_store(){
   int response;
 
   //Chose key
-  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Choose a GPG key, import one or create a new one.");
-  gtk_window_set_title(GTK_WINDOW(dialog), "Select your Clavis Master Key");
+  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, :("Choose a GPG key, import one or create a new one."));
+  gtk_window_set_title(GTK_WINDOW(dialog), _("Select your Clavis Master Key"));
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
 
@@ -2242,7 +2242,7 @@ int gui_templates_initialize_password_store(){
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Confirm selection");
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Confirm selection"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
@@ -2286,7 +2286,7 @@ int gui_templates_initialize_password_store(){
   //Instance
   key_combo_box = gtk_combo_box_text_new();
 
-  button_import = gtk_button_new_with_label("Import key");
+  button_import = gtk_button_new_with_label(_("Import key"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("insert-object-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_import), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(button_import), true);
@@ -2295,14 +2295,14 @@ int gui_templates_initialize_password_store(){
   g_signal_connect(button_import, "pressed", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
   g_signal_connect(button_import, "activate", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
 
-  button_export = gtk_button_new_with_label("Export key");
+  button_export = gtk_button_new_with_label(_("Export key"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("document-save-as-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_export), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(button_export), true);
   g_signal_connect(button_export, "pressed", G_CALLBACK(gui_templates_export_key_handler_combobox), (gpointer) key_combo_box);
   g_signal_connect(button_export, "activate", G_CALLBACK(gui_templates_export_key_handler_combobox), (gpointer) key_combo_box);
 
-  button_create = gtk_button_new_with_label("Create new key");
+  button_create = gtk_button_new_with_label(_("Create new key"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("document-new-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_create), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(button_create), true);
@@ -2376,8 +2376,8 @@ int gui_templates_initialize_password_store(){
   }
 
   //Toggles
-  toggle_git_server = gtk_check_button_new_with_label("Use git server");
-  toggle_create_new = gtk_check_button_new_with_label("Create new repo");
+  toggle_git_server = gtk_check_button_new_with_label(_("Use git server"));
+  toggle_create_new = gtk_check_button_new_with_label(_("Create new repo"));
   toggle_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   gtk_box_pack_start(GTK_BOX(toggle_hbox), toggle_git_server, true, false, 0);
   gtk_box_pack_start(GTK_BOX(toggle_hbox), toggle_create_new, true, false, 0);
@@ -2393,7 +2393,7 @@ int gui_templates_initialize_password_store(){
 
 
   //Toggle for git
-  GtkWidget *show_git_config = gtk_check_button_new_with_label("Git server settings");
+  GtkWidget *show_git_config = gtk_check_button_new_with_label(_("Git server settings"));
   GtkWidget *git_check_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   gtk_box_pack_start(GTK_BOX(git_check_hbox), show_git_config, true, false, 0);
   g_signal_connect(show_git_config, "toggled", G_CALLBACK(gui_templates_toggle_widget_visible_handler), (gpointer) git_frame_vbox);

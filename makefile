@@ -83,7 +83,7 @@ archlinux: $(OBJ) $(OBJ_GUI)
 	cp assets/clavis.desktop $(BDIR)/usr/share/applications/
 	cp assets/app_icon/256.png $(BDIR)/usr/share/pixmaps/clavis.png
 
-locale: $(LOCALEDIR)/es/LC_MESSAGES/$(LOCALENAME).mo $(LOCALEDIR)/ru/LC_MESSAGES/$(LOCALENAME).mo
+locale: $(LOCALEDIR)/es/LC_MESSAGES/$(LOCALENAME).mo #$(LOCALEDIR)/ru/LC_MESSAGES/$(LOCALENAME).mo
 	echo $<
 
 $(LOCALEDIR)/%/LC_MESSAGES/$(LOCALENAME).mo: $(LOCALEDIR)/%/$(LOCALENAME).po
