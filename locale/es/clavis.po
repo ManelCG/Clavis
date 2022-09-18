@@ -24,7 +24,7 @@ msgstr "Aceptar"
 #. Chose key
 #: src/gui_templates.c:2238
 msgid "Choose a GPG key, import one or create a new one."
-msgstr ""
+msgstr "Elija una clave GPG, importe una, o cree una nueva."
 
 #: src/gui_templates.c:1880
 msgid "Choose key type:"
@@ -71,9 +71,8 @@ msgid "Decrypted password:"
 msgstr "Contraseña descifrada:"
 
 #: src/gui_templates.c:870 src/gui_templates.c:1941
-#, fuzzy
 msgid "Display password"
-msgstr "Contraseña descifrada:"
+msgstr "Mostrar contraseña"
 
 #: src/gui_templates.c:2301
 msgid "Export key"
@@ -141,9 +140,8 @@ msgid "RSA and DSA (default)"
 msgstr "RSA y DSA (default)"
 
 #: src/gui_templates.c:1956
-#, fuzzy
 msgid "Repeat password"
-msgstr "Contraseña descifrada:"
+msgstr "Repetir contraseña"
 
 #: src/gui_templates.c:2239
 msgid "Select your Clavis Master Key"
@@ -155,9 +153,8 @@ msgid "Set expiration (0 = eternal)"
 msgstr "Caducidad (0 = eterna)"
 
 #: src/gui_templates.c:1958
-#, fuzzy
 msgid "Set key's password:"
-msgstr "Contraseña descifrada:"
+msgstr "Contraseña de la clave:"
 
 #. Advanced frame
 #: src/gui_templates.c:1965
