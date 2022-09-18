@@ -503,6 +503,9 @@ msgstr ""
 msgid "Show advanced configuration"
 msgstr ""
 
+#  Keep this string really short
+#  Maybe just "Show", or "See", or "Watch"
+#  If its longer than this string, window loses its shape and looks ugly
 #: src/clavis_normal.c:369
 msgid "Show pass"
 msgstr ""

@@ -498,7 +498,7 @@ msgstr "Mostrar configuración avanzada"
 
 #: src/clavis_normal.c:369
 msgid "Show pass"
-msgstr "Mostrar contraseña"
+msgstr "Mostrar"
 
 #: src/gui_templates.c:924
 msgid "Symbols"

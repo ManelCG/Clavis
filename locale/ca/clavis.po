@@ -496,7 +496,7 @@ msgstr "Mostrar configuració avançada"
 
 #: src/clavis_normal.c:369
 msgid "Show pass"
-msgstr "Mostrar contra"
+msgstr "Mostrar"
 
 #: src/gui_templates.c:924
 msgid "Symbols"
