@@ -510,7 +510,7 @@ msgstr "Показать расширенную конфигурацию"
 #  If its longer than this string, window loses its shape and looks ugly
 #: src/clavis_normal.c:369
 msgid "Show pass"
-msgstr "Показать пароль"
+msgstr "Показать"
 
 #: src/gui_templates.c:924
 msgid "Symbols"
