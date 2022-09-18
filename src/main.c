@@ -17,15 +17,28 @@
 #include <locale.h>
 #include <libintl.h>
 
+#if defined(_WIN32) || defined (WIN32)
+#include <windows.h>
+#endif
+
 void draw_main_window(GtkWidget *widget, gpointer data){
   printf("Drawing main window!\n");
 }
 
 int main(int argc, char *argv[]){
   //Set locale environment
-  setlocale(LC_ALL, "");
+  // setlocale(LC_ALL, "es-Es");
+  // SetThreadLocale(1034);
+
+
+  #ifdef __unix__
   char localedir[strlen(getenv("PWD")) + strlen("locale") + 8];
   sprintf(localedir, "%s/%s", getenv("PWD"), "locale");
+  #elif defined(_WIN32) || defined (WIN32)
+  char localedir[strlen(_getcwd(NULL, 0)) + strlen("locale") + 8];
+  sprintf(localedir, "%s\\%s", _getcwd(NULL, 0), "locale");
+  #endif
+
   bindtextdomain(CLAVIS_LOCALE_, localedir);
   textdomain(CLAVIS_LOCALE_);
 
