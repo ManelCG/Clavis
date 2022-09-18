@@ -1926,7 +1926,8 @@ char *file_io_get_clavis_folder(){
   return ret;
   #elif defined __unix__
   ret = malloc(sizeof(char) * 1024);
-  readlink("/proc/self/exe", ret, 1023);
+  int written = readlink("/proc/self/exe", ret, 1023);
+  ret[written] = '\0';
   char *token = strrchr(ret, '/');
   if (token[0] == '/'){
     token[0] = '\0';
