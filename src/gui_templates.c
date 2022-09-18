@@ -11,6 +11,9 @@
 #include <clavis_popup.h>
 #include <clavis_normal.h>
 
+#include <locale.h>
+#include <libintl.h>
+
 #ifdef __unix__
 #include <sys/wait.h>
 #elif defined(_WIN32) || defined (WIN32)
@@ -2232,7 +2235,7 @@ int gui_templates_initialize_password_store(){
   int response;
 
   //Chose key
-  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, :("Choose a GPG key, import one or create a new one."));
+  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, _("Choose a GPG key, import one or create a new one."));
   gtk_window_set_title(GTK_WINDOW(dialog), _("Select your Clavis Master Key"));
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
