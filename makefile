@@ -83,8 +83,7 @@ archlinux: $(OBJ) $(OBJ_GUI)
 	cp assets/clavis.desktop $(BDIR)/usr/share/applications/
 	cp assets/app_icon/256.png $(BDIR)/usr/share/pixmaps/clavis.png
 
-locale: $(LOCALEDIR)/es/LC_MESSAGES/$(LOCALENAME).mo #$(LOCALEDIR)/ru/LC_MESSAGES/$(LOCALENAME).mo
-	echo $<
+locale: $(LOCALEDIR)/es/LC_MESSAGES/$(LOCALENAME).mo $(LOCALEDIR)/ru/LC_MESSAGES/$(LOCALENAME).mo $(LOCALEDIR)/ca/LC_MESSAGES/$(LOCALENAME).mo
 
 $(LOCALEDIR)/%/LC_MESSAGES/$(LOCALENAME).mo: $(LOCALEDIR)/%/$(LOCALENAME).po
 	msgfmt --output-file=$(LOCALEDIR)/$*/LC_MESSAGES/$(LOCALENAME).mo $(LOCALEDIR)/$*/$(LOCALENAME).po
