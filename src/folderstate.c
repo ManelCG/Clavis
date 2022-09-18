@@ -4,6 +4,10 @@
 #include <string.h>
 #include <file_io.h>
 
+#include <libintl.h>
+#include <locale.h>
+#define _(String) gettext(String)
+
 #include <folderstate.h>
 
 typedef struct folderstate{
@@ -150,7 +154,7 @@ const char *folderstate_get_path_shortname(folderstate *fs){
   char *path;
   if (strcmp(fs->path, ".") == 0){
     path = calloc(sizeof(char) * 32, 1);
-    strcpy(path, "Password Store");
+    strcpy(path, _("Password Store"));
   } else {
     path = calloc(sizeof(char) * (strlen(fs->path)+8), 1);
     int nslashes = 0;

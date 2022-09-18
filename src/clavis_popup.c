@@ -9,6 +9,10 @@
 #include <gui_templates.h>
 #include <clavis_constants.h>
 
+#include <libintl.h>
+#include <locale.h>
+#define _(String) gettext(String)
+
 void clavis_popup_draw_main_window(GtkWidget *window, gpointer data){
   gui_templates_clear_container(window);
   folderstate *fs;
@@ -43,7 +47,7 @@ void clavis_popup_draw_main_window(GtkWidget *window, gpointer data){
   { GtkWidget *icon = gtk_image_new_from_icon_name("folder", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_goup), icon); }
 
-  button_close = gtk_button_new_with_label("Close");
+  button_close = gtk_button_new_with_label(_("Close"));
   g_signal_connect(button_close, "clicked", G_CALLBACK(gtk_main_quit), (gpointer) window);
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_close), icon); }
@@ -56,7 +60,7 @@ void clavis_popup_draw_main_window(GtkWidget *window, gpointer data){
 
   //Main vbox
   entry_filter = gtk_search_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_filter), "Filter files");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_filter), _("Filter files"));
   const char *filter_text = folderstate_get_filter(fs);
   if (filter_text != NULL){
     gtk_entry_set_text(GTK_ENTRY(entry_filter), filter_text);
@@ -67,7 +71,7 @@ void clavis_popup_draw_main_window(GtkWidget *window, gpointer data){
   GtkWidget *password_output = gtk_entry_new();
   gtk_entry_set_visibility(GTK_ENTRY(password_output), false);
   gtk_editable_set_editable(GTK_EDITABLE(password_output), false);
-  gtk_entry_set_placeholder_text(GTK_ENTRY(password_output), "Password output");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(password_output), _("Password output"));
   GtkWidget *button_copy = gtk_button_new();
   { GtkWidget *icon = gtk_image_new_from_icon_name("edit-copy", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_copy), icon); }
@@ -76,7 +80,7 @@ void clavis_popup_draw_main_window(GtkWidget *window, gpointer data){
   { GtkWidget *icon = gtk_image_new_from_icon_name("document-edit", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_xdotool), icon); }
   g_signal_connect(button_xdotool, "pressed", G_CALLBACK(type_entry_with_keyboard_handler), (gpointer) password_output);
-  GtkWidget *toggle_visibility = gtk_check_button_new_with_label("Display password");
+  GtkWidget *toggle_visibility = gtk_check_button_new_with_label(_("Display password"));
   g_signal_connect(toggle_visibility, "toggled", G_CALLBACK(toggle_visibility_handler), (gpointer) password_output);
   gtk_box_pack_start(GTK_BOX(password_hbox), password_output, true, true, 0);
   gtk_box_pack_start(GTK_BOX(password_hbox), button_copy, false, false, 0);
@@ -107,7 +111,7 @@ void clavis_popup_draw_main_window(GtkWidget *window, gpointer data){
 
   {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
    gtk_box_pack_start(GTK_BOX(main_vbox), separator, false, false, 0);}
-  GtkWidget *password_label = gtk_label_new("Decrypted password:");
+  GtkWidget *password_label = gtk_label_new(_("Decrypted password:"));
   gtk_box_pack_start(GTK_BOX(main_vbox), password_label, false, false, 0);
   gtk_box_pack_start(GTK_BOX(main_vbox), password_hbox, false, false, 0);
 

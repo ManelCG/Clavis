@@ -13,6 +13,7 @@
 
 #include <locale.h>
 #include <libintl.h>
+#define _(String) gettext(String)
 
 #ifdef __unix__
 #include <sys/wait.h>

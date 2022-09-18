@@ -10,6 +10,10 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include <libintl.h>
+#include <locale.h>
+#define _(String) gettext(String)
+
 #ifdef __unix__
 #include <sys/wait.h>
 #elif defined(_WIN32) || defined (WIN32)
@@ -261,9 +265,9 @@ int file_io_init_git_server(const char *username, const char *email, const char 
         close(p[0]);
 
         wait(NULL);
-        printf("Writing credentials:\n%s\n", credentials);
+        printf(_("Writing credentials:\n%s\n"), credentials);
         write(p[1], credentials, strlen(credentials));
-        printf("Done\n");
+        printf("_(Done\n");
         close(p[1]);
         free(credentials);
       }
@@ -473,7 +477,6 @@ int file_io_get_git_auth_method_from_string(const char *url){
     return CLAVIS_GIT_AUTH_HTTPS;
   }
 
-  printf("Suka\n");
   return CLAVIS_GIT_NONE;
 }
 
