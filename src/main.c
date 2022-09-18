@@ -14,11 +14,21 @@
 
 #include <stdbool.h>
 
+#include <locale.h>
+#include <libintl.h>
+
 void draw_main_window(GtkWidget *widget, gpointer data){
   printf("Drawing main window!\n");
 }
 
 int main(int argc, char *argv[]){
+  //Set locale environment
+  setlocale(LC_ALL, "");
+  char localedir[strlen(getenv("PWD")) + strlen("locale") + 8];
+  sprintf(localedir, "%s/%s", getenv("PWD"), "locale");
+  bindtextdomain(CLAVIS_LOCALE_, localedir);
+  textdomain(CLAVIS_LOCALE_);
+
   const char *papath = get_password_store_path();
   if (chdir(papath) != 0){
     mkdir_handler(papath);

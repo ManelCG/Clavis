@@ -3,9 +3,9 @@ CLAVIS_VERSION = "1.2.2"
 SDIR = src
 
 IDIR = include
-#CCCMD = x86_64-w64-mingw32-gcc
+LOCALENAME = clavis
 CCCMD = gcc
-CFLAGS = -I$(IDIR) `pkg-config --cflags --libs gtk+-3.0` -lcrypto -Wall -Wno-deprecated-declarations
+CFLAGS = -I$(IDIR) `pkg-config --cflags --libs gtk+-3.0` -lcrypto -Wall -Wno-deprecated-declarations -DCLAVIS_LOCALE_=\"$(LOCALENAME)\"
 
 debug: CC = $(CCCMD) -DDEBUG_ALL -DCLAVIS_VERSION=\"$(CLAVIS_VERSION)_DEBUG\"
 debug: BDIR = debug
@@ -22,6 +22,8 @@ install: CLAVIS_DIR = /usr/lib/clavis
 install: BDIR = $(CLAVIS_DIR)/bin
 
 archlinux: CC = $(CCCMD) -O2 -DMAKE_INSTALL -DCLAVIS_VERSION=\"$(CLAVIS_VERSION)\"
+
+locale: LOCALEDIR = locale
 
 ODIR=.obj
 LDIR=lib
@@ -80,6 +82,17 @@ archlinux: $(OBJ) $(OBJ_GUI)
 	cp -r assets/ $(BDIR)/usr/lib/clavis/
 	cp assets/clavis.desktop $(BDIR)/usr/share/applications/
 	cp assets/app_icon/256.png $(BDIR)/usr/share/pixmaps/clavis.png
+
+locale: $(LOCALEDIR)/es/LC_MESSAGES/$(LOCALENAME).mo $(LOCALEDIR)/ru/LC_MESSAGES/$(LOCALENAME).mo
+	echo $<
+
+$(LOCALEDIR)/%/LC_MESSAGES/$(LOCALENAME).mo: $(LOCALEDIR)/%/$(LOCALENAME).po
+	msgfmt --output-file=$(LOCALEDIR)/$*/LC_MESSAGES/$(LOCALENAME).mo $(LOCALEDIR)/$*/$(LOCALENAME).po
+$(LOCALEDIR)/%/$(LOCALENAME).po: $(LOCALEDIR)/$(LOCALENAME).pot
+	msgmerge --update $(LOCALEDIR)/$*/$(LOCALENAME).po $(LOCALEDIR)/$(LOCALENAME).pot
+	mkdir -p $(LOCALEDIR)/$*/LC_MESSAGES
+$(LOCALEDIR)/$(LOCALENAME).pot: $(SDIR)/*
+	xgettext --keyword=_ --language=C --add-comments --sort-output -o $(LOCALEDIR)/$(LOCALENAME).pot $(SDIR)/*.c
 
 .PHONY: clean
 clean:

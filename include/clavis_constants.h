@@ -8,6 +8,8 @@
 #define CLAVIS_NORMAL_MODE_NAME "Clavis Normal"
 #define CLAVIS_POPUP_MODE_NAME "Clavis Popup"
 
+#define _(String) gettext(String)
+
 //Password info
 #define DEFAULT_PASSWORD_SIZE 25
 #define DEFAULT_GPG_NAME_LEN 32

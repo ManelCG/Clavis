@@ -10,6 +10,9 @@
 #include <folderstate.h>
 #include <clavis_constants.h>
 
+#include <libintl.h>
+#include <locale.h>
+
 void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   gui_templates_clear_container(window);
   folderstate *fs;
@@ -401,7 +404,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   //Password label and output + separator
   {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
    gtk_box_pack_start(GTK_BOX(folder_vbox), separator, false, false, 0);}
-  GtkWidget *password_label = gtk_label_new("Decrypted password:");
+  GtkWidget *password_label = gtk_label_new(_("Decrypted password:"));
   gtk_box_pack_start(GTK_BOX(folder_vbox), password_label, false, false, 0);
   gtk_box_pack_start(GTK_BOX(folder_vbox), password_hbox, false, false, 0);
 
