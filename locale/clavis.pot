@@ -8,17 +8,58 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-18 19:32+0200\n"
+"POT-Creation-Date: 2022-09-18 20:00+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: src/gui_templates.c:103
+#, c-format
+msgid "%s already exists. Overwrite?"
+msgstr ""
+
+#: src/gui_templates.c:2533
+msgid "<a href=\"https://github.com/ManelCG/clavis\"> Github repository</a>"
+msgstr ""
+
+#: src/gui_templates.c:2523
+msgid "<b>Clavis</b>"
+msgstr ""
+
+#: src/gui_templates.c:2539
+msgid "<small>Copyright © Manel Castillo Giménez</small>"
+msgstr ""
+
+#: src/gui_templates.c:2497
+msgid "About Clavis"
+msgstr ""
 
 #: src/gui_templates.c:1558
 msgid "Accept"
+msgstr ""
+
+#: src/gui_templates.c:815
+msgid "Add new password to Clavis"
+msgstr ""
+
+#: src/gui_templates.c:814
+msgid "Add new password:"
+msgstr ""
+
+#: src/gui_templates.c:828
+msgid "Add password"
+msgstr ""
+
+#: src/gui_templates.c:516
+msgid "Apply"
+msgstr ""
+
+#: src/gui_templates.c:603
+msgid "Cancel"
 msgstr ""
 
 #. Chose key
@@ -34,16 +75,41 @@ msgstr ""
 msgid "Clavis Master Key creation"
 msgstr ""
 
+#: src/gui_templates.c:2527
+msgid "Clavis is an easy to use Password Manager."
+msgstr ""
+
+#: src/gui_templates.c:2541
+msgid "Close"
+msgstr ""
+
 #: src/gui_templates.c:1928
 msgid "Comment (Optional)"
+msgstr ""
+
+#: src/gui_templates.c:509
+msgid "Configure your Git server:"
 msgstr ""
 
 #: src/gui_templates.c:1824
 msgid "Configure your new GPG key:"
 msgstr ""
 
+#: src/gui_templates.c:435 src/gui_templates.c:610
+msgid "Confirm"
+msgstr ""
+
 #: src/gui_templates.c:2248
 msgid "Confirm selection"
+msgstr ""
+
+#: src/gui_templates.c:1112 src/gui_templates.c:1183
+#, c-format
+msgid "Could not overwrite %s."
+msgstr ""
+
+#: src/gui_templates.c:1078
+msgid "Create"
 msgstr ""
 
 #: src/gui_templates.c:1834
@@ -58,6 +124,14 @@ msgstr ""
 msgid "Create new repo"
 msgstr ""
 
+#: src/gui_templates.c:620
+msgid "Create new repository"
+msgstr ""
+
+#: src/gui_templates.c:2545
+msgid "Credits"
+msgstr ""
+
 #: src/gui_templates.c:1878
 msgid "DSA and ElGamal"
 msgstr ""
@@ -70,12 +144,55 @@ msgstr ""
 msgid "Decrypted password:"
 msgstr ""
 
+#: src/gui_templates.c:686
+#, c-format
+msgid "Decrypting\n"
+msgstr ""
+
+#: src/gui_templates.c:1264 src/gui_templates.c:1302 src/gui_templates.c:1490
+msgid "Delete"
+msgstr ""
+
 #: src/gui_templates.c:870 src/gui_templates.c:1941
 msgid "Display password"
 msgstr ""
 
+#: src/gui_templates.c:817
+msgid "Edit existing password:"
+msgstr ""
+
+#: src/gui_templates.c:1513
+msgid "Edit password"
+msgstr ""
+
+#: src/gui_templates.c:818
+msgid "Edit password in Clavis"
+msgstr ""
+
+#: src/gui_templates.c:1280
+#, c-format
+msgid "Error. Could not remove %s"
+msgstr ""
+
 #: src/gui_templates.c:2301
 msgid "Export key"
+msgstr ""
+
+#: src/gui_templates.c:1253
+#, c-format
+msgid "Folder %s contains %d files. Remove anyways?"
+msgstr ""
+
+#: src/gui_templates.c:877
+msgid "Generate password with options"
+msgstr ""
+
+#: src/gui_templates.c:523
+msgid "Git Syncronization Config"
+msgstr ""
+
+#: src/gui_templates.c:447
+msgid "Git credentials"
 msgstr ""
 
 #: src/gui_templates.c:557 src/gui_templates.c:561 src/gui_templates.c:2341
@@ -103,6 +220,15 @@ msgstr ""
 msgid "Git username"
 msgstr ""
 
+#: src/gui_templates.c:2536
+msgid "Go to the Clavis Github repository"
+msgstr ""
+
+#. Buttons
+#: src/gui_templates.c:598
+msgid "Help"
+msgstr ""
+
 #: src/gui_templates.c:1549
 msgid ""
 "Hey! It seems this is your first time running Clavis.\n"
@@ -117,20 +243,100 @@ msgstr ""
 msgid "Key length"
 msgstr ""
 
+#: src/gui_templates.c:2014
+msgid "Key length must be a 3+ digit number"
+msgstr ""
+
 #: src/gui_templates.c:1927
 msgid "Key name"
+msgstr ""
+
+#: src/gui_templates.c:2036
+msgid "Key name must be at least 5 letters long"
 msgstr ""
 
 #: src/gui_templates.c:1890
 msgid "Key size:"
 msgstr ""
 
+#: src/gui_templates.c:2548
+msgid "License"
+msgstr ""
+
+#: src/gui_templates.c:926
+msgid "Lowercase"
+msgstr ""
+
 #: src/gui_templates.c:1908
 msgid "Months"
 msgstr ""
 
-#: src/gui_templates.c:867 src/gui_templates.c:1950
+#: src/gui_templates.c:2025
+msgid "Name must be at least 5 letters long."
+msgstr ""
+
+#: src/gui_templates.c:1064
+msgid "New folder"
+msgstr ""
+
+#: src/gui_templates.c:1063
+msgid "New folder name:"
+msgstr ""
+
+#: src/gui_templates.c:888
+msgid "New password name"
+msgstr ""
+
+#. Main left vbox
+#: src/gui_templates.c:909
+msgid "New password:"
+msgstr ""
+
+#: src/gui_templates.c:922
+msgid "Numerals"
+msgstr ""
+
+#: src/gui_templates.c:1001 src/gui_templates.c:1011 src/gui_templates.c:2018
+#: src/gui_templates.c:2029 src/gui_templates.c:2040 src/gui_templates.c:2051
+#: src/gui_templates.c:2062
+msgid "Okay"
+msgstr ""
+
+#: src/gui_templates.c:1719
+msgid "Open File"
+msgstr ""
+
+#: src/gui_templates.c:467 src/gui_templates.c:867 src/gui_templates.c:1950
 msgid "Password"
+msgstr ""
+
+#: src/gui_templates.c:2468
+msgid "Password Store data"
+msgstr ""
+
+#: src/gui_templates.c:2486
+msgid "Password Store directory"
+msgstr ""
+
+#: src/gui_templates.c:965
+msgid "Password generator:"
+msgstr ""
+
+#: src/gui_templates.c:928
+msgid "Password length"
+msgstr ""
+
+#. Main right vbox
+#: src/gui_templates.c:920
+msgid "Password length:"
+msgstr ""
+
+#: src/gui_templates.c:896
+msgid "Password name"
+msgstr ""
+
+#: src/gui_templates.c:461
+msgid "Password:"
 msgstr ""
 
 #. PERSONAL INFO
@@ -138,16 +344,66 @@ msgstr ""
 msgid "Personal information:"
 msgstr ""
 
+#: src/gui_templates.c:997 src/gui_templates.c:2047
+msgid "Please enter a password"
+msgstr ""
+
+#: src/gui_templates.c:1007
+msgid "Please give a name to your password"
+msgstr ""
+
+#: src/gui_templates.c:428
+msgid "Please provid Git credentials"
+msgstr ""
+
+#: src/gui_templates.c:924
+msgid "Pronounceable"
+msgstr ""
+
 #: src/gui_templates.c:1877
 msgid "RSA and DSA (default)"
+msgstr ""
+
+#: src/gui_templates.c:1291
+#, c-format
+msgid "Remove file '%s'? This cannot be undone!"
+msgstr ""
+
+#: src/gui_templates.c:1148
+msgid "Rename"
+msgstr ""
+
+#: src/gui_templates.c:1132
+#, c-format
+msgid "Rename %s:\n"
+msgstr ""
+
+#: src/gui_templates.c:1482
+msgid "Rename file"
 msgstr ""
 
 #: src/gui_templates.c:1956
 msgid "Repeat password"
 msgstr ""
 
+#: src/gui_templates.c:114
+msgid "Replace"
+msgstr ""
+
+#: src/gui_templates.c:1602
+msgid "Save Keys"
+msgstr ""
+
+#: src/gui_templates.c:1660
+msgid "Save your GPG key"
+msgstr ""
+
 #: src/gui_templates.c:2239
 msgid "Select your Clavis Master Key"
+msgstr ""
+
+#: src/gui_templates.c:1766
+msgid "Select your GPG key"
 msgstr ""
 
 #. EXPIRATION
@@ -159,14 +415,35 @@ msgstr ""
 msgid "Set key's password:"
 msgstr ""
 
+#. Saveto hbox
+#: src/gui_templates.c:885
+msgid "Set password name:"
+msgstr ""
+
 #. Advanced frame
 #: src/gui_templates.c:1965
 msgid "Show advanced configuration"
 msgstr ""
 
+#: src/gui_templates.c:923
+msgid "Symbols"
+msgstr ""
+
+#: src/gui_templates.c:925
+msgid "Uppercase"
+msgstr ""
+
 #. Toggles
 #: src/gui_templates.c:2382
 msgid "Use git server"
+msgstr ""
+
+#: src/gui_templates.c:464
+msgid "Username"
+msgstr ""
+
+#: src/gui_templates.c:460
+msgid "Username:"
 msgstr ""
 
 #: src/gui_templates.c:1907
@@ -183,4 +460,24 @@ msgstr ""
 
 #: src/gui_templates.c:1926
 msgid "Your name"
+msgstr ""
+
+#: src/gui_templates.c:2058
+msgid "Your passwords do not match!"
+msgstr ""
+
+#: src/gui_templates.c:1602 src/gui_templates.c:1719
+msgid "_Cancel"
+msgstr ""
+
+#: src/gui_templates.c:1719
+msgid "_Open"
+msgstr ""
+
+#: src/gui_templates.c:1602
+msgid "_Save"
+msgstr ""
+
+#: src/gui_templates.c:889
+msgid "new_password"
 msgstr ""

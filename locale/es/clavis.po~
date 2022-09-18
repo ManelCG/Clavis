@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Clavis 1.2.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-18 19:26+0200\n"
+"POT-Creation-Date: 2022-09-18 19:32+0200\n"
 "PO-Revision-Date: 2022-09-18 17:47+0200\n"
 "Last-Translator: Hrad <manelcg@protonmail.com>\n"
 "Language-Team: Spanish <es@tp.org.es>\n"
@@ -78,12 +78,14 @@ msgstr "Mostrar contraseña"
 msgid "Export key"
 msgstr "Exportar clave"
 
-#: src/gui_templates.c:557 src/gui_templates.c:561
+#: src/gui_templates.c:557 src/gui_templates.c:561 src/gui_templates.c:2341
+#: src/gui_templates.c:2345
 msgid "Git email"
 msgstr "Email de Git"
 
 #. Repo config
-#: src/gui_templates.c:587 src/gui_templates.c:589
+#: src/gui_templates.c:587 src/gui_templates.c:589 src/gui_templates.c:2371
+#: src/gui_templates.c:2373
 msgid "Git repo URL"
 msgstr "URL del repositorio de Git"
 
@@ -94,7 +96,10 @@ msgstr "Opciones del servidor de Git"
 
 #. Instance
 #. User Config
-#: src/gui_templates.c:556 src/gui_templates.c:559
+#. Git config
+#. User Config
+#: src/gui_templates.c:556 src/gui_templates.c:559 src/gui_templates.c:2340
+#: src/gui_templates.c:2343
 msgid "Git username"
 msgstr "Usuario de Git"
 

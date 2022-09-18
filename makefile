@@ -92,7 +92,7 @@ $(LOCALEDIR)/%/$(LOCALENAME).po: $(LOCALEDIR)/$(LOCALENAME).pot
 	msgmerge --update $(LOCALEDIR)/$*/$(LOCALENAME).po $(LOCALEDIR)/$(LOCALENAME).pot
 	mkdir -p $(LOCALEDIR)/$*/LC_MESSAGES
 $(LOCALEDIR)/$(LOCALENAME).pot: $(SDIR)/*
-	xgettext --keyword=_ --language=C --add-comments --sort-output -o $(LOCALEDIR)/$(LOCALENAME).pot $(SDIR)/*.c
+	xgettext --keyword=_ --language=C --from-code=UTF-8 --add-comments --sort-output -o $(LOCALEDIR)/$(LOCALENAME).pot $(SDIR)/*.c
 
 .PHONY: clean
 clean:
