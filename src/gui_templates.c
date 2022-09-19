@@ -2494,6 +2494,90 @@ void gui_templates_show_password_store_info_window(GtkWidget *w, gpointer data){
   gtk_widget_show_all(GTK_WIDGET(window));
 }
 
+GtkWidget *gui_templates_get_language_credits_hbox(const char *text_translationby, const char *language, const char *credits[], const char *webs[], int ncredits){
+  char translation_text[strlen(text_translationby) + strlen(language) + 8];
+  sprintf(translation_text, text_translationby, language);
+  GtkWidget *translation_label = gtk_label_new(translation_text);
+  gtk_label_set_xalign(GTK_LABEL(translation_label), 1);
+
+  GtkWidget *left_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  GtkWidget *right_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+
+  gtk_box_pack_start(GTK_BOX(left_vbox), translation_label, 0, true, true);
+
+  for (int i = 0; i < ncredits; i++){
+    const char *labeltext;
+    GtkWidget *label;
+    if (webs[i] == NULL){
+      labeltext = credits[i];
+      label = gtk_label_new(labeltext);
+    } else {
+      char *html = malloc(strlen(webs[i]) + strlen(credits[i]) + 32);
+      sprintf(html, "<a href=\"%s\">%s</a>", webs[i], credits[i]);
+      labeltext = html;
+
+      label = gtk_label_new(NULL);
+      gtk_label_set_markup(GTK_LABEL(label), labeltext);
+    }
+
+    gtk_label_set_xalign(GTK_LABEL(label), 0);
+    gtk_box_pack_start(GTK_BOX(right_vbox), label, 0, true, true);
+  }
+
+  gtk_box_pack_start(GTK_BOX(hbox), left_vbox, 0, true, true);
+  gtk_box_pack_start(GTK_BOX(hbox), right_vbox, 0, true, true);
+
+  return hbox;
+}
+
+void gui_templates_window_credits(GtkWidget *w, gpointer data){
+  GtkWindow *wdw = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
+  gtk_window_set_title(wdw, _("Clavis acknowledgements"));
+  gtk_window_set_resizable(wdw, false);
+  gtk_container_set_border_width(GTK_CONTAINER(wdw), 10);
+  gtk_window_set_default_size(GTK_WINDOW(wdw), 420, 0);
+
+  gtk_window_set_position(GTK_WINDOW(wdw), GTK_WIN_POS_CENTER);
+
+  const char *text_translationby = _("%s translation by:");
+
+  //Languages:
+  const char *spanish = _("Spanish");
+  const char *english = _("English");
+  const char *catalan = _("Catalan");
+  const char *russian = _("Russian");
+
+  //Boxes
+  GtkWidget *main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+
+  {
+    GtkWidget *label_app_name = gtk_label_new(NULL);
+    gtk_label_set_markup(GTK_LABEL(label_app_name), _("<b>Clavis</b>"));
+    gtk_box_pack_start(GTK_BOX(main_vbox), label_app_name, 0, true, true);
+  }
+
+  //Translation Credits
+  {
+    const char *language = spanish;
+    const char *credits[] = {"Manel Castillo Giménez"};
+    const char *webs[] = {"https://github.com/ManelCG"};
+    GtkWidget *box = gui_templates_get_language_credits_hbox(text_translationby, language, credits, webs, 1);
+    gtk_box_pack_start(GTK_BOX(main_vbox), box, 0, true, true);
+  }
+  {
+    const char *language = russian;
+    const char *credits[] = {"Polina Chainikova"};
+    const char *webs[] = {"https://github.com/polinatea"};
+    GtkWidget *box = gui_templates_get_language_credits_hbox(text_translationby, language, credits, webs, 1);
+    gtk_box_pack_start(GTK_BOX(main_vbox), box, 0, true, true);
+  }
+
+  gtk_container_add(GTK_CONTAINER(wdw), main_vbox);
+  gtk_widget_show_all(GTK_WIDGET(wdw));
+
+}
+
 void gui_templates_show_about_window(GtkWidget *w, gpointer data){
   GtkWindow *window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
 
@@ -2547,6 +2631,7 @@ void gui_templates_show_about_window(GtkWidget *w, gpointer data){
 
   button_credits = gtk_button_new_with_label(_("Credits"));
   gtk_widget_set_size_request(button_credits, GUI_TEMPLATES_BUTTON_WIDTH, 0);
+  g_signal_connect(GTK_BUTTON(button_credits), "pressed", G_CALLBACK(gui_templates_window_credits), NULL);
 
   button_license = gtk_button_new_with_label(_("License"));
   gtk_widget_set_size_request(button_license, GUI_TEMPLATES_BUTTON_WIDTH, 0);
