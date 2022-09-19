@@ -77,6 +77,7 @@ Source: "G:\clavis\build\libwinpthread-1.dll"; DestDir: "{app}"; Flags: ignoreve
 Source: "G:\clavis\build\zlib1.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "G:\clavis\__windows__\windows_assets\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 Source: "G:\clavis\assets\*"; DestDir: "{app}\assets\"; Flags: ignoreversion recursesubdirs
+Source: "G:\clavis\locale\*"; DestDir: "{app}\locale\"; Flags: ignoreversion recursesubdirs
 Source: "G:\clavis\__windows__\windows_configs\*"; DestDir: "{userappdata}\Clavis\"; Flags: ignoreversion recursesubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
