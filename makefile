@@ -56,6 +56,7 @@ windows_GTKENV: windows
 	ldd $(BDIR)/clavis.exe | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" $(BDIR)/
 	cp -ru __windows__/windows_assets/* $(BDIR)/
 	cp -ru assets $(BDIR)/
+	cp -ru locale/ $(BDIR)/
 
 
 debug: $(OBJ)
@@ -79,7 +80,8 @@ archlinux: $(OBJ) $(OBJ_GUI)
 	mkdir -p $(BDIR)/usr/bin/
 	mkdir -p $(ODIR)
 	$(CC) -o $(BDIR)/usr/bin/clavis $^ $(CFLAGS) $(LIBS)
-	cp -r assets/ $(BDIR)/usr/lib/clavis/
+	cp -ru assets/ $(BDIR)/usr/lib/clavis/
+	cp -ru locale/ $(BDIR)/usr/lib/clavis/
 	cp assets/clavis.desktop $(BDIR)/usr/share/applications/
 	cp assets/app_icon/256.png $(BDIR)/usr/share/pixmaps/clavis.png
 

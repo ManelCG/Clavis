@@ -31,12 +31,11 @@ int main(int argc, char *argv[]){
   // SetThreadLocale(1034);
 
 
+  char localedir[strlen(file_io_get_clavis_folder()) + strlen("locale") + 8];
   #ifdef __unix__
-  char localedir[strlen(getenv("PWD")) + strlen("locale") + 8];
   sprintf(localedir, "%s/%s", getenv("PWD"), "locale");
   #elif defined(_WIN32) || defined (WIN32)
-  char localedir[strlen(_getcwd(NULL, 0)) + strlen("locale") + 8];
-  sprintf(localedir, "%s\\%s", _getcwd(NULL, 0), "locale");
+  sprintf(localedir, "%s\\%s", file_io_get_clavis_folder(), "locale");
   #endif
 
   bindtextdomain(CLAVIS_LOCALE_, localedir);
