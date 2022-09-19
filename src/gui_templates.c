@@ -706,9 +706,11 @@ _Bool entry_filter_keyrelease_handler(GtkWidget *widget, GdkEventKey *event, gpo
   } else if (strcmp(gdk_keyval_name(event->keyval), "Down") == 0){
     folderstate_increase_state(fs);
   } else if (strcmp(gdk_keyval_name(event->keyval), "Return") == 0){
-    const char *name = folderstate_get_files(fs)[folderstate_get_state(fs)];
+    if (folderstate_get_nfiles(fs) > 0){
+      const char *name = folderstate_get_files(fs)[folderstate_get_state(fs)];
 
-    gui_templates_folder_button_from_string(output, name, fs);
+      gui_templates_folder_button_from_string(output, name, fs);
+    }
     return true;
   } else if (strcmp(gdk_keyval_name(event->keyval), "Escape") == 0){
     if (strcmp(folderstate_get_path(fs), ".") != 0){
