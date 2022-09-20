@@ -25,9 +25,9 @@ archlinux: CC = $(CCCMD) -O2 -DMAKE_INSTALL -DCLAVIS_VERSION=\"$(CLAVIS_VERSION)
 
 locale: LOCALEDIR = locale
 
-ODIR=.obj
-WODIR=.wobj
-DODIR=.debug_obj
+ODIR=.obj/linux
+WODIR=.obj/win
+DODIR=.obj/debug
 LDIR=lib
 
 LIBS = -lm -lpthread
