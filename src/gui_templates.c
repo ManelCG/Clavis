@@ -1169,6 +1169,7 @@ void button_rename_handler(GtkWidget *widget, gpointer data){
   gtk_box_pack_end(GTK_BOX(dialog_box), entry, false, false, 0);
 
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), _("Cancel"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
@@ -1285,6 +1286,7 @@ void button_delete_handler(GtkWidget *widget, gpointer data){
     gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
 
     GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+    gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), _("Cancel"));
     { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
     gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
     gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
@@ -2741,7 +2743,7 @@ void gui_templates_show_about_window(GtkWidget *w, gpointer data){
   gtk_label_set_max_width_chars(GTK_LABEL(label_description), 50);
   gtk_label_set_width_chars(GTK_LABEL(label_description), 50);
 
-  const char *label_git_repo_text = _("<a href=\"https://github.com/ManelCG/clavis\"> Github repository</a>");
+  const char *label_git_repo_text = _("<a href=\"https://github.com/ManelCG/clavis\">Github repository</a>");
   label_git_repo = gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(label_git_repo), label_git_repo_text);
   gtk_widget_set_tooltip_text(label_git_repo, _("Go to the Clavis Github repository"));
