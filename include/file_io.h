@@ -1,3 +1,22 @@
+/*
+ *  Clavis
+ *  Copyright (C) 2022  Manel Castillo Giménez <manelcg@protonmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
+
 #ifndef __FILE_IO_H_
 #define __FILE_IO_H_
 
@@ -39,6 +58,7 @@ int file_io_remove_password(const char *path);
 
 char *file_io_get_clavis_executable();
 char *file_io_get_clavis_folder();
+char *file_io_get_clavis_license_file_buffer();
 
 #ifdef __unix__
 #ifndef MAKE_INSTALL
@@ -49,6 +69,7 @@ char *file_io_get_about_picture_png();
 char *file_io_get_about_picture_png();
 char *file_io_get_gtk_settings_ini_file();
 int file_io_get_gtk_theme();
+char *windows_string(const char *s);
 #endif
 
 #endif //_FILE_IO_H_

@@ -1,3 +1,22 @@
+/*
+ *  Clavis
+ *  Copyright (C) 2022  Manel Castillo Giménez <manelcg@protonmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
+
 #include <gui_templates.h>
 #include <stdbool.h>
 #include <file_io.h>
@@ -10,6 +29,11 @@
 
 #include <clavis_popup.h>
 #include <clavis_normal.h>
+
+#include <locale.h>
+#include <libintl.h>
+
+#include <clavis_macros.h>
 
 #ifdef __unix__
 #include <sys/wait.h>
@@ -97,7 +121,7 @@ void gui_templates_message_dialog(const char *message){
 _Bool gui_templates_overwrite_confirmation(const char *path){
   char dialog_prompt[strlen(path) + 32];
 
-  sprintf(dialog_prompt, "%s already exists. Overwrite?", path);
+  sprintf(dialog_prompt, _("%s already exists. Overwrite?"), path);
   GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
@@ -108,7 +132,7 @@ _Bool gui_templates_overwrite_confirmation(const char *path){
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
 
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Replace");
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Replace"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
@@ -312,7 +336,7 @@ void change_theme_handler(GtkWidget *widget, gpointer data){
     free(buffer);
   }
 
-  GtkWidget *dialog;
+  // GtkWidget *dialog;
 
   ////Reload?
   //dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Theme changed. Reload Clavis?");
@@ -422,14 +446,14 @@ char *gui_templates_ask_for_git_credentials(){
   GtkWidget *dialog;
   int response;
 
-  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Please provid Git credentials");
+  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, _("Please provide Git credentials"));
 
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Confirm");
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Confirm"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
@@ -441,7 +465,7 @@ char *gui_templates_ask_for_git_credentials(){
 
 
   GtkWindow *window = GTK_WINDOW(dialog);
-  gtk_window_set_title(window, "Git credentials");
+  gtk_window_set_title(window, _("Git credentials"));
   gtk_window_set_resizable(window, false);
   gtk_container_set_border_width(GTK_CONTAINER(window), 10);
   gtk_window_set_default_size(GTK_WINDOW(window), 0, 0);
@@ -454,14 +478,14 @@ char *gui_templates_ask_for_git_credentials(){
   GtkWidget *vbox2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
   GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 
-  GtkWidget *label_1 = gtk_label_new("Username:");
-  GtkWidget *label_2 = gtk_label_new("Password:");
+  GtkWidget *label_1 = gtk_label_new(_("Username:"));
+  GtkWidget *label_2 = gtk_label_new(_("Password:"));
 
   GtkWidget *user_entry = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(user_entry), "Username");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(user_entry), _("Username"));
 
   GtkWidget *pass_entry = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(pass_entry), "Password");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(pass_entry), _("Password"));
 
   gtk_box_pack_start(GTK_BOX(vbox1), label_1, true, true, 0);
   gtk_box_pack_start(GTK_BOX(vbox1), user_entry, true, true, 0);
@@ -503,21 +527,22 @@ int gui_templates_git_config_window(){
 
   _Bool create_new;
 
-  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Configure your Git server:");
+  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, _("Configure your Git server:"));
 
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), _("Cancel"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Apply");
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Apply"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
 
   GtkWindow *window = GTK_WINDOW(dialog);
 
-  gtk_window_set_title(window, "Git Syncronization Config");
+  gtk_window_set_title(window, _("Git Synchronization Config"));
   gtk_window_set_resizable(window, false);
   gtk_container_set_border_width(GTK_CONTAINER(window), 10);
   gtk_window_set_default_size(GTK_WINDOW(window), 0, 0);
@@ -550,12 +575,12 @@ int gui_templates_git_config_window(){
 
   //Instance
   //User Config
-  label_username = gtk_label_new("Git username");
-  label_email = gtk_label_new("Git email");
+  label_username = gtk_label_new(_("Git username"));
+  label_email = gtk_label_new(_("Git email"));
   entry_username = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_username), "Git username");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_username), _("Git username"));
   entry_email = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_email), "Git email");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_email), _("Git email"));
 
   user_git_name = file_io_get_git_config_field("user.name");
   user_git_email = file_io_get_git_config_field("user.email");
@@ -581,9 +606,9 @@ int gui_templates_git_config_window(){
   gtk_box_pack_start(GTK_BOX(name_email_hbox), mail_vbox, false, false, 0);
 
   //Repo config
-  label_repo_url = gtk_label_new("Git repo URL");
+  label_repo_url = gtk_label_new(_("Git repo URL"));
   entry_repo_url = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_repo_url), "Git repo URL");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_repo_url), _("Git repo URL"));
 
   user_git_repo = file_io_get_git_config_field("remote.origin.url");
   if (user_git_repo != NULL){
@@ -592,19 +617,19 @@ int gui_templates_git_config_window(){
   }
 
   //Buttons
-  button_info = gtk_button_new_with_label("Help");
+  button_info = gtk_button_new_with_label(_("Help"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("system-help", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_info), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(button_info), true);
 
-  button_cancel = gtk_button_new_with_label("Cancel");
+  button_cancel = gtk_button_new_with_label(_("Cancel"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_cancel), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(button_cancel), true);
   g_signal_connect(button_cancel, "activate", G_CALLBACK(destroy), (gpointer) window);
   g_signal_connect(button_cancel, "pressed", G_CALLBACK(destroy), (gpointer) window);
 
-  button_confirm = gtk_button_new_with_label("Confirm");
+  button_confirm = gtk_button_new_with_label(_("Confirm"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_confirm), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(button_confirm), true);
@@ -614,7 +639,7 @@ int gui_templates_git_config_window(){
   gtk_box_pack_start(GTK_BOX(lower_buttons_hbox), button_cancel, true, true, 0);
   gtk_box_pack_start(GTK_BOX(lower_buttons_hbox), button_confirm, true, true, 0);
 
-  toggle_create_new = gtk_check_button_new_with_label("Create new repository");
+  toggle_create_new = gtk_check_button_new_with_label(_("Create new repository"));
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle_create_new), true);
 
 
@@ -680,7 +705,7 @@ void toggle_visibility_handler(GtkWidget *widget, gpointer data){
   gtk_entry_set_visibility(GTK_ENTRY(entry), gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
 }
 void password_decrypt_handler(GtkWidget *widget, gpointer data){
-  printf("Decrypting\n");
+  printf(_("Decrypting\n"));
 }
 
 _Bool entry_filter_keyrelease_handler(GtkWidget *widget, GdkEventKey *event, gpointer data){
@@ -702,14 +727,16 @@ _Bool entry_filter_keyrelease_handler(GtkWidget *widget, GdkEventKey *event, gpo
   } else if (strcmp(gdk_keyval_name(event->keyval), "Down") == 0){
     folderstate_increase_state(fs);
   } else if (strcmp(gdk_keyval_name(event->keyval), "Return") == 0){
-    const char *name = folderstate_get_files(fs)[folderstate_get_state(fs)];
-    gui_templates_folder_button_from_string(output, name, fs);
+    if (folderstate_get_nfiles(fs) > 0){
+      const char *name = folderstate_get_files(fs)[folderstate_get_state(fs)];
 
+      gui_templates_folder_button_from_string(output, name, fs);
+    }
     return true;
   } else if (strcmp(gdk_keyval_name(event->keyval), "Escape") == 0){
     if (strcmp(folderstate_get_path(fs), ".") != 0){
-      button_goup_handler(output, (gpointer)  fs);
 
+      button_goup_handler(output, (gpointer)  fs);
       return true;
     }
   } else {
@@ -808,21 +835,22 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
 
   GtkWidget *dialog;
   if (strcmp(gtk_widget_get_name(widget), CLAVIS_BUTTON_NEWPASSWORD_NAME) == 0){
-    dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Add new password:");
-    gtk_window_set_title(GTK_WINDOW(dialog), "Add new password to Clavis");
+    dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, _("Add new password:"));
+    gtk_window_set_title(GTK_WINDOW(dialog), _("Add new password to Clavis"));
   } else {
-    dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Edit existing password:");
-    gtk_window_set_title(GTK_WINDOW(dialog), "Edit password in Clavis");
+    dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, _("Edit existing password:"));
+    gtk_window_set_title(GTK_WINDOW(dialog), _("Edit password in Clavis"));
   }
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), _("Cancel"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
 
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Add password");
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Add password"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
@@ -861,17 +889,17 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
 
   //Password hbox
   entry_password = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password), "Password");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password), _("Password"));
   passgen_set_output_entry(pg, entry_password);
 
-  toggle_visibility = gtk_check_button_new_with_label("Display password");
+  toggle_visibility = gtk_check_button_new_with_label(_("Display password"));
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle_visibility), true);
   g_signal_connect(toggle_visibility, "toggled", G_CALLBACK(toggle_visibility_handler), (gpointer) entry_password);
 
   button_generate = gtk_button_new();
   { GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_generate), icon); }
-  gtk_widget_set_tooltip_text(button_generate, "Generate password with options");
+  gtk_widget_set_tooltip_text(button_generate, _("Generate password with options"));
   g_signal_connect(button_generate, "clicked", G_CALLBACK(passgen_button_handler), (gpointer) pg);
 
   password_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
@@ -879,18 +907,18 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
   gtk_box_pack_start(GTK_BOX(password_hbox), button_generate, false, false, 0);
 
   //Saveto hbox
-  label_saveto = gtk_label_new("Set password name:");
+  label_saveto = gtk_label_new(_("Set password name:"));
   entry_passname = gtk_entry_new();
   if (strcmp(gtk_widget_get_name(widget), CLAVIS_BUTTON_NEWPASSWORD_NAME) == 0){
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_passname), "New password name");
-    gtk_entry_set_text(GTK_ENTRY(entry_passname), "new_password");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_passname), _("New password name"));
+    gtk_entry_set_text(GTK_ENTRY(entry_passname), _("new_password"));
   } else {
     char buffer[strlen(gtk_widget_get_name(widget))];
     strcpy(buffer, gtk_widget_get_name(widget));
     if (strlen(buffer) > 4 && strcmp(&buffer[strlen(buffer)-4], ".gpg") == 0){
       buffer[strlen(buffer)-4] = '\0';
     }
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_passname), "Password name");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_passname), _("Password name"));
     gtk_entry_set_text(GTK_ENTRY(entry_passname), buffer);
     gtk_widget_set_can_focus(entry_passname, false);
     gtk_widget_set_sensitive(entry_passname, false);
@@ -903,7 +931,7 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
 
 
   //Main left vbox
-  GtkWidget *new_pass_label = gtk_label_new("New password:");
+  GtkWidget *new_pass_label = gtk_label_new(_("New password:"));
   left_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
   gtk_box_pack_start(GTK_BOX(left_vbox), saveto_vbox, false, false, 0);
@@ -914,15 +942,15 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
   gtk_box_pack_start(GTK_BOX(left_vbox), toggle_visibility, false, false, 5);
 
   //Main right vbox
-  GtkWidget *label_passlen = gtk_label_new("Password length:");
+  GtkWidget *label_passlen = gtk_label_new(_("Password length:"));
   entry_passlen = gtk_entry_new();
-  check_numerals = gtk_check_button_new_with_label("Numerals");
-  check_symbols = gtk_check_button_new_with_label("Symbols");
-  check_pron = gtk_check_button_new_with_label("Pronounceable");
-  check_upper = gtk_check_button_new_with_label("Uppercase");
-  check_lower = gtk_check_button_new_with_label("Lowercase");
+  check_numerals = gtk_check_button_new_with_label(_("Numerals"));
+  check_symbols = gtk_check_button_new_with_label(_("Symbols"));
+  check_pron = gtk_check_button_new_with_label(_("Pronounceable"));
+  check_upper = gtk_check_button_new_with_label(_("Uppercase"));
+  check_lower = gtk_check_button_new_with_label(_("Lowercase"));
 
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_passlen), "Password length");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_passlen), _("Password length"));
   char buffer[128];
   sprintf(buffer, "%d", passgen_get_len(pg));
   gtk_entry_set_text(GTK_ENTRY(entry_passlen), buffer);
@@ -959,7 +987,7 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
   gtk_box_pack_start(GTK_BOX(hbox_of_vbox), separator, false, false, 15);}
   gtk_box_pack_start(GTK_BOX(hbox_of_vbox), gen_right_vbox, false, false, 0);
 
-  GtkWidget *label_autogen = gtk_label_new("Password generator:");
+  GtkWidget *label_autogen = gtk_label_new(_("Password generator:"));
   right_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
   gtk_box_pack_start(GTK_BOX(right_vbox), label_autogen, false, false, 0);
   gtk_box_pack_start(GTK_BOX(right_vbox), passlen_hbox, false, false, 0);
@@ -991,21 +1019,21 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
 
     if (response == GTK_RESPONSE_OK){
       if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_password))) == 0){
-        GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Please enter a password");
+        GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, _("Please enter a password"));
         gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
 
         GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
-        gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+        gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Okay"));
         gtk_dialog_run(GTK_DIALOG(dialog_failure));
         destroy(dialog_failure, dialog_failure);
         valid_password = false;
       }
       if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_passname))) == 0){
-        GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Please give a name to your password");
+        GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, _("Please give a name to your password"));
         gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
 
         GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
-        gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+        gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Okay"));
         gtk_dialog_run(GTK_DIALOG(dialog_failure));
         destroy(dialog_failure, dialog_failure);
         valid_password = false;
@@ -1045,6 +1073,9 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
           #endif
         }
       }
+    } else {
+      valid_password = false;
+      break;
     }
   }
 
@@ -1057,8 +1088,8 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
 void button_newfolder_handler(GtkWidget *widget, gpointer data){
   folderstate *fs = (folderstate *) data;
 
-  GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "New folder name:");
-  gtk_window_set_title(GTK_WINDOW(dialog), "New folder");
+  GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, _("New folder name:"));
+  gtk_window_set_title(GTK_WINDOW(dialog), _("New folder"));
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
@@ -1067,12 +1098,13 @@ void button_newfolder_handler(GtkWidget *widget, gpointer data){
   gtk_box_pack_end(GTK_BOX(dialog_box), entry, false, false, 0);
 
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), _("Cancel"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
 
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Create");
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Create"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("folder-new-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
@@ -1106,7 +1138,7 @@ void button_newfolder_handler(GtkWidget *widget, gpointer data){
     if (should_create){
       if (mkdir_handler(path) != 0){
         char dialog_prompt[strlen(path) + 32];
-        sprintf(dialog_prompt, "Could not overwrite %s.", path);
+        sprintf(dialog_prompt, _("Could not overwrite %s."), path);
         gui_templates_message_dialog(dialog_prompt);
       }
     }
@@ -1126,7 +1158,7 @@ void button_rename_handler(GtkWidget *widget, gpointer data){
   const char *oldpath = folderstate_file_get_full_path_from_string(fs, name);
 
   char dialog_prompt[strlen(oldpath) + 128];
-  sprintf(dialog_prompt, "Rename %s:\n", oldpath);
+  sprintf(dialog_prompt, _("Rename %s:\n"), oldpath);
   GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
@@ -1137,12 +1169,13 @@ void button_rename_handler(GtkWidget *widget, gpointer data){
   gtk_box_pack_end(GTK_BOX(dialog_box), entry, false, false, 0);
 
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), _("Cancel"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
 
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Rename");
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Rename"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("document-edit", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
@@ -1177,7 +1210,7 @@ void button_rename_handler(GtkWidget *widget, gpointer data){
     if (should_rename){
       if (rename(oldpath, path) != 0){
         char dialog_prompt[strlen(path) + 32];
-        sprintf(dialog_prompt, "Could not overwrite %s.", path);
+        sprintf(dialog_prompt, _("Could not overwrite %s."), path);
         gui_templates_message_dialog(dialog_prompt);
       } else {
         #ifdef __unix__
@@ -1247,18 +1280,19 @@ void button_delete_handler(GtkWidget *widget, gpointer data){
 
   if (file_io_string_is_folder(path)){
     char dialog_prompt[strlen(path) + 128];
-    sprintf(dialog_prompt, "Folder %s contains %d files. Remove anyways?", path, file_io_folder_get_file_n(path, ""));
+    sprintf(dialog_prompt, _("Folder %s contains %d files. Remove anyways?"), path, file_io_folder_get_file_n(path, ""));
     GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
     gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
     gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
 
     GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+    gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), _("Cancel"));
     { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
     gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
     gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
 
     GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Delete");
+    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Delete"));
     gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
     // { GtkWidget *icon = gtk_image_new_from_icon_name("edit-delete", GTK_ICON_SIZE_MENU);
     // gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
@@ -1274,7 +1308,7 @@ void button_delete_handler(GtkWidget *widget, gpointer data){
     if (response == GTK_RESPONSE_OK){
       if (!file_io_rm_rf(path)){
         char dialog_prompt[strlen(path) + 128];
-        sprintf(dialog_prompt, "Error. Could not remove %s", path);
+        sprintf(dialog_prompt, _("Error. Could not remove %s"), path);
         GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, dialog_prompt);
         gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
         gtk_dialog_run(GTK_DIALOG(dialog));
@@ -1285,7 +1319,7 @@ void button_delete_handler(GtkWidget *widget, gpointer data){
     destroy(dialog, dialog);
   } else if (file_io_string_is_file(path)){
     char dialog_prompt[strlen(path) + 128];
-    sprintf(dialog_prompt, "Remove file '%s'? This cannot be undone!", path);
+    sprintf(dialog_prompt, _("Remove file '%s'? This cannot be undone!"), path);
     GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, dialog_prompt);
     gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
     gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
@@ -1296,7 +1330,7 @@ void button_delete_handler(GtkWidget *widget, gpointer data){
     gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
 
     GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Delete");
+    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Delete"));
     // { GtkWidget *icon = gtk_image_new_from_icon_name("edit-delete", GTK_ICON_SIZE_MENU);
     // gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
     GtkStyleContext *context = gtk_widget_get_style_context(dialog_button_ok);
@@ -1341,6 +1375,12 @@ void button_reload_handler(GtkWidget *widget, gpointer data){
 
 void draw_main_window_handler(GtkWidget *window, folderstate *fs){
   const char *widgetname = gtk_widget_get_name(window);
+
+
+  int *sigid = ((int *) g_object_get_data(G_OBJECT(window), CLAVIS_SIGNAL_KEYRELEASE_HANDLER_KEYNAV));
+  g_signal_handler_disconnect(G_OBJECT(window), *sigid);
+  free(sigid);
+
   if (strcmp(widgetname, CLAVIS_NORMAL_MODE_NAME) == 0){
     clavis_normal_draw_main_window(window, (gpointer) fs);
   } else if (strcmp(widgetname, CLAVIS_POPUP_MODE_NAME) == 0){
@@ -1358,6 +1398,7 @@ _Bool gui_templates_folder_button_from_string(GtkWidget *widget, const char *s, 
     folderstate_chdir(fs, s);
 
     GtkWidget *parent = gtk_widget_get_toplevel(widget);
+
     draw_main_window_handler(parent, fs);
     return true;
   } else if (file_io_string_is_file(pressed_fullpath)){
@@ -1382,6 +1423,7 @@ void folder_button_handler(GtkWidget *widget, gpointer data){
     folderstate_chdir(fs, pressed);
 
     GtkWidget *parent = gtk_widget_get_toplevel(widget);
+
     draw_main_window_handler(parent, fs);
   }
 
@@ -1468,7 +1510,7 @@ GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate 
       GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
 
       GtkWidget *button_rename = gtk_button_new();
-      gtk_widget_set_tooltip_text(button_rename, "Rename file");
+      gtk_widget_set_tooltip_text(button_rename, _("Rename file"));
       { GtkWidget *icon = gtk_image_new_from_icon_name("document-edit", GTK_ICON_SIZE_MENU);
       gtk_button_set_image(GTK_BUTTON(button_rename), icon); }
       gtk_button_set_always_show_image(GTK_BUTTON(button_rename), true);
@@ -1476,7 +1518,7 @@ GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate 
       g_signal_connect(button_rename, "pressed", G_CALLBACK(button_rename_handler), (gpointer) fs);
 
       GtkWidget *button_delete = gtk_button_new();
-      gtk_widget_set_tooltip_text(button_delete, "Delete");
+      gtk_widget_set_tooltip_text(button_delete, _("Delete"));
       { GtkWidget *icon = gtk_image_new_from_icon_name("edit-delete", GTK_ICON_SIZE_MENU);
       gtk_button_set_image(GTK_BUTTON(button_delete), icon); }
       gtk_button_set_always_show_image(GTK_BUTTON(button_delete), true);
@@ -1499,7 +1541,7 @@ GtkWidget *gui_templates_get_folder_scrollbox(GtkWidget *scrollbox, folderstate 
         gtk_button_set_image(GTK_BUTTON(button_edit), icon); }
         gtk_button_set_always_show_image(GTK_BUTTON(button_edit), true);
         gtk_widget_set_name(button_edit, file_list[i]);
-        gtk_widget_set_tooltip_text(button_edit, "Edit password");
+        gtk_widget_set_tooltip_text(button_edit, _("Edit password"));
         g_signal_connect(button_edit, "pressed", G_CALLBACK(button_newpassword_handler), (gpointer) fs);
         g_signal_connect(button_edit, "activate", G_CALLBACK(button_newpassword_handler), (gpointer) fs);
         gtk_box_pack_start(GTK_BOX(button_hbox), button_edit, false, false, 0);
@@ -1535,16 +1577,17 @@ int gui_templates_password_store_init_handler(){
     GtkWidget *dialog;
     int response;
 
-    dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Hey! It seems this is your first time running Clavis.\nInitialize Password Store?");
-    gtk_window_set_title(GTK_WINDOW(dialog), "Welcome to Clavis!");
+    dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, _("Hey! It seems this is your first time running Clavis.\nInitialize Password Store?"));
+    gtk_window_set_title(GTK_WINDOW(dialog), _("Welcome to Clavis!"));
     gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
     GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+    gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), _("Cancel"));
     { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
     gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
     gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
 
     GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Accept");
+    gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Accept"));
     { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
     gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
     gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
@@ -1588,7 +1631,7 @@ void gui_templates_fill_combo_box_with_gpg_keys(GtkWidget *combo){
 
 void gui_templates_export_key_handler(const char *key, _Bool private){
   #ifdef __unix__
-  GtkWidget *dialog = gtk_file_chooser_dialog_new("Save Keys", NULL, GTK_FILE_CHOOSER_ACTION_SAVE, "_Cancel", GTK_RESPONSE_CANCEL, "_Save", GTK_RESPONSE_ACCEPT, NULL);
+  GtkWidget *dialog = gtk_file_chooser_dialog_new(_("Save Keys"), NULL, GTK_FILE_CHOOSER_ACTION_SAVE, _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Save"), GTK_RESPONSE_ACCEPT, NULL);
 
   const char *cwd = getcwd(NULL, 0);
   const char *userhome = getenv("HOME");
@@ -1630,15 +1673,19 @@ void gui_templates_export_key_handler(const char *key, _Bool private){
   strcpy(filename, key);
 
   token = strchr(filename, '<');
-  if (token[0] == '<'){
+  if (token != NULL && token[0] == '<'){
     token[0] = '[';
   }
   token = strchr(filename, '>');
-  if (token[0] == '>'){
+  if (token != NULL && token[0] == '>'){
     token[0] = ']';
   }
+  token = strchr(filename, '\n');
+  if (token != NULL && token[0] == '\n'){
+    token[0] = '\0';
+  }
 
-  OPENFILENAMEA ofn;
+  OPENFILENAME ofn;
   memset(&ofn, 0, sizeof(ofn));
   ofn.lStructSize = sizeof(ofn);
   ofn.hwndOwner = NULL;
@@ -1646,7 +1693,7 @@ void gui_templates_export_key_handler(const char *key, _Bool private){
   ofn.lpstrFilter = "GPG key\0*.sec;*.pub;*.gpg;*.key\0\0";
   ofn.lpstrFile = filename;
   ofn.nMaxFile = MAX_PATH;
-  ofn.lpstrTitle = "Save your GPG key";
+  ofn.lpstrTitle = _("Save your GPG key");
   ofn.Flags = OFN_NONETWORKBUTTON | OFN_FILEMUSTEXIST;
 
   if (!GetSaveFileName(&ofn)){
@@ -1705,7 +1752,7 @@ void gui_templates_export_key_handler_label(GtkWidget *w, gpointer data){
 
 void gui_templates_import_key_handler(){
   #ifdef __unix__
-  GtkWidget *dialog = gtk_file_chooser_dialog_new("Open File", NULL, GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, NULL);
+  GtkWidget *dialog = gtk_file_chooser_dialog_new(_("Open File"), NULL, GTK_FILE_CHOOSER_ACTION_OPEN, _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Open"), GTK_RESPONSE_ACCEPT, NULL);
   int response = gtk_dialog_run(GTK_DIALOG(dialog));
   if (response == GTK_RESPONSE_ACCEPT){
     char *filename;
@@ -1752,7 +1799,7 @@ void gui_templates_import_key_handler(){
   ofn.lpstrFilter = "GPG Keys (.gpg, .sec, .pub, .key)\0*.sec;*.gpg;*.pub;*.key\0\0";
   ofn.lpstrFile = filename;
   ofn.nMaxFile = MAX_PATH;
-  ofn.lpstrTitle = "Select your GPG key";
+  ofn.lpstrTitle = _("Select your GPG key");
   ofn.Flags = OFN_NONETWORKBUTTON | OFN_FILEMUSTEXIST;
 
   if (!GetOpenFileName(&ofn)){
@@ -1810,17 +1857,18 @@ void gui_templates_import_key_handler(){
   #endif
 }
 int gui_templates_create_key_handler(){
-  GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Configure your new GPG key:");
-  gtk_window_set_title(GTK_WINDOW(dialog), "Clavis Master Key creation");
+  GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, _("Configure your new GPG key:"));
+  gtk_window_set_title(GTK_WINDOW(dialog), _("Clavis Master Key creation"));
 
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
 
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), _("Cancel"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Create key");
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Create key"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
@@ -1863,20 +1911,20 @@ int gui_templates_create_key_handler(){
   //Pack
   //KEY TYPE VBOX
   combo_keytype = gtk_combo_box_text_new();
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_keytype), NULL, "RSA and DSA (default)");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_keytype), NULL, "DSA and ElGamal");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_keytype), NULL, _("RSA and DSA (default)"));
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_keytype), NULL, _("DSA and ElGamal"));
   gtk_combo_box_set_active(GTK_COMBO_BOX(combo_keytype), 0);
-  GtkWidget *label_keytype = gtk_label_new("Choose key type:");
+  GtkWidget *label_keytype = gtk_label_new(_("Choose key type:"));
   keytype_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
   gtk_box_pack_start(GTK_BOX(keytype_vbox), label_keytype, true, true, 0);
   gtk_box_pack_start(GTK_BOX(keytype_vbox), combo_keytype, true, true, 0);
 
   //KEY LENGTH VBOX
   entry_keylen = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_keylen), "Key length");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_keylen), _("Key length"));
   gtk_entry_set_text(GTK_ENTRY(entry_keylen), "4096");
   gtk_entry_set_width_chars(GTK_ENTRY(entry_keylen), 6);
-  GtkWidget *label_keylen = gtk_label_new("Key size:");
+  GtkWidget *label_keylen = gtk_label_new(_("Key size:"));
   keylen_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
   gtk_box_pack_start(GTK_BOX(keylen_vbox), label_keylen, true, true, 0);
   gtk_box_pack_start(GTK_BOX(keylen_vbox), entry_keylen, true, true, 0);
@@ -1886,16 +1934,16 @@ int gui_templates_create_key_handler(){
   gtk_box_pack_start(GTK_BOX(top_hbox), keylen_vbox, true, true, 0);
 
   //EXPIRATION
-  GtkWidget *label_expiration = gtk_label_new("Set expiration (0 = eternal)");
+  GtkWidget *label_expiration = gtk_label_new(_("Set expiration (0 = eternal)"));
 
   entry_expiration_n = gtk_entry_new();
   gtk_entry_set_text(GTK_ENTRY(entry_expiration_n), "0");
 
   combo_expiration_type = gtk_combo_box_text_new();
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, "Days");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, "Weeks");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, "Months");
-  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, "Years");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, _("Days"));
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, _("Weeks"));
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, _("Months"));
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo_expiration_type), NULL, _("Years"));
   gtk_combo_box_set_active(GTK_COMBO_BOX(combo_expiration_type), 3);
 
   expiration_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
@@ -1908,13 +1956,13 @@ int gui_templates_create_key_handler(){
 
 
   //PERSONAL INFO
-  GtkWidget *label_personal = gtk_label_new("Personal information:");
+  GtkWidget *label_personal = gtk_label_new(_("Personal information:"));
   entry_name = gtk_entry_new();
   entry_email = gtk_entry_new();
   entry_comment = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_name), "Your name");
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_email), "Key name");
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_comment), "Comment (Optional)");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_name), _("Your name"));
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_email), _("Key name"));
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_comment), _("Comment (Optional)"));
 
   name_email_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   gtk_box_pack_start(GTK_BOX(name_email_hbox), entry_name, true, true, 0);
@@ -1927,7 +1975,7 @@ int gui_templates_create_key_handler(){
 
   //KEY PASSWORD
   GtkWidget *display_password_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-  check_password_visibility = gtk_check_button_new_with_label("Display password");
+  check_password_visibility = gtk_check_button_new_with_label(_("Display password"));
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_password_visibility), false);
   gtk_box_pack_start(GTK_BOX(display_password_hbox), check_password_visibility, true, false, 0);
   password_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
@@ -1936,22 +1984,22 @@ int gui_templates_create_key_handler(){
   gtk_entry_set_visibility(GTK_ENTRY(entry_password_1), false);
   g_signal_connect(check_password_visibility, "toggled", G_CALLBACK(toggle_visibility_handler), (gpointer) entry_password_1);
   gtk_box_pack_start(GTK_BOX(password_hbox), entry_password_1, true, true, 0);
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password_1), "Password");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password_1), _("Password"));
 
   entry_password_2 = gtk_entry_new();
   gtk_entry_set_visibility(GTK_ENTRY(entry_password_2), false);
   g_signal_connect(check_password_visibility, "toggled", G_CALLBACK(toggle_visibility_handler), (gpointer) entry_password_2);
   gtk_box_pack_start(GTK_BOX(password_hbox), entry_password_2, true, true, 0);
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password_2), "Repeat password");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password_2), _("Repeat password"));
 
-  GtkWidget *password_label = gtk_label_new("Set key's password:");
+  GtkWidget *password_label = gtk_label_new(_("Set key's password:"));
   password_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
   gtk_box_pack_start(GTK_BOX(password_vbox), password_label, false, false, 0);
   gtk_box_pack_start(GTK_BOX(password_vbox), password_hbox, false, false, 0);
   gtk_box_pack_start(GTK_BOX(password_vbox), display_password_hbox, false, false, 0);
 
   //Advanced frame
-  show_advanced_config = gtk_check_button_new_with_label("Show advanced configuration");
+  show_advanced_config = gtk_check_button_new_with_label(_("Show advanced configuration"));
   GtkWidget *frame_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
   GtkWidget *advanced_check_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   gtk_box_pack_start(GTK_BOX(advanced_check_hbox), show_advanced_config, true, false, 0);
@@ -2000,55 +2048,55 @@ int gui_templates_create_key_handler(){
     }
 
     if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_keylen))) < 3){
-      GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Key length must be a 3+ digit number");
+      GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, _("Key length must be a 3+ digit number"));
       gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
 
       GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
-      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Okay"));
       gtk_dialog_run(GTK_DIALOG(dialog_failure));
       destroy(dialog_failure, dialog_failure);
       valid_key = false;
     }
 
     if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_name))) <=4){
-      GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Name must be at least 5 letters long.");
+      GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, _("Name must be at least 5 letters long."));
       gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
 
       GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
-      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Okay"));
       gtk_dialog_run(GTK_DIALOG(dialog_failure));
       destroy(dialog_failure, dialog_failure);
       valid_key = false;
     }
 
     if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_email))) <=4){
-      GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Key name must be at least 5 letters long");
+      GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, _("Key name must be at least 5 letters long"));
       gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
 
       GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
-      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Okay"));
       gtk_dialog_run(GTK_DIALOG(dialog_failure));
       destroy(dialog_failure, dialog_failure);
       valid_key = false;
     }
 
     if (strlen(gtk_entry_get_text(GTK_ENTRY(entry_password_1))) == 0){
-      GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Please enter a password");
+      GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, _("Please enter a password"));
       gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
 
       GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
-      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Okay"));
       gtk_dialog_run(GTK_DIALOG(dialog_failure));
       destroy(dialog_failure, dialog_failure);
       valid_key = false;
     }
 
     if (strcmp(gtk_entry_get_text(GTK_ENTRY(entry_password_1)), gtk_entry_get_text(GTK_ENTRY(entry_password_2))) != 0){
-      GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, "Your passwords do not match!");
+      GtkWidget *dialog_failure = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK, _("Your passwords do not match!"));
       gtk_container_set_border_width(GTK_CONTAINER(dialog_failure), 10);
 
       GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog_failure), GTK_RESPONSE_OK);
-      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Okay");
+      gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Okay"));
       gtk_dialog_run(GTK_DIALOG(dialog_failure));
       destroy(dialog_failure, dialog_failure);
       valid_key = false;
@@ -2224,17 +2272,18 @@ int gui_templates_initialize_password_store(){
   int response;
 
   //Chose key
-  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Choose a GPG key, import one or create a new one.");
-  gtk_window_set_title(GTK_WINDOW(dialog), "Select your Clavis Master Key");
+  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, _("Choose a GPG key, import one or create a new one."));
+  gtk_window_set_title(GTK_WINDOW(dialog), _("Select your Clavis Master Key"));
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
 
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), _("Cancel"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Confirm selection");
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Confirm selection"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
@@ -2278,7 +2327,7 @@ int gui_templates_initialize_password_store(){
   //Instance
   key_combo_box = gtk_combo_box_text_new();
 
-  button_import = gtk_button_new_with_label("Import key");
+  button_import = gtk_button_new_with_label(_("Import key"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("insert-object-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_import), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(button_import), true);
@@ -2287,14 +2336,14 @@ int gui_templates_initialize_password_store(){
   g_signal_connect(button_import, "pressed", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
   g_signal_connect(button_import, "activate", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
 
-  button_export = gtk_button_new_with_label("Export key");
+  button_export = gtk_button_new_with_label(_("Export key"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("document-save-as-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_export), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(button_export), true);
   g_signal_connect(button_export, "pressed", G_CALLBACK(gui_templates_export_key_handler_combobox), (gpointer) key_combo_box);
   g_signal_connect(button_export, "activate", G_CALLBACK(gui_templates_export_key_handler_combobox), (gpointer) key_combo_box);
 
-  button_create = gtk_button_new_with_label("Create new key");
+  button_create = gtk_button_new_with_label(_("Create new key"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("document-new-symbolic", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(button_create), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(button_create), true);
@@ -2326,12 +2375,12 @@ int gui_templates_initialize_password_store(){
 
   //Git config
   //User Config
-  label_username = gtk_label_new("Git username");
-  label_email = gtk_label_new("Git email");
+  label_username = gtk_label_new(_("Git username"));
+  label_email = gtk_label_new(_("Git email"));
   entry_username = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_username), "Git username");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_username), _("Git username"));
   entry_email = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_email), "Git email");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_email), _("Git email"));
 
   user_git_name = file_io_get_git_config_field("user.name");
   user_git_email = file_io_get_git_config_field("user.email");
@@ -2357,9 +2406,9 @@ int gui_templates_initialize_password_store(){
   gtk_box_pack_start(GTK_BOX(name_email_hbox), mail_vbox, true, true, 0);
 
   //Repo config
-  label_repo_url = gtk_label_new("Git repo URL");
+  label_repo_url = gtk_label_new(_("Git repo URL"));
   entry_repo_url = gtk_entry_new();
-  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_repo_url), "Git repo URL");
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_repo_url), _("Git repo URL"));
 
   user_git_repo = file_io_get_git_config_field("remote.origin.url");
   if (user_git_repo != NULL){
@@ -2368,8 +2417,8 @@ int gui_templates_initialize_password_store(){
   }
 
   //Toggles
-  toggle_git_server = gtk_check_button_new_with_label("Use git server");
-  toggle_create_new = gtk_check_button_new_with_label("Create new repo");
+  toggle_git_server = gtk_check_button_new_with_label(_("Use git server"));
+  toggle_create_new = gtk_check_button_new_with_label(_("Create new repo"));
   toggle_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   gtk_box_pack_start(GTK_BOX(toggle_hbox), toggle_git_server, true, false, 0);
   gtk_box_pack_start(GTK_BOX(toggle_hbox), toggle_create_new, true, false, 0);
@@ -2385,7 +2434,7 @@ int gui_templates_initialize_password_store(){
 
 
   //Toggle for git
-  GtkWidget *show_git_config = gtk_check_button_new_with_label("Git server settings");
+  GtkWidget *show_git_config = gtk_check_button_new_with_label(_("Git server settings"));
   GtkWidget *git_check_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   gtk_box_pack_start(GTK_BOX(git_check_hbox), show_git_config, true, false, 0);
   g_signal_connect(show_git_config, "toggled", G_CALLBACK(gui_templates_toggle_widget_visible_handler), (gpointer) git_frame_vbox);
@@ -2454,7 +2503,7 @@ int gui_templates_initialize_password_store(){
 void gui_templates_show_password_store_info_window(GtkWidget *w, gpointer data){
   GtkWindow *window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
 
-  gtk_window_set_title(window, "Password Store data");
+  gtk_window_set_title(window, _("Password Store data"));
   gtk_window_set_resizable(window, false);
   gtk_container_set_border_width(GTK_CONTAINER(window), 10);
   gtk_window_set_default_size(GTK_WINDOW(window), 320, 0);
@@ -2472,7 +2521,7 @@ void gui_templates_show_password_store_info_window(GtkWidget *w, gpointer data){
   gtk_entry_set_text(GTK_ENTRY(entry_pass_dir), getcwd(NULL, 0));
 
   main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-  gtk_box_pack_start(GTK_BOX(main_vbox), gtk_label_new("Password Store directory"), false, false, 0);
+  gtk_box_pack_start(GTK_BOX(main_vbox), gtk_label_new(_("Password Store directory")), false, false, 0);
   gtk_box_pack_start(GTK_BOX(main_vbox), entry_pass_dir, false, false, 0);
 
   //Showing window
@@ -2480,10 +2529,185 @@ void gui_templates_show_password_store_info_window(GtkWidget *w, gpointer data){
   gtk_widget_show_all(GTK_WIDGET(window));
 }
 
+void gui_templates_get_credits_hbox(const char *text_feature, const char *detail,
+                                          const char *credits[], const char *webs[], int ncredits,
+                                          GtkWidget *left_vbox, GtkWidget *right_vbox){
+  GtkWidget *feature_label;
+  if (detail != NULL){
+    char translation_text[strlen(text_feature) + strlen(detail) + 8];
+    sprintf(translation_text, text_feature, detail);
+    feature_label = gtk_label_new(translation_text);
+  } else {
+    feature_label = gtk_label_new(text_feature);
+  }
+
+  gtk_label_set_xalign(GTK_LABEL(feature_label), 1);
+  gtk_box_pack_start(GTK_BOX(left_vbox), feature_label, 0, true, false);
+
+  for (int i = 0; i < ncredits; i++){
+    const char *labeltext;
+    GtkWidget *label;
+    if (webs[i] == NULL){
+      labeltext = credits[i];
+      label = gtk_label_new(labeltext);
+    } else {
+      char *html = malloc(strlen(webs[i]) + strlen(credits[i]) + 32);
+      sprintf(html, "<a href=\"%s\">%s</a>", webs[i], credits[i]);
+      labeltext = html;
+
+      label = gtk_label_new(NULL);
+      gtk_label_set_markup(GTK_LABEL(label), labeltext);
+    }
+
+    gtk_label_set_xalign(GTK_LABEL(label), 0);
+    gtk_box_pack_start(GTK_BOX(right_vbox), label, 0, true, false);
+  }
+
+  for (int i = 0; i < ncredits-1; i++){
+    GtkWidget *label = gtk_label_new(NULL);
+    gtk_box_pack_start(GTK_BOX(left_vbox), label, 0, true, false);
+  }
+}
+
+void gui_templates_window_license(GtkWidget *w, gpointer data){
+  char *license_buffer = file_io_get_clavis_license_file_buffer();
+  if (license_buffer == NULL){
+    return;
+  }
+
+  GtkWindow *wdw = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
+  gtk_window_set_title(wdw, _("Clavis License"));
+  // gtk_window_set_resizable(wdw, false);
+  gtk_container_set_border_width(GTK_CONTAINER(wdw), 10);
+  gtk_window_set_default_size(GTK_WINDOW(wdw), 700, 800);
+
+  gtk_window_set_position(GTK_WINDOW(wdw), GTK_WIN_POS_CENTER);
+
+  //Boxes
+  GtkWidget *scrollbox = gtk_scrolled_window_new(NULL, NULL);
+
+  GtkWidget *text_view = gtk_text_view_new();
+  GtkTextBuffer *bf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
+  gtk_text_buffer_set_text(bf, license_buffer, -1);
+  gtk_text_view_set_editable(GTK_TEXT_VIEW(text_view), false);
+  // gtk_text_view_set_justification(GTK_TEXT_VIEW(text_view), GTK_JUSTIFY_CENTER);
+  PangoFontDescription *monospace = pango_font_description_from_string("monospace");
+  gtk_widget_override_font(text_view, monospace);
+
+  gtk_container_add(GTK_CONTAINER(scrollbox), text_view);
+
+
+  gtk_container_add(GTK_CONTAINER(wdw), scrollbox);
+  gtk_widget_show_all(GTK_WIDGET(wdw));
+
+  // free(license_buffer);
+}
+
+void gui_templates_window_credits(GtkWidget *w, gpointer data){
+  GtkWindow *wdw = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
+  gtk_window_set_title(wdw, _("Clavis acknowledgements"));
+  gtk_window_set_resizable(wdw, false);
+  gtk_container_set_border_width(GTK_CONTAINER(wdw), 10);
+  // gtk_window_set_default_size(GTK_WINDOW(wdw), 420, 0);
+
+  gtk_window_set_position(GTK_WINDOW(wdw), GTK_WIN_POS_CENTER);
+
+  GtkWidget *left_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  GtkWidget *right_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+
+  const char *text_translationby = _("%s translation by:");
+  const char *original_text_by   = _("Original text in %s by:");
+  const char *developed_by       = _("Program developed by:");
+  const char *artwork_by         = _("Artwork by:");
+
+  //Languages:
+  const char *spanish = _("Spanish");
+  const char *english = _("English");
+  const char *catalan = _("Catalan");
+  const char *russian = _("Russian");
+
+  //People:
+  const char *manel_castillo      = "Manel Castillo Giménez";
+  const char *manel_castillo_w    = "https://github.com/ManelCG/";
+  const char *polina_chainikova   = "Polina Chainikova";
+  const char *polina_chainikova_w = "https://github.com/polinatea";
+
+  //Boxes
+  GtkWidget *main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+
+  {
+    GtkWidget *label_app_name = gtk_label_new(NULL);
+    gtk_label_set_markup(GTK_LABEL(label_app_name), _("<b>Clavis</b>"));
+    gtk_box_pack_start(GTK_BOX(main_vbox), label_app_name, 0, true, true);
+  }
+
+  //Program Credits
+  {
+    const char *credits[] = {manel_castillo};
+    const char *webs[] = {manel_castillo_w};
+    gui_templates_get_credits_hbox(developed_by, NULL, credits, webs, 1, left_vbox, right_vbox);
+  }
+
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(left_vbox), separator, false, false, 5);}
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(right_vbox), separator, false, false, 5);}
+
+  //Translation Credits
+  {
+    const char *language = english;
+    const char *credits[] = {manel_castillo};
+    const char *webs[] = {manel_castillo_w};
+    gui_templates_get_credits_hbox(original_text_by, language, credits, webs, 1, left_vbox, right_vbox);
+  }
+  {
+    const char *language = russian;
+    const char *credits[] = {polina_chainikova};
+    const char *webs[] = {polina_chainikova_w};
+    gui_templates_get_credits_hbox(text_translationby, language, credits, webs, 1, left_vbox, right_vbox);
+  }
+  {
+    const char *language = spanish;
+    const char *credits[] = {manel_castillo};
+    const char *webs[] = {manel_castillo_w};
+    gui_templates_get_credits_hbox(text_translationby, language, credits, webs, 1, left_vbox, right_vbox);
+  }
+  {
+    const char *language = catalan;
+    const char *credits[] = {manel_castillo};
+    const char *webs[] = {manel_castillo_w};
+    gui_templates_get_credits_hbox(text_translationby, language, credits, webs, 1, left_vbox, right_vbox);
+  }
+
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(left_vbox), separator, false, false, 5);}
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(right_vbox), separator, false, false, 5);}
+
+  //Artwork
+  {
+    const char *credits[] = {"Manel Castillo Giménez"};
+    const char *webs[] = {"https://github.com/ManelCG"};
+    gui_templates_get_credits_hbox(artwork_by, NULL, credits, webs, 1, left_vbox, right_vbox);
+  }
+
+
+  gtk_box_pack_start(GTK_BOX(hbox), left_vbox, 0, true, true);
+  gtk_box_pack_end(GTK_BOX(hbox), right_vbox, 0, true, true);
+
+  gtk_box_pack_end(GTK_BOX(main_vbox), hbox, 0, true, true);
+
+
+  gtk_container_add(GTK_CONTAINER(wdw), main_vbox);
+  gtk_widget_show_all(GTK_WIDGET(wdw));
+
+}
+
 void gui_templates_show_about_window(GtkWidget *w, gpointer data){
   GtkWindow *window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
 
-  gtk_window_set_title(window, "About Clavis");
+  gtk_window_set_title(window, _("About Clavis"));
   gtk_window_set_resizable(window, false);
   gtk_container_set_border_width(GTK_CONTAINER(window), 10);
   gtk_window_set_default_size(GTK_WINDOW(window), 420, 0);
@@ -2509,33 +2733,35 @@ void gui_templates_show_about_window(GtkWidget *w, gpointer data){
   GtkWidget *image = gtk_image_new_from_pixbuf(pixbuf);
 
   label_app_name = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label_app_name), "<b>Clavis</b>");
+  gtk_label_set_markup(GTK_LABEL(label_app_name), _("<b>Clavis</b>"));
 
   label_version = gtk_label_new(CLAVIS_VERSION);
 
-  label_description = gtk_label_new("Clavis is an easy to use Password Manager.");
+  label_description = gtk_label_new(_("Clavis is an easy to use Password Manager."));
   gtk_label_set_justify(GTK_LABEL(label_description),GTK_JUSTIFY_CENTER);
   gtk_label_set_line_wrap(GTK_LABEL(label_description), true);
   gtk_label_set_max_width_chars(GTK_LABEL(label_description), 50);
   gtk_label_set_width_chars(GTK_LABEL(label_description), 50);
 
-  const char *label_git_repo_text = "<a href=\"https://github.com/ManelCG/clavis\"> Github repository</a>";
+  const char *label_git_repo_text = _("<a href=\"https://github.com/ManelCG/clavis\">Github repository</a>");
   label_git_repo = gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(label_git_repo), label_git_repo_text);
-  gtk_widget_set_tooltip_text(label_git_repo, "Go to the Clavis Github repository");
+  gtk_widget_set_tooltip_text(label_git_repo, _("Go to the Clavis Github repository"));
 
   label_copyright_manel = gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label_copyright_manel), "<small>Copyright © Manel Castillo Giménez</small>");
+  gtk_label_set_markup(GTK_LABEL(label_copyright_manel), _("<small>Copyright © Manel Castillo Giménez</small>"));
 
-  button_close = gtk_button_new_with_label("Close");
+  button_close = gtk_button_new_with_label(_("Close"));
   gtk_widget_set_size_request(button_close, GUI_TEMPLATES_BUTTON_WIDTH, 0);
   g_signal_connect(button_close, "clicked", G_CALLBACK(destroy), (gpointer) window);
 
-  button_credits = gtk_button_new_with_label("Credits");
+  button_credits = gtk_button_new_with_label(_("Credits"));
   gtk_widget_set_size_request(button_credits, GUI_TEMPLATES_BUTTON_WIDTH, 0);
+  g_signal_connect(GTK_BUTTON(button_credits), "pressed", G_CALLBACK(gui_templates_window_credits), NULL);
 
-  button_license = gtk_button_new_with_label("License");
+  button_license = gtk_button_new_with_label(_("License"));
   gtk_widget_set_size_request(button_license, GUI_TEMPLATES_BUTTON_WIDTH, 0);
+  g_signal_connect(GTK_BUTTON(button_license), "pressed", G_CALLBACK(gui_templates_window_license), NULL);
 
   final_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   gtk_box_pack_start(GTK_BOX(final_hbox), button_credits, false, false, 0);

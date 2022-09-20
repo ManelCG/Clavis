@@ -1,6 +1,10 @@
 .obj/
+.wobj/
+.debug_obj/
 build
 debug
 releases/
 *Thumbs.db
 *Thumbs.db:encryptable
+*.po~
+*.pot~

@@ -1,8 +1,32 @@
+/*
+ *  Clavis
+ *  Copyright (C) 2022  Manel Castillo Giménez <manelcg@protonmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 #include <file_io.h>
+
+#include <libintl.h>
+#include <locale.h>
+
+#include <clavis_macros.h>
 
 #include <folderstate.h>
 
@@ -150,7 +174,7 @@ const char *folderstate_get_path_shortname(folderstate *fs){
   char *path;
   if (strcmp(fs->path, ".") == 0){
     path = calloc(sizeof(char) * 32, 1);
-    strcpy(path, "Password Store");
+    strcpy(path, _("Password Store"));
   } else {
     path = calloc(sizeof(char) * (strlen(fs->path)+8), 1);
     int nslashes = 0;

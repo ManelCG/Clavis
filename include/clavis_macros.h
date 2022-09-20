@@ -17,11 +17,19 @@
  *
  */
 
-#ifndef __CLAVIS_NORMAL_H_
-#define __CLAVIS_NORMAL_H_
+#ifndef __CLAVIS_MACROS_H_
+#define __CLAVIS_MACROS_H_
 
-int clavis_normal_main(int argc, char *argv[]);
+#include <file_io.h>
+#include <gtk/gtk.h>
 
-void clavis_normal_draw_main_window(GtkWidget *, gpointer);
+#ifdef __unix__
+#define _(String) gettext(String)
+#elif defined(_WIN32) || defined (WIN32)
+//windows_string() is defined in src/file_io.c and changes the format of string
+//From single-char utf-8 special characters to wide multi-byte characters
+//that windows understands
+#define _(String) windows_string(gettext(String))
+#endif
 
-#endif //_CLAVIS_NORMAL_H_
+#endif //_CLAVIS_MACROS_H_

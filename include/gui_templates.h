@@ -1,3 +1,22 @@
+/*
+ *  Clavis
+ *  Copyright (C) 2022  Manel Castillo Giménez <manelcg@protonmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
+
 #ifndef __GUI_TEMPLATES_H_
 #define __GUI_TEMPLATES_H_
 
@@ -36,6 +55,8 @@ void menu_button_export_gpg_handler(GtkWidget *, gpointer);
 //Special windows
 void gui_templates_show_password_store_info_window(GtkWidget *, gpointer);
 void gui_templates_show_about_window(GtkWidget *, gpointer);
+void gui_templates_window_credits(GtkWidget *w, gpointer data);
+void gui_templates_window_license(GtkWidget *w, gpointer data);
 
 _Bool gui_templates_overwrite_confirmation(const char *path);
 void gui_templates_message_dialog(const char *message);

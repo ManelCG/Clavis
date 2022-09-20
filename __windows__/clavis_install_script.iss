@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Clavis"
-#define MyAppVersion "1.2.2"
+#define MyAppVersion "1.3.0"
 #define MyAppPublisher "Manel Castillo Gimenez"
 #define MyAppURL "https://github.com/ManelCG/Clavis"
 #define MyAppExeName "clavis.exe"
@@ -75,8 +75,10 @@ Source: "G:\clavis\build\libstdc++-6.dll"; DestDir: "{app}"; Flags: ignoreversio
 Source: "G:\clavis\build\libthai-0.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "G:\clavis\build\libwinpthread-1.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "G:\clavis\build\zlib1.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "G:\clavis\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 Source: "G:\clavis\__windows__\windows_assets\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 Source: "G:\clavis\assets\*"; DestDir: "{app}\assets\"; Flags: ignoreversion recursesubdirs
+Source: "G:\clavis\locale\*"; DestDir: "{app}\locale\"; Flags: ignoreversion recursesubdirs
 Source: "G:\clavis\__windows__\windows_configs\*"; DestDir: "{userappdata}\Clavis\"; Flags: ignoreversion recursesubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

@@ -1,3 +1,22 @@
+/*
+ *  Clavis
+ *  Copyright (C) 2022  Manel Castillo Giménez <manelcg@protonmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
+
 #include <sys/stat.h>
 #include <dirent.h>
 
@@ -9,6 +28,11 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
+
+#include <libintl.h>
+#include <locale.h>
+
+#include <clavis_macros.h>
 
 #ifdef __unix__
 #include <sys/wait.h>
@@ -261,9 +285,9 @@ int file_io_init_git_server(const char *username, const char *email, const char 
         close(p[0]);
 
         wait(NULL);
-        printf("Writing credentials:\n%s\n", credentials);
+        printf(_("Writing credentials:\n%s\n"), credentials);
         write(p[1], credentials, strlen(credentials));
-        printf("Done\n");
+        printf("_(Done\n");
         close(p[1]);
         free(credentials);
       }
@@ -473,7 +497,6 @@ int file_io_get_git_auth_method_from_string(const char *url){
     return CLAVIS_GIT_AUTH_HTTPS;
   }
 
-  printf("Suka\n");
   return CLAVIS_GIT_NONE;
 }
 
@@ -1923,7 +1946,8 @@ char *file_io_get_clavis_folder(){
   return ret;
   #elif defined __unix__
   ret = malloc(sizeof(char) * 1024);
-  readlink("/proc/self/exe", ret, 1023);
+  int written = readlink("/proc/self/exe", ret, 1023);
+  ret[written] = '\0';
   char *token = strrchr(ret, '/');
   if (token[0] == '/'){
     token[0] = '\0';
@@ -1959,3 +1983,64 @@ char *file_io_get_clavis_executable(){
   return ret;
   #endif
 }
+
+char *file_io_get_clavis_license_file_buffer(){
+  #ifdef __unix__
+  char *folder = file_io_get_clavis_folder();
+  char *license = malloc((strlen(folder) + strlen("LICENSE") + 8) * sizeof(char));
+  sprintf(license, "%s/%s", folder, "LICENSE");
+
+  size_t size;
+  FILE *fp = fopen(license, "r");
+  fseek(fp, 0L, SEEK_END);
+  size = ftell(fp);
+  fseek(fp, 0L, SEEK_SET);
+
+  char *buffer = malloc(sizeof(char) * size);
+  fread(buffer, 1, size, fp);
+
+  fclose(fp);
+  #elif defined(_WIN32) || defined (WIN32)
+  char *folder = file_io_get_clavis_folder();
+  char *license = malloc((strlen(folder) + strlen("LICENSE") + 8) * sizeof(char));
+  sprintf(license, "%s\\%s", folder, "LICENSE");
+
+  HANDLE hFile;
+  hFile = CreateFile(license,
+                     GENERIC_READ,
+                     FILE_SHARE_READ,
+                     NULL,
+                     OPEN_EXISTING,
+                     FILE_ATTRIBUTE_NORMAL,
+                     NULL);
+
+  if (hFile == INVALID_HANDLE_VALUE){
+    return NULL;
+  }
+
+  size_t size = GetFileSize(hFile, NULL);
+  char *buffer = malloc(sizeof(char) * size);
+
+  ReadFile(hFile, buffer, size, NULL, NULL);
+  CloseHandle(hFile);
+  #endif
+
+  free(license);
+  free(folder);
+
+  return buffer;
+}
+
+#if defined(_WIN32) || defined (WIN32)
+char *windows_string(const char *s){
+  size_t size = mbstowcs(NULL, s, 0);
+  wchar_t *wide = malloc(sizeof(wchar_t) * (size + 2));
+  size = mbstowcs(wide, s, size);
+  wide[size] = '\0';
+  wide[size+1] = '\0';
+
+  char *ret = g_utf16_to_utf8(wide, -1, NULL, NULL, NULL);
+  free(wide);
+  return ret;
+}
+#endif
