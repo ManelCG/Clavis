@@ -6,5 +6,5 @@ debug
 releases/
 *Thumbs.db
 *Thumbs.db:encryptable
-locale/*.po~
-locale/*.pot~
+*.po~
+*.pot~
