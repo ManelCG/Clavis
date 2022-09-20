@@ -39,6 +39,7 @@ int file_io_remove_password(const char *path);
 
 char *file_io_get_clavis_executable();
 char *file_io_get_clavis_folder();
+char *file_io_get_clavis_license_file_buffer();
 
 #ifdef __unix__
 #ifndef MAKE_INSTALL

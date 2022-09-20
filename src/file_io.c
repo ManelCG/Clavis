@@ -1965,6 +1965,53 @@ char *file_io_get_clavis_executable(){
   #endif
 }
 
+char *file_io_get_clavis_license_file_buffer(){
+  #ifdef __unix__
+  char *folder = file_io_get_clavis_folder();
+  char *license = malloc((strlen(folder) + strlen("LICENSE") + 8) * sizeof(char));
+  sprintf(license, "%s/%s", folder, "LICENSE");
+
+  size_t size;
+  FILE *fp = fopen(license, "r");
+  fseek(fp, 0L, SEEK_END);
+  size = ftell(fp);
+  fseek(fp, 0L, SEEK_SET);
+
+  char *buffer = malloc(sizeof(char) * size);
+  fread(buffer, 1, size, fp);
+
+  fclose(fp);
+  #elif defined(_WIN32) || defined (WIN32)
+  char *folder = file_io_get_clavis_folder();
+  char *license = malloc((strlen(folder) + strlen("LICENSE") + 8) * sizeof(char));
+  sprintf(license, "%s\\%s", folder, "LICENSE");
+
+  HANDLE hFile;
+  hFile = CreateFile(license,
+                     GENERIC_READ,
+                     FILE_SHARE_READ,
+                     NULL,
+                     OPEN_EXISTING,
+                     FILE_ATTRIBUTE_NORMAL,
+                     NULL);
+
+  if (hFile == INVALID_HANDLE_VALUE){
+    return NULL;
+  }
+
+  size_t size = GetFileSize(hFile, NULL);
+  char *buffer = malloc(sizeof(char) * size);
+
+  ReadFile(hFile, buffer, size, NULL, NULL);
+  CloseHandle(hFile);
+  #endif
+
+  free(license);
+  free(folder);
+
+  return buffer;
+}
+
 #if defined(_WIN32) || defined (WIN32)
 char *windows_string(const char *s){
   size_t size = mbstowcs(NULL, s, 0);

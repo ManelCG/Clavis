@@ -36,6 +36,8 @@ void menu_button_export_gpg_handler(GtkWidget *, gpointer);
 //Special windows
 void gui_templates_show_password_store_info_window(GtkWidget *, gpointer);
 void gui_templates_show_about_window(GtkWidget *, gpointer);
+void gui_templates_window_credits(GtkWidget *w, gpointer data);
+void gui_templates_window_license(GtkWidget *w, gpointer data);
 
 _Bool gui_templates_overwrite_confirmation(const char *path);
 void gui_templates_message_dialog(const char *message);

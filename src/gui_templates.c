@@ -2535,6 +2535,40 @@ void gui_templates_get_credits_hbox(const char *text_feature, const char *detail
   }
 }
 
+void gui_templates_window_license(GtkWidget *w, gpointer data){
+  char *license_buffer = file_io_get_clavis_license_file_buffer();
+  if (license_buffer == NULL){
+    return;
+  }
+
+  GtkWindow *wdw = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
+  gtk_window_set_title(wdw, _("Clavis License"));
+  // gtk_window_set_resizable(wdw, false);
+  gtk_container_set_border_width(GTK_CONTAINER(wdw), 10);
+  gtk_window_set_default_size(GTK_WINDOW(wdw), 700, 800);
+
+  gtk_window_set_position(GTK_WINDOW(wdw), GTK_WIN_POS_CENTER);
+
+  //Boxes
+  GtkWidget *scrollbox = gtk_scrolled_window_new(NULL, NULL);
+
+  GtkWidget *text_view = gtk_text_view_new();
+  GtkTextBuffer *bf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
+  gtk_text_buffer_set_text(bf, license_buffer, -1);
+  gtk_text_view_set_editable(GTK_TEXT_VIEW(text_view), false);
+  // gtk_text_view_set_justification(GTK_TEXT_VIEW(text_view), GTK_JUSTIFY_CENTER);
+  PangoFontDescription *monospace = pango_font_description_from_string("monospace");
+  gtk_widget_override_font(text_view, monospace);
+
+  gtk_container_add(GTK_CONTAINER(scrollbox), text_view);
+
+
+  gtk_container_add(GTK_CONTAINER(wdw), scrollbox);
+  gtk_widget_show_all(GTK_WIDGET(wdw));
+
+  // free(license_buffer);
+}
+
 void gui_templates_window_credits(GtkWidget *w, gpointer data){
   GtkWindow *wdw = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
   gtk_window_set_title(wdw, _("Clavis acknowledgements"));
@@ -2693,6 +2727,7 @@ void gui_templates_show_about_window(GtkWidget *w, gpointer data){
 
   button_license = gtk_button_new_with_label(_("License"));
   gtk_widget_set_size_request(button_license, GUI_TEMPLATES_BUTTON_WIDTH, 0);
+  g_signal_connect(GTK_BUTTON(button_license), "pressed", G_CALLBACK(gui_templates_window_license), NULL);
 
   final_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   gtk_box_pack_start(GTK_BOX(final_hbox), button_credits, false, false, 0);
