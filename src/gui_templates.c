@@ -426,7 +426,7 @@ char *gui_templates_ask_for_git_credentials(){
   GtkWidget *dialog;
   int response;
 
-  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, _("Please provid Git credentials"));
+  dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, _("Please provide Git credentials"));
 
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
@@ -521,7 +521,7 @@ int gui_templates_git_config_window(){
 
   GtkWindow *window = GTK_WINDOW(dialog);
 
-  gtk_window_set_title(window, _("Git Syncronization Config"));
+  gtk_window_set_title(window, _("Git Synchronization Config"));
   gtk_window_set_resizable(window, false);
   gtk_container_set_border_width(GTK_CONTAINER(window), 10);
   gtk_window_set_default_size(GTK_WINDOW(window), 0, 0);

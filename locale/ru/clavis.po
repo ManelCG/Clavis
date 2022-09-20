@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Clavis 1.2.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-18 20:34+0200\n"
+"POT-Creation-Date: 2022-09-20 12:37+0200\n"
 "PO-Revision-Date: 2022-09-18 20:35+0200\n"
 "Last-Translator:  <polinachainikova99@gmail.com>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -24,15 +24,20 @@ msgstr ""
 msgid "%s already exists. Overwrite?"
 msgstr "%s уже существует. Перезаписать?"
 
-#: src/gui_templates.c:2534
+#: src/gui_templates.c:2543
+#, c-format
+msgid "%s translation by:"
+msgstr ""
+
+#: src/gui_templates.c:2620
 msgid "<a href=\"https://github.com/ManelCG/clavis\"> Github repository</a>"
 msgstr "<a href=\"https://github.com/ManelCG/clavis\"> Github репозиторий</a>"
 
-#: src/gui_templates.c:2524
+#: src/gui_templates.c:2556 src/gui_templates.c:2610
 msgid "<b>Clavis</b>"
 msgstr "<b>Clavis</b>"
 
-#: src/gui_templates.c:2540
+#: src/gui_templates.c:2626
 msgid "<small>Copyright © Manel Castillo Giménez</small>"
 msgstr "<small>Авторские права © Manel Castillo Giménez</small>"
 
@@ -40,23 +45,23 @@ msgstr "<small>Авторские права © Manel Castillo Giménez</small>"
 msgid "About"
 msgstr "О программе"
 
-#: src/gui_templates.c:2498
+#: src/gui_templates.c:2584
 msgid "About Clavis"
 msgstr "О программе Clavis"
 
-#: src/gui_templates.c:1559
+#: src/gui_templates.c:1561
 msgid "Accept"
 msgstr "Принять"
 
-#: src/gui_templates.c:816
+#: src/gui_templates.c:818
 msgid "Add new password to Clavis"
 msgstr "Добавить новый пароль в Clavis"
 
-#: src/gui_templates.c:815
+#: src/gui_templates.c:817
 msgid "Add new password:"
 msgstr "Добавить новый пароль:"
 
-#: src/gui_templates.c:829
+#: src/gui_templates.c:831
 msgid "Add password"
 msgstr "Добавить пароль"
 
@@ -72,29 +77,37 @@ msgstr "Автоматическое заполнение"
 msgid "Cancel"
 msgstr "Отменить"
 
+#: src/gui_templates.c:2548
+msgid "Catalan"
+msgstr ""
+
 #. Chose key
-#: src/gui_templates.c:2239
+#: src/gui_templates.c:2241
 msgid "Choose a GPG key, import one or create a new one."
 msgstr "Выберите GPG ключ, импортируйте или создайте новый"
 
-#: src/gui_templates.c:1881
+#: src/gui_templates.c:1883
 msgid "Choose key type:"
 msgstr "Выберите тип ключа"
 
-#: src/gui_templates.c:1826
+#: src/gui_templates.c:1828
 msgid "Clavis Master Key creation"
 msgstr "Clavis мастер создания ключей"
 
-#: src/gui_templates.c:2528
+#: src/gui_templates.c:2536
+msgid "Clavis acknowledgements"
+msgstr ""
+
+#: src/gui_templates.c:2614
 msgid "Clavis is an easy to use Password Manager."
 msgstr "Clavis - это легкий в использовании менеджер паролей"
 
 #. Bottom hbox (buttons)
-#: src/clavis_normal.c:328 src/clavis_popup.c:50 src/gui_templates.c:2542
+#: src/clavis_normal.c:328 src/clavis_popup.c:50 src/gui_templates.c:2628
 msgid "Close"
 msgstr "Закрыть"
 
-#: src/gui_templates.c:1929
+#: src/gui_templates.c:1931
 msgid "Comment (Optional)"
 msgstr "Комментарий (Необязательно)"
 
@@ -102,7 +115,7 @@ msgstr "Комментарий (Необязательно)"
 msgid "Configure your Git server:"
 msgstr "Настройте свой Git сервер:"
 
-#: src/gui_templates.c:1825
+#: src/gui_templates.c:1827
 msgid "Configure your new GPG key:"
 msgstr "Настройте ваш новый GPG ключ:"
 
@@ -110,7 +123,7 @@ msgstr "Настройте ваш новый GPG ключ:"
 msgid "Confirm"
 msgstr "Подтвердить"
 
-#: src/gui_templates.c:2249
+#: src/gui_templates.c:2251
 msgid "Confirm selection"
 msgstr "Подтвердить выбор"
 
@@ -119,24 +132,24 @@ msgid "Copy to clipboard"
 msgstr "Скопировать в буфер обмена"
 
 #  Keep %s in string as this is placed in a printf() function.
-#: src/gui_templates.c:1113 src/gui_templates.c:1184
+#: src/gui_templates.c:1115 src/gui_templates.c:1186
 #, c-format
 msgid "Could not overwrite %s."
 msgstr "Не удалось перезаписать %s."
 
-#: src/gui_templates.c:1079
+#: src/gui_templates.c:1081
 msgid "Create"
 msgstr "Создать"
 
-#: src/gui_templates.c:1835
+#: src/gui_templates.c:1837
 msgid "Create key"
 msgstr "Создать ключ"
 
-#: src/gui_templates.c:2309
+#: src/gui_templates.c:2311
 msgid "Create new key"
 msgstr "Создать новый ключ"
 
-#: src/gui_templates.c:2384
+#: src/gui_templates.c:2386
 msgid "Create new repo"
 msgstr "Создать новый репозиторий"
 
@@ -144,11 +157,11 @@ msgstr "Создать новый репозиторий"
 msgid "Create new repository"
 msgstr "Создать новый репозиторий"
 
-#: src/gui_templates.c:2546
+#: src/gui_templates.c:2632
 msgid "Credits"
 msgstr "Вклад"
 
-#: src/gui_templates.c:1879
+#: src/gui_templates.c:1881
 msgid "DSA and ElGamal"
 msgstr "DSA и ElGamal"
 
@@ -156,7 +169,7 @@ msgstr "DSA и ElGamal"
 msgid "Dark theme"
 msgstr "Темная тема"
 
-#: src/gui_templates.c:1907
+#: src/gui_templates.c:1909
 msgid "Days"
 msgstr "Дней"
 
@@ -170,11 +183,11 @@ msgstr "Расшифрованный пароль"
 msgid "Decrypting\n"
 msgstr "Расшифровка\n"
 
-#: src/gui_templates.c:1265 src/gui_templates.c:1303 src/gui_templates.c:1491
+#: src/gui_templates.c:1267 src/gui_templates.c:1305 src/gui_templates.c:1493
 msgid "Delete"
 msgstr "Удалить"
 
-#: src/clavis_popup.c:83 src/gui_templates.c:871 src/gui_templates.c:1942
+#: src/clavis_popup.c:83 src/gui_templates.c:873 src/gui_templates.c:1944
 msgid "Display password"
 msgstr "Показать пароль"
 
@@ -187,25 +200,29 @@ msgstr "Скачать пароли из Git"
 msgid "Edit"
 msgstr "Редактировать"
 
-#: src/gui_templates.c:818
+#: src/gui_templates.c:820
 msgid "Edit existing password:"
 msgstr "Редактировать существующий пароль"
 
-#: src/gui_templates.c:1514
+#: src/gui_templates.c:1516
 msgid "Edit password"
 msgstr "Редактировать пароль"
 
-#: src/gui_templates.c:819
+#: src/gui_templates.c:821
 msgid "Edit password in Clavis"
 msgstr "Редактировать пароль в Clavis"
 
+#: src/gui_templates.c:2547
+msgid "English"
+msgstr ""
+
 #  Keep %s in string as this is placed in a printf() function.
-#: src/gui_templates.c:1281
+#: src/gui_templates.c:1283
 #, c-format
 msgid "Error. Could not remove %s"
 msgstr "Ошибка. Не удалось удалить %s"
 
-#: src/gui_templates.c:2302
+#: src/gui_templates.c:2304
 msgid "Export key"
 msgstr "Экспортировать ключ"
 
@@ -227,7 +244,7 @@ msgid "Filter files"
 msgstr "Фильтровать файлы"
 
 #  Keep %s and %d in string as this is placed in a printf() function.
-#: src/gui_templates.c:1254
+#: src/gui_templates.c:1256
 #, c-format
 msgid "Folder %s contains %d files. Remove anyways?"
 msgstr "Папка %s содержит %d файлы. Все равно удалить?"
@@ -236,31 +253,31 @@ msgstr "Папка %s содержит %d файлы. Все равно удал
 msgid "GPG key settings"
 msgstr "Настройки GPG ключа"
 
-#: src/gui_templates.c:878
+#: src/gui_templates.c:880
 msgid "Generate password with options"
 msgstr "Сгенерировать пароль с опциями"
 
 #: src/gui_templates.c:524
-msgid "Git Syncronization Config"
+msgid "Git Synchronization Config"
 msgstr "Конфигурация Git-синхронизации"
 
 #: src/gui_templates.c:448
 msgid "Git credentials"
 msgstr "Git-учетные данные"
 
-#: src/gui_templates.c:558 src/gui_templates.c:562 src/gui_templates.c:2342
-#: src/gui_templates.c:2346
+#: src/gui_templates.c:558 src/gui_templates.c:562 src/gui_templates.c:2344
+#: src/gui_templates.c:2348
 msgid "Git email"
 msgstr "Git email"
 
 #. Repo config
-#: src/gui_templates.c:588 src/gui_templates.c:590 src/gui_templates.c:2372
-#: src/gui_templates.c:2374
+#: src/gui_templates.c:588 src/gui_templates.c:590 src/gui_templates.c:2374
+#: src/gui_templates.c:2376
 msgid "Git repo URL"
 msgstr "Ссылка на Git репозиторий"
 
 #. Toggle for git
-#: src/clavis_normal.c:222 src/gui_templates.c:2400
+#: src/clavis_normal.c:222 src/gui_templates.c:2402
 msgid "Git server settings"
 msgstr "Настройки Git сервера"
 
@@ -268,12 +285,12 @@ msgstr "Настройки Git сервера"
 #. User Config
 #. Git config
 #. User Config
-#: src/gui_templates.c:557 src/gui_templates.c:560 src/gui_templates.c:2341
-#: src/gui_templates.c:2344
+#: src/gui_templates.c:557 src/gui_templates.c:560 src/gui_templates.c:2343
+#: src/gui_templates.c:2346
 msgid "Git username"
 msgstr "Имя пользователя Git"
 
-#: src/gui_templates.c:2537
+#: src/gui_templates.c:2623
 msgid "Go to the Clavis Github repository"
 msgstr "Перейти в репозиторий Clavis на Github"
 
@@ -285,7 +302,7 @@ msgstr "Помощь"
 
 #  Keep \n in string as this is placed in a printf() function.
 #  Write the translation in the same format (First line empty, then two lines with each string)
-#: src/gui_templates.c:1550
+#: src/gui_templates.c:1552
 msgid ""
 "Hey! It seems this is your first time running Clavis.\n"
 "Initialize Password Store?"
@@ -293,31 +310,31 @@ msgstr ""
 "Привет! Кажется это твой первый запуск Clavis.\n"
 "Инициализировать хранилище паролей?"
 
-#: src/gui_templates.c:2293
+#: src/gui_templates.c:2295
 msgid "Import key"
 msgstr "Импортировать ключ"
 
-#: src/gui_templates.c:1888
+#: src/gui_templates.c:1890
 msgid "Key length"
 msgstr "Длина ключа"
 
-#: src/gui_templates.c:2015
+#: src/gui_templates.c:2017
 msgid "Key length must be a 3+ digit number"
 msgstr "Длина ключа должна состоять из трех и более цифр"
 
-#: src/gui_templates.c:1928
+#: src/gui_templates.c:1930
 msgid "Key name"
 msgstr "Имя ключа"
 
-#: src/gui_templates.c:2037
+#: src/gui_templates.c:2039
 msgid "Key name must be at least 5 letters long"
 msgstr "Имя ключа должно содержать хотя бы 5 букв"
 
-#: src/gui_templates.c:1891
+#: src/gui_templates.c:1893
 msgid "Key size:"
 msgstr "Размер ключа"
 
-#: src/gui_templates.c:2549
+#: src/gui_templates.c:2636
 msgid "License"
 msgstr "Лицензия"
 
@@ -325,23 +342,23 @@ msgstr "Лицензия"
 msgid "Light theme"
 msgstr "Светлая тема"
 
-#: src/gui_templates.c:927
+#: src/gui_templates.c:929
 msgid "Lowercase"
 msgstr "Нижний регистр"
 
-#: src/gui_templates.c:1909
+#: src/gui_templates.c:1911
 msgid "Months"
 msgstr "Месяцев"
 
-#: src/gui_templates.c:2026
+#: src/gui_templates.c:2028
 msgid "Name must be at least 5 letters long."
 msgstr "Имя должно содержать хотя бы 5 букв"
 
-#: src/clavis_normal.c:138 src/gui_templates.c:1065
+#: src/clavis_normal.c:138 src/gui_templates.c:1067
 msgid "New folder"
 msgstr "Новая папка"
 
-#: src/gui_templates.c:1064
+#: src/gui_templates.c:1066
 msgid "New folder name:"
 msgstr "Имя новой папки: "
 
@@ -349,30 +366,30 @@ msgstr "Имя новой папки: "
 msgid "New password"
 msgstr "Новый пароль"
 
-#: src/gui_templates.c:889
+#: src/gui_templates.c:891
 msgid "New password name"
 msgstr "Имя нового пароля"
 
 #. Main left vbox
-#: src/gui_templates.c:910
+#: src/gui_templates.c:912
 msgid "New password:"
 msgstr "Новый пароль"
 
-#: src/gui_templates.c:923
+#: src/gui_templates.c:925
 msgid "Numerals"
 msgstr "Цифры"
 
-#: src/gui_templates.c:1002 src/gui_templates.c:1012 src/gui_templates.c:2019
-#: src/gui_templates.c:2030 src/gui_templates.c:2041 src/gui_templates.c:2052
-#: src/gui_templates.c:2063
+#: src/gui_templates.c:1004 src/gui_templates.c:1014 src/gui_templates.c:2021
+#: src/gui_templates.c:2032 src/gui_templates.c:2043 src/gui_templates.c:2054
+#: src/gui_templates.c:2065
 msgid "Okay"
 msgstr "ОК"
 
-#: src/gui_templates.c:1720
+#: src/gui_templates.c:1722
 msgid "Open File"
 msgstr "Открыть файл"
 
-#: src/gui_templates.c:468 src/gui_templates.c:868 src/gui_templates.c:1951
+#: src/gui_templates.c:468 src/gui_templates.c:870 src/gui_templates.c:1953
 msgid "Password"
 msgstr "Пароль"
 
@@ -380,28 +397,28 @@ msgstr "Пароль"
 msgid "Password Store"
 msgstr "Хранилище паролей"
 
-#: src/clavis_normal.c:107 src/gui_templates.c:2469
+#: src/clavis_normal.c:107 src/gui_templates.c:2471
 msgid "Password Store data"
 msgstr "Данные хранилища паролей"
 
-#: src/gui_templates.c:2487
+#: src/gui_templates.c:2489
 msgid "Password Store directory"
 msgstr "Каталог хранилища паролей"
 
-#: src/gui_templates.c:966
+#: src/gui_templates.c:968
 msgid "Password generator:"
 msgstr "Генератор паролей:"
 
-#: src/gui_templates.c:929
+#: src/gui_templates.c:931
 msgid "Password length"
 msgstr "Длина пароля"
 
 #. Main right vbox
-#: src/gui_templates.c:921
+#: src/gui_templates.c:923
 msgid "Password length:"
 msgstr "Длина пароля"
 
-#: src/gui_templates.c:897
+#: src/gui_templates.c:899
 msgid "Password name"
 msgstr "Имя пароля"
 
@@ -414,23 +431,23 @@ msgid "Password:"
 msgstr "Пароль:"
 
 #. PERSONAL INFO
-#: src/gui_templates.c:1923
+#: src/gui_templates.c:1925
 msgid "Personal information:"
 msgstr "Личная информация:"
 
-#: src/gui_templates.c:998 src/gui_templates.c:2048
+#: src/gui_templates.c:1000 src/gui_templates.c:2050
 msgid "Please enter a password"
 msgstr "Пожалуйста, введите пароль"
 
-#: src/gui_templates.c:1008
+#: src/gui_templates.c:1010
 msgid "Please give a name to your password"
 msgstr "Пожалуйста, дайте имя вашему паролю"
 
 #: src/gui_templates.c:429
-msgid "Please provid Git credentials"
+msgid "Please provide Git credentials"
 msgstr "Пожалуйста, предоставьте учетные данные Git"
 
-#: src/gui_templates.c:925
+#: src/gui_templates.c:927
 msgid "Pronounceable"
 msgstr "Произносимый"
 
@@ -438,31 +455,31 @@ msgstr "Произносимый"
 msgid "Quit"
 msgstr "Выйти"
 
-#: src/gui_templates.c:1878
+#: src/gui_templates.c:1880
 msgid "RSA and DSA (default)"
 msgstr "RSA и DSA (По умолчанию)"
 
 #  Keep %s in string as this is placed in a printf() function.
-#: src/gui_templates.c:1292
+#: src/gui_templates.c:1294
 #, c-format
 msgid "Remove file '%s'? This cannot be undone!"
 msgstr "Удалить файл '%s'? Это действие нельзя будет отменить!"
 
-#: src/gui_templates.c:1149
+#: src/gui_templates.c:1151
 msgid "Rename"
 msgstr "Переименовать"
 
 #  Keep %s and \n in string as this is placed in a printf() function.
-#: src/gui_templates.c:1133
+#: src/gui_templates.c:1135
 #, c-format
 msgid "Rename %s:\n"
 msgstr "Переименовать %s:\n"
 
-#: src/gui_templates.c:1483
+#: src/gui_templates.c:1485
 msgid "Rename file"
 msgstr "Переименовать файл"
 
-#: src/gui_templates.c:1957
+#: src/gui_templates.c:1959
 msgid "Repeat password"
 msgstr "Повторить пароль"
 
@@ -470,38 +487,42 @@ msgstr "Повторить пароль"
 msgid "Replace"
 msgstr "Заменить"
 
-#: src/gui_templates.c:1603
+#: src/gui_templates.c:2549
+msgid "Russian"
+msgstr ""
+
+#: src/gui_templates.c:1605
 msgid "Save Keys"
 msgstr "Сохранить ключи"
 
-#: src/gui_templates.c:1661
+#: src/gui_templates.c:1663
 msgid "Save your GPG key"
 msgstr "Сохранить GPG ключ"
 
-#: src/gui_templates.c:2240
+#: src/gui_templates.c:2242
 msgid "Select your Clavis Master Key"
 msgstr "Выберите мастер-ключ Clavis"
 
-#: src/gui_templates.c:1767
+#: src/gui_templates.c:1769
 msgid "Select your GPG key"
 msgstr "Выберите GPG ключ"
 
 #. EXPIRATION
-#: src/gui_templates.c:1901
+#: src/gui_templates.c:1903
 msgid "Set expiration (0 = eternal)"
 msgstr "Установите срок действия (0 = вечный)"
 
-#: src/gui_templates.c:1959
+#: src/gui_templates.c:1961
 msgid "Set key's password:"
 msgstr "Установить пароль ключа"
 
 #. Saveto hbox
-#: src/gui_templates.c:886
+#: src/gui_templates.c:888
 msgid "Set password name:"
 msgstr "Установите имя пароля"
 
 #. Advanced frame
-#: src/gui_templates.c:1966
+#: src/gui_templates.c:1968
 msgid "Show advanced configuration"
 msgstr "Показать расширенную конфигурацию"
 
@@ -512,7 +533,12 @@ msgstr "Показать расширенную конфигурацию"
 msgid "Show pass"
 msgstr "Показать"
 
-#: src/gui_templates.c:924
+#. Languages:
+#: src/gui_templates.c:2546
+msgid "Spanish"
+msgstr ""
+
+#: src/gui_templates.c:926
 msgid "Symbols"
 msgstr "Символы"
 
@@ -524,12 +550,12 @@ msgstr "Синхронизировать все пароли"
 msgid "Upload passwords to Git"
 msgstr "Загрузить пароли на Git"
 
-#: src/gui_templates.c:926
+#: src/gui_templates.c:928
 msgid "Uppercase"
 msgstr "Верхний регистр"
 
 #. Toggles
-#: src/gui_templates.c:2383
+#: src/gui_templates.c:2385
 msgid "Use git server"
 msgstr "Использовать сервер Git"
 
@@ -541,11 +567,11 @@ msgstr "Имя пользователя"
 msgid "Username:"
 msgstr "Имя пользователя:"
 
-#: src/gui_templates.c:1908
+#: src/gui_templates.c:1910
 msgid "Weeks"
 msgstr "Недель"
 
-#: src/gui_templates.c:1551
+#: src/gui_templates.c:1553
 msgid "Welcome to Clavis!"
 msgstr "Добро пожаловать в Clavis!"
 
@@ -560,30 +586,30 @@ msgstr ""
 "Написание учетных данных:\n"
 "%s\n"
 
-#: src/gui_templates.c:1910
+#: src/gui_templates.c:1912
 msgid "Years"
 msgstr "Лет"
 
-#: src/gui_templates.c:1927
+#: src/gui_templates.c:1929
 msgid "Your name"
 msgstr "Ваше имя"
 
-#: src/gui_templates.c:2059
+#: src/gui_templates.c:2061
 msgid "Your passwords do not match!"
 msgstr "Ваши пароли не совпадают!"
 
 #  The '_' means that you can press C to automatically press this button, so use that _ before the first letter (or important letter) of the word
-#: src/gui_templates.c:1603 src/gui_templates.c:1720
+#: src/gui_templates.c:1605 src/gui_templates.c:1722
 msgid "_Cancel"
 msgstr "Отменить"
 
 #  The '_' means that you can press O to automatically press this button, so use that _ before the first letter (or important letter) of the word
-#: src/gui_templates.c:1720
+#: src/gui_templates.c:1722
 msgid "_Open"
 msgstr "Открыть"
 
 #  The '_' means that you can press S to automatically press this button, so use that _ before the first letter (or important letter) of the word
-#: src/gui_templates.c:1603
+#: src/gui_templates.c:1605
 msgid "_Save"
 msgstr "Сохранить"
 
@@ -591,6 +617,6 @@ msgstr "Сохранить"
 #  DONT USE CYRILLIC!!!
 #  This is the default name of files created when creating new passwords.
 #  The _ is just there because we cannot use spaces. It doesnt have anything to do with the last 3 string translations!
-#: src/gui_templates.c:890
+#: src/gui_templates.c:892
 msgid "new_password"
 msgstr "new_password"
