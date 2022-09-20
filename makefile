@@ -99,7 +99,7 @@ archlinux: $(OBJ) $(OBJ_GUI)
 	$(CC) -o $(BDIR)/usr/bin/clavis $^ $(CFLAGS) $(LIBS)
 	cp -ru assets/ $(BDIR)/usr/lib/clavis/
 	cp -ru locale/ $(BDIR)/usr/lib/clavis/
-	cp LICENSE /usr/lib/clavis
+	cp LICENSE $(BDIR)/usr/lib/clavis/
 	cp assets/clavis.desktop $(BDIR)/usr/share/applications/
 	cp assets/app_icon/256.png $(BDIR)/usr/share/pixmaps/clavis.png
 
