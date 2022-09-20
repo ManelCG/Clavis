@@ -12,7 +12,8 @@
 
 #include <libintl.h>
 #include <locale.h>
-#define _(String) gettext(String)
+
+#include <clavis_macros.h>
 
 #ifdef __unix__
 #include <sys/wait.h>
@@ -1963,3 +1964,17 @@ char *file_io_get_clavis_executable(){
   return ret;
   #endif
 }
+
+#if defined(_WIN32) || defined (WIN32)
+char *windows_string(const char *s){
+  size_t size = mbstowcs(NULL, s, 0);
+  wchar_t *wide = malloc(sizeof(wchar_t) * (size + 2));
+  size = mbstowcs(wide, s, size);
+  wide[size] = '\0';
+  wide[size+1] = '\0';
+
+  char *ret = g_utf16_to_utf8(wide, -1, NULL, NULL, NULL);
+  free(wide);
+  return ret;
+}
+#endif

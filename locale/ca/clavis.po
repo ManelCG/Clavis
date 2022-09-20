@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Clavis 1.2.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 12:37+0200\n"
+"POT-Creation-Date: 2022-09-20 16:25+0200\n"
 "PO-Revision-Date: 2022-09-18 20:56+0200\n"
 "Last-Translator:  <manelcg@protonmail.com>\n"
 "Language-Team: Catalan <ca@dodds.net>\n"
@@ -16,262 +16,266 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/gui_templates.c:104
+#: src/gui_templates.c:105
 #, c-format
 msgid "%s already exists. Overwrite?"
 msgstr "%s ja existeix. Sobreescriure?"
 
-#: src/gui_templates.c:2543
+#: src/gui_templates.c:2551
 #, c-format
 msgid "%s translation by:"
-msgstr ""
+msgstr "Traducció al %s per:"
 
-#: src/gui_templates.c:2620
+#: src/gui_templates.c:2678
 msgid "<a href=\"https://github.com/ManelCG/clavis\"> Github repository</a>"
 msgstr ""
 "<a href=\"https://github.com/ManelCG/clavis\"> Repositori de Github</a>"
 
-#: src/gui_templates.c:2556 src/gui_templates.c:2610
+#: src/gui_templates.c:2573 src/gui_templates.c:2668
 msgid "<b>Clavis</b>"
 msgstr "<b>Clavis</b>"
 
-#: src/gui_templates.c:2626
+#: src/gui_templates.c:2684
 msgid "<small>Copyright © Manel Castillo Giménez</small>"
 msgstr "<small>Copyright © Manel Castillo Giménez</small>"
 
-#: src/clavis_normal.c:277
+#: src/clavis_normal.c:278
 msgid "About"
 msgstr "Sobre"
 
-#: src/gui_templates.c:2584
+#: src/gui_templates.c:2642
 msgid "About Clavis"
 msgstr "Sobre Clavis"
 
-#: src/gui_templates.c:1561
+#: src/gui_templates.c:1562
 msgid "Accept"
 msgstr "Acceptar"
 
-#: src/gui_templates.c:818
+#: src/gui_templates.c:819
 msgid "Add new password to Clavis"
 msgstr "Afegir una nova contrasenya a Clavis"
 
-#: src/gui_templates.c:817
+#: src/gui_templates.c:818
 msgid "Add new password:"
 msgstr "Afegir nova contrasenya:"
 
-#: src/gui_templates.c:831
+#: src/gui_templates.c:832
 msgid "Add password"
 msgstr "Afegir contrasenya"
 
-#: src/gui_templates.c:517
+#: src/gui_templates.c:518
 msgid "Apply"
 msgstr "Aplicar"
 
-#: src/clavis_normal.c:366
+#: src/gui_templates.c:2554
+msgid "Artwork by:"
+msgstr "Art per:"
+
+#: src/clavis_normal.c:367
 msgid "Automatic type"
 msgstr "Escriure automàticament"
 
-#: src/gui_templates.c:604
+#: src/gui_templates.c:605
 msgid "Cancel"
 msgstr "Cancel·lar"
 
-#: src/gui_templates.c:2548
+#: src/gui_templates.c:2559
 msgid "Catalan"
-msgstr ""
+msgstr "Català"
 
 #. Chose key
-#: src/gui_templates.c:2241
+#: src/gui_templates.c:2242
 msgid "Choose a GPG key, import one or create a new one."
 msgstr "Trie una clau GPG, importa una o crea una nova."
 
-#: src/gui_templates.c:1883
+#: src/gui_templates.c:1884
 msgid "Choose key type:"
 msgstr "Trie un tipus de clau:"
 
-#: src/gui_templates.c:1828
+#: src/gui_templates.c:1829
 msgid "Clavis Master Key creation"
 msgstr "Creació de Clau Maestra de Clavis"
 
-#: src/gui_templates.c:2536
+#: src/gui_templates.c:2540
 msgid "Clavis acknowledgements"
-msgstr ""
+msgstr "Reconeixements de Clavis"
 
-#: src/gui_templates.c:2614
+#: src/gui_templates.c:2672
 msgid "Clavis is an easy to use Password Manager."
 msgstr "Clavis es un Gestor de Contrasenyes fàcil d'usar."
 
 #. Bottom hbox (buttons)
-#: src/clavis_normal.c:328 src/clavis_popup.c:50 src/gui_templates.c:2628
+#: src/clavis_normal.c:329 src/clavis_popup.c:51 src/gui_templates.c:2686
 msgid "Close"
 msgstr "Tancar"
 
-#: src/gui_templates.c:1931
+#: src/gui_templates.c:1932
 msgid "Comment (Optional)"
 msgstr "Comentari (Opcional)"
 
-#: src/gui_templates.c:510
+#: src/gui_templates.c:511
 msgid "Configure your Git server:"
 msgstr "Configure el seu servidor de Git:"
 
-#: src/gui_templates.c:1827
+#: src/gui_templates.c:1828
 msgid "Configure your new GPG key:"
 msgstr "Configure la seua nova clau GPG:"
 
-#: src/gui_templates.c:436 src/gui_templates.c:611
+#: src/gui_templates.c:437 src/gui_templates.c:612
 msgid "Confirm"
 msgstr "Confirmar"
 
-#: src/gui_templates.c:2251
+#: src/gui_templates.c:2252
 msgid "Confirm selection"
 msgstr "Confirmar selecció"
 
-#: src/clavis_normal.c:357
+#: src/clavis_normal.c:358
 msgid "Copy to clipboard"
 msgstr "Copiar al portapapers"
 
-#: src/gui_templates.c:1115 src/gui_templates.c:1186
+#: src/gui_templates.c:1116 src/gui_templates.c:1187
 #, c-format
 msgid "Could not overwrite %s."
 msgstr "No s'ha pogut sobreescriure %s"
 
-#: src/gui_templates.c:1081
+#: src/gui_templates.c:1082
 msgid "Create"
 msgstr "Crear"
 
-#: src/gui_templates.c:1837
+#: src/gui_templates.c:1838
 msgid "Create key"
 msgstr "Crear clau"
 
-#: src/gui_templates.c:2311
+#: src/gui_templates.c:2312
 msgid "Create new key"
 msgstr "Crear nova clau"
 
-#: src/gui_templates.c:2386
+#: src/gui_templates.c:2387
 msgid "Create new repo"
 msgstr "Crear nou repositori"
 
-#: src/gui_templates.c:621
+#: src/gui_templates.c:622
 msgid "Create new repository"
 msgstr "Crear nou repositori"
 
-#: src/gui_templates.c:2632
+#: src/gui_templates.c:2690
 msgid "Credits"
 msgstr "Crèdits"
 
-#: src/gui_templates.c:1881
+#: src/gui_templates.c:1882
 msgid "DSA and ElGamal"
 msgstr "DSA i ElGamal"
 
-#: src/clavis_normal.c:236
+#: src/clavis_normal.c:237
 msgid "Dark theme"
 msgstr "Tema oscur"
 
-#: src/gui_templates.c:1909
+#: src/gui_templates.c:1910
 msgid "Days"
 msgstr "Díes"
 
-#: src/clavis_normal.c:408 src/clavis_popup.c:114
+#: src/clavis_normal.c:409 src/clavis_popup.c:115
 msgid "Decrypted password:"
 msgstr "Contrasenya desxifrada:"
 
-#: src/gui_templates.c:687
+#: src/gui_templates.c:688
 #, c-format
 msgid "Decrypting\n"
 msgstr "Desxifrant\n"
 
-#: src/gui_templates.c:1267 src/gui_templates.c:1305 src/gui_templates.c:1493
+#: src/gui_templates.c:1268 src/gui_templates.c:1306 src/gui_templates.c:1494
 msgid "Delete"
 msgstr "Borrar"
 
-#: src/clavis_popup.c:83 src/gui_templates.c:873 src/gui_templates.c:1944
+#: src/clavis_popup.c:84 src/gui_templates.c:874 src/gui_templates.c:1945
 msgid "Display password"
 msgstr "Mostrar contrasenya"
 
-#: src/clavis_normal.c:195
+#: src/clavis_normal.c:196
 msgid "Download passwords from Git"
 msgstr "Descargar contrasenyes de Git"
 
 #. Edit submenu
-#: src/clavis_normal.c:182
+#: src/clavis_normal.c:183
 msgid "Edit"
 msgstr "Editar"
 
-#: src/gui_templates.c:820
+#: src/gui_templates.c:821
 msgid "Edit existing password:"
 msgstr "Editar contrasenya existent:"
 
-#: src/gui_templates.c:1516
+#: src/gui_templates.c:1517
 msgid "Edit password"
 msgstr "Editar contrasenya"
 
-#: src/gui_templates.c:821
+#: src/gui_templates.c:822
 msgid "Edit password in Clavis"
 msgstr "Editar contrasenya en Clavis"
 
-#: src/gui_templates.c:2547
+#: src/gui_templates.c:2558
 msgid "English"
-msgstr ""
+msgstr "Anglés"
 
-#: src/gui_templates.c:1283
+#: src/gui_templates.c:1284
 #, c-format
 msgid "Error. Could not remove %s"
 msgstr "Error. No s'ha pogut borrar %s"
 
-#: src/gui_templates.c:2304
+#: src/gui_templates.c:2305
 msgid "Export key"
 msgstr "Exportar clau"
 
-#: src/clavis_normal.c:128
+#: src/clavis_normal.c:129
 msgid "Export private GPG key"
 msgstr "Exportar clau privada GPG"
 
-#: src/clavis_normal.c:119
+#: src/clavis_normal.c:120
 msgid "Export public GPG key"
 msgstr "Exportar clau pública GPG"
 
 #. File submenu
-#: src/clavis_normal.c:102
+#: src/clavis_normal.c:103
 msgid "File"
 msgstr "Arxiu"
 
-#: src/clavis_normal.c:340 src/clavis_normal.c:341 src/clavis_popup.c:63
+#: src/clavis_normal.c:341 src/clavis_normal.c:342 src/clavis_popup.c:64
 msgid "Filter files"
 msgstr "Filtrar arxius"
 
-#: src/gui_templates.c:1256
+#: src/gui_templates.c:1257
 #, c-format
 msgid "Folder %s contains %d files. Remove anyways?"
 msgstr "La carpeta %s conté %d arxius. Borrar igualment?"
 
-#: src/clavis_normal.c:187
+#: src/clavis_normal.c:188
 msgid "GPG key settings"
 msgstr "Opcions de clau GPG"
 
-#: src/gui_templates.c:880
+#: src/gui_templates.c:881
 msgid "Generate password with options"
 msgstr "Generar contrasenya amb les opcions"
 
-#: src/gui_templates.c:524
+#: src/gui_templates.c:525
 msgid "Git Synchronization Config"
 msgstr "Configuració de la sincronització amb Git"
 
-#: src/gui_templates.c:448
+#: src/gui_templates.c:449
 msgid "Git credentials"
 msgstr "Credencials de Git"
 
-#: src/gui_templates.c:558 src/gui_templates.c:562 src/gui_templates.c:2344
-#: src/gui_templates.c:2348
+#: src/gui_templates.c:559 src/gui_templates.c:563 src/gui_templates.c:2345
+#: src/gui_templates.c:2349
 msgid "Git email"
 msgstr "Email de Git"
 
 #. Repo config
-#: src/gui_templates.c:588 src/gui_templates.c:590 src/gui_templates.c:2374
-#: src/gui_templates.c:2376
+#: src/gui_templates.c:589 src/gui_templates.c:591 src/gui_templates.c:2375
+#: src/gui_templates.c:2377
 msgid "Git repo URL"
 msgstr "URL del repositori de Git"
 
 #. Toggle for git
-#: src/clavis_normal.c:222 src/gui_templates.c:2402
+#: src/clavis_normal.c:223 src/gui_templates.c:2403
 msgid "Git server settings"
 msgstr "Opcions del servidor de Git"
 
@@ -279,22 +283,22 @@ msgstr "Opcions del servidor de Git"
 #. User Config
 #. Git config
 #. User Config
-#: src/gui_templates.c:557 src/gui_templates.c:560 src/gui_templates.c:2343
-#: src/gui_templates.c:2346
+#: src/gui_templates.c:558 src/gui_templates.c:561 src/gui_templates.c:2344
+#: src/gui_templates.c:2347
 msgid "Git username"
 msgstr "Nom d'usuari de Git"
 
-#: src/gui_templates.c:2623
+#: src/gui_templates.c:2681
 msgid "Go to the Clavis Github repository"
 msgstr "Anar al repositori de Github de Clavis"
 
 #. Help submenu
 #. Buttons
-#: src/clavis_normal.c:260 src/clavis_normal.c:265 src/gui_templates.c:599
+#: src/clavis_normal.c:261 src/clavis_normal.c:266 src/gui_templates.c:600
 msgid "Help"
 msgstr "Ajuda"
 
-#: src/gui_templates.c:1552
+#: src/gui_templates.c:1553
 msgid ""
 "Hey! It seems this is your first time running Clavis.\n"
 "Initialize Password Store?"
@@ -302,267 +306,277 @@ msgstr ""
 "Hola! Pareix que es la primera vegada que obriu Clavis.\n"
 "Desitja inicialitzar el magatzem de contrasenyes?"
 
-#: src/gui_templates.c:2295
+#: src/gui_templates.c:2296
 msgid "Import key"
 msgstr "Importar clau"
 
-#: src/gui_templates.c:1890
+#: src/gui_templates.c:1891
 msgid "Key length"
 msgstr "Longitud de la clau"
 
-#: src/gui_templates.c:2017
+#: src/gui_templates.c:2018
 msgid "Key length must be a 3+ digit number"
 msgstr "La longitud de la clau ha de ser un nombre de 3 o més xifres"
 
-#: src/gui_templates.c:1930
+#: src/gui_templates.c:1931
 msgid "Key name"
 msgstr "Nom de la clau"
 
-#: src/gui_templates.c:2039
+#: src/gui_templates.c:2040
 msgid "Key name must be at least 5 letters long"
 msgstr "El nom de la clau ha de tindre al menys 5 lletres"
 
-#: src/gui_templates.c:1893
+#: src/gui_templates.c:1894
 msgid "Key size:"
 msgstr "Grandària de la clau:"
 
-#: src/gui_templates.c:2636
+#: src/gui_templates.c:2694
 msgid "License"
 msgstr "Licència"
 
-#: src/clavis_normal.c:233
+#: src/clavis_normal.c:234
 msgid "Light theme"
 msgstr "Tema clar"
 
-#: src/gui_templates.c:929
+#: src/gui_templates.c:930
 msgid "Lowercase"
 msgstr "Minúscules"
 
-#: src/gui_templates.c:1911
+#: src/gui_templates.c:1912
 msgid "Months"
 msgstr "Mesos"
 
-#: src/gui_templates.c:2028
+#: src/gui_templates.c:2029
 msgid "Name must be at least 5 letters long."
 msgstr "El nom ha de tindre al menys 5 lletres"
 
-#: src/clavis_normal.c:138 src/gui_templates.c:1067
+#: src/clavis_normal.c:139 src/gui_templates.c:1068
 msgid "New folder"
 msgstr "Nova carpeta"
 
-#: src/gui_templates.c:1066
+#: src/gui_templates.c:1067
 msgid "New folder name:"
 msgstr "Nom de la nova carpeta:"
 
-#: src/clavis_normal.c:147
+#: src/clavis_normal.c:148
 msgid "New password"
 msgstr "Nova contrasenya"
 
-#: src/gui_templates.c:891
+#: src/gui_templates.c:892
 msgid "New password name"
 msgstr "Nom de la nova contrasenya"
 
 #. Main left vbox
-#: src/gui_templates.c:912
+#: src/gui_templates.c:913
 msgid "New password:"
 msgstr "Nova contrasenya:"
 
-#: src/gui_templates.c:925
+#: src/gui_templates.c:926
 msgid "Numerals"
 msgstr "Nombres"
 
-#: src/gui_templates.c:1004 src/gui_templates.c:1014 src/gui_templates.c:2021
-#: src/gui_templates.c:2032 src/gui_templates.c:2043 src/gui_templates.c:2054
-#: src/gui_templates.c:2065
+#: src/gui_templates.c:1005 src/gui_templates.c:1015 src/gui_templates.c:2022
+#: src/gui_templates.c:2033 src/gui_templates.c:2044 src/gui_templates.c:2055
+#: src/gui_templates.c:2066
 msgid "Okay"
 msgstr "D'acord"
 
-#: src/gui_templates.c:1722
+#: src/gui_templates.c:1723
 msgid "Open File"
 msgstr "Obrir arxiu"
 
-#: src/gui_templates.c:468 src/gui_templates.c:870 src/gui_templates.c:1953
+#: src/gui_templates.c:2552
+#, c-format
+msgid "Original text in %s by:"
+msgstr "Text original en %s per:"
+
+#: src/gui_templates.c:469 src/gui_templates.c:871 src/gui_templates.c:1954
+#: src/main.c:61
 msgid "Password"
 msgstr "Contrasenya"
 
-#: src/folderstate.c:157
+#: src/folderstate.c:158
 msgid "Password Store"
 msgstr "Magatzem de Contrasenyes"
 
-#: src/clavis_normal.c:107 src/gui_templates.c:2471
+#: src/clavis_normal.c:108 src/gui_templates.c:2472
 msgid "Password Store data"
 msgstr "Dades del Magatzem de Contrasenyes"
 
-#: src/gui_templates.c:2489
+#: src/gui_templates.c:2490
 msgid "Password Store directory"
 msgstr "Carpeta del Magatzem de Contrasenyes"
 
-#: src/gui_templates.c:968
+#: src/gui_templates.c:969
 msgid "Password generator:"
 msgstr "Generador de contrasenyes:"
 
-#: src/gui_templates.c:931
+#: src/gui_templates.c:932
 msgid "Password length"
 msgstr "Longitud de la contrasenya"
 
 #. Main right vbox
-#: src/gui_templates.c:923
+#: src/gui_templates.c:924
 msgid "Password length:"
 msgstr "Longitud de la contrasenya:"
 
-#: src/gui_templates.c:899
+#: src/gui_templates.c:900
 msgid "Password name"
 msgstr "Nom de la contrasenya"
 
-#: src/clavis_normal.c:352 src/clavis_popup.c:74
+#: src/clavis_normal.c:353 src/clavis_popup.c:75
 msgid "Password output"
 msgstr "Eixida de la contrasenya"
 
-#: src/gui_templates.c:462
+#: src/gui_templates.c:463
 msgid "Password:"
 msgstr "Contrasenya:"
 
 #. PERSONAL INFO
-#: src/gui_templates.c:1925
+#: src/gui_templates.c:1926
 msgid "Personal information:"
 msgstr "Informació personal:"
 
-#: src/gui_templates.c:1000 src/gui_templates.c:2050
+#: src/gui_templates.c:1001 src/gui_templates.c:2051
 msgid "Please enter a password"
 msgstr "Per favor, introduiu una contrasenya"
 
-#: src/gui_templates.c:1010
+#: src/gui_templates.c:1011
 msgid "Please give a name to your password"
 msgstr "Per favor, posa-li nom a la teua contrasenya"
 
-#: src/gui_templates.c:429
+#: src/gui_templates.c:430
 msgid "Please provide Git credentials"
 msgstr "Per favor, proporciona credencials de Git"
 
-#: src/gui_templates.c:927
+#: src/gui_templates.c:2553
+msgid "Program developed by:"
+msgstr "Programa desenvolupat per:"
+
+#: src/gui_templates.c:928
 msgid "Pronounceable"
 msgstr "Pronunciable"
 
-#: src/clavis_normal.c:157
+#: src/clavis_normal.c:158
 msgid "Quit"
 msgstr "Eixir"
 
-#: src/gui_templates.c:1880
+#: src/gui_templates.c:1881
 msgid "RSA and DSA (default)"
 msgstr "RSA and DSA (per defecte)"
 
-#: src/gui_templates.c:1294
+#: src/gui_templates.c:1295
 #, c-format
 msgid "Remove file '%s'? This cannot be undone!"
 msgstr "Eliminar arxiu '%s'? Aquesta acció no es pot desfer!"
 
-#: src/gui_templates.c:1151
+#: src/gui_templates.c:1152
 msgid "Rename"
 msgstr "Canviar de nom"
 
-#: src/gui_templates.c:1135
+#: src/gui_templates.c:1136
 #, c-format
 msgid "Rename %s:\n"
 msgstr "Canviar de nom %s:\n"
 
-#: src/gui_templates.c:1485
+#: src/gui_templates.c:1486
 msgid "Rename file"
 msgstr "Canviar nom de l'arxiu"
 
-#: src/gui_templates.c:1959
+#: src/gui_templates.c:1960
 msgid "Repeat password"
 msgstr "Repetir la contrasenya"
 
-#: src/gui_templates.c:115
+#: src/gui_templates.c:116
 msgid "Replace"
 msgstr "Reemplaçar"
 
-#: src/gui_templates.c:2549
+#: src/gui_templates.c:2560
 msgid "Russian"
-msgstr ""
+msgstr "Rus"
 
-#: src/gui_templates.c:1605
+#: src/gui_templates.c:1606
 msgid "Save Keys"
 msgstr "Guardar claus"
 
-#: src/gui_templates.c:1663
+#: src/gui_templates.c:1664
 msgid "Save your GPG key"
 msgstr "Guarda la teua clau GPG"
 
-#: src/gui_templates.c:2242
+#: src/gui_templates.c:2243
 msgid "Select your Clavis Master Key"
 msgstr "Selecciona la teua Clau Maestra de Clavis"
 
-#: src/gui_templates.c:1769
+#: src/gui_templates.c:1770
 msgid "Select your GPG key"
 msgstr "Selecciona la teua clau GPG"
 
 #. EXPIRATION
-#: src/gui_templates.c:1903
+#: src/gui_templates.c:1904
 msgid "Set expiration (0 = eternal)"
 msgstr "Caducitat (0 = eterna)"
 
-#: src/gui_templates.c:1961
+#: src/gui_templates.c:1962
 msgid "Set key's password:"
 msgstr "Contrasenya de la clau:"
 
 #. Saveto hbox
-#: src/gui_templates.c:888
+#: src/gui_templates.c:889
 msgid "Set password name:"
 msgstr "Nom de la contrasenya:"
 
 #. Advanced frame
-#: src/gui_templates.c:1968
+#: src/gui_templates.c:1969
 msgid "Show advanced configuration"
 msgstr "Mostrar configuració avançada"
 
-#: src/clavis_normal.c:369
+#: src/clavis_normal.c:370
 msgid "Show pass"
 msgstr "Mostrar"
 
 #. Languages:
-#: src/gui_templates.c:2546
+#: src/gui_templates.c:2557
 msgid "Spanish"
-msgstr ""
+msgstr "Espanyol"
 
-#: src/gui_templates.c:926
+#: src/gui_templates.c:927
 msgid "Symbols"
 msgstr "Símbols"
 
-#: src/clavis_normal.c:213
+#: src/clavis_normal.c:214
 msgid "Sync all passwords"
 msgstr "Sincronitzar contrasenyes"
 
-#: src/clavis_normal.c:204
+#: src/clavis_normal.c:205
 msgid "Upload passwords to Git"
 msgstr "Pujar contrasenyes a Git"
 
-#: src/gui_templates.c:928
+#: src/gui_templates.c:929
 msgid "Uppercase"
 msgstr "Majúscules"
 
 #. Toggles
-#: src/gui_templates.c:2385
+#: src/gui_templates.c:2386
 msgid "Use git server"
 msgstr "Utilitzar servidor Git"
 
-#: src/gui_templates.c:465
+#: src/gui_templates.c:466
 msgid "Username"
 msgstr "Nom d'usuari"
 
-#: src/gui_templates.c:461
+#: src/gui_templates.c:462
 msgid "Username:"
 msgstr "Nom d'usuari:"
 
-#: src/gui_templates.c:1910
+#: src/gui_templates.c:1911
 msgid "Weeks"
 msgstr "Setmanes"
 
-#: src/gui_templates.c:1553
+#: src/gui_templates.c:1554
 msgid "Welcome to Clavis!"
 msgstr "Benvingut a Clavis!"
 
-#: src/file_io.c:268
+#: src/file_io.c:269
 #, c-format
 msgid ""
 "Writing credentials:\n"
@@ -571,30 +585,30 @@ msgstr ""
 "Escrivint credencials:\n"
 "%s\n"
 
-#: src/gui_templates.c:1912
+#: src/gui_templates.c:1913
 msgid "Years"
 msgstr "Anys"
 
-#: src/gui_templates.c:1929
+#: src/gui_templates.c:1930
 msgid "Your name"
 msgstr "El teu nom"
 
-#: src/gui_templates.c:2061
+#: src/gui_templates.c:2062
 msgid "Your passwords do not match!"
 msgstr "Les contrasenyes no son iguals!"
 
-#: src/gui_templates.c:1605 src/gui_templates.c:1722
+#: src/gui_templates.c:1606 src/gui_templates.c:1723
 msgid "_Cancel"
 msgstr "_Cancel·lar"
 
-#: src/gui_templates.c:1722
+#: src/gui_templates.c:1723
 msgid "_Open"
 msgstr "_Obrir"
 
-#: src/gui_templates.c:1605
+#: src/gui_templates.c:1606
 msgid "_Save"
 msgstr "_Guardar"
 
-#: src/gui_templates.c:892
+#: src/gui_templates.c:893
 msgid "new_password"
 msgstr "nova_contrasenya"

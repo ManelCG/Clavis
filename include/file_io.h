@@ -49,6 +49,7 @@ char *file_io_get_about_picture_png();
 char *file_io_get_about_picture_png();
 char *file_io_get_gtk_settings_ini_file();
 int file_io_get_gtk_theme();
+char *windows_string(const char *s);
 #endif
 
 #endif //_FILE_IO_H_

@@ -13,7 +13,8 @@
 
 #include <locale.h>
 #include <libintl.h>
-#define _(String) gettext(String)
+
+#include <clavis_macros.h>
 
 #ifdef __unix__
 #include <sys/wait.h>
@@ -2494,17 +2495,20 @@ void gui_templates_show_password_store_info_window(GtkWidget *w, gpointer data){
   gtk_widget_show_all(GTK_WIDGET(window));
 }
 
-GtkWidget *gui_templates_get_language_credits_hbox(const char *text_translationby, const char *language, const char *credits[], const char *webs[], int ncredits){
-  char translation_text[strlen(text_translationby) + strlen(language) + 8];
-  sprintf(translation_text, text_translationby, language);
-  GtkWidget *translation_label = gtk_label_new(translation_text);
-  gtk_label_set_xalign(GTK_LABEL(translation_label), 1);
+void gui_templates_get_credits_hbox(const char *text_feature, const char *detail,
+                                          const char *credits[], const char *webs[], int ncredits,
+                                          GtkWidget *left_vbox, GtkWidget *right_vbox){
+  GtkWidget *feature_label;
+  if (detail != NULL){
+    char translation_text[strlen(text_feature) + strlen(detail) + 8];
+    sprintf(translation_text, text_feature, detail);
+    feature_label = gtk_label_new(translation_text);
+  } else {
+    feature_label = gtk_label_new(text_feature);
+  }
 
-  GtkWidget *left_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-  GtkWidget *right_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-  GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-
-  gtk_box_pack_start(GTK_BOX(left_vbox), translation_label, 0, true, true);
+  gtk_label_set_xalign(GTK_LABEL(feature_label), 1);
+  gtk_box_pack_start(GTK_BOX(left_vbox), feature_label, 0, true, false);
 
   for (int i = 0; i < ncredits; i++){
     const char *labeltext;
@@ -2522,13 +2526,13 @@ GtkWidget *gui_templates_get_language_credits_hbox(const char *text_translationb
     }
 
     gtk_label_set_xalign(GTK_LABEL(label), 0);
-    gtk_box_pack_start(GTK_BOX(right_vbox), label, 0, true, true);
+    gtk_box_pack_start(GTK_BOX(right_vbox), label, 0, true, false);
   }
 
-  gtk_box_pack_start(GTK_BOX(hbox), left_vbox, 0, true, true);
-  gtk_box_pack_start(GTK_BOX(hbox), right_vbox, 0, true, true);
-
-  return hbox;
+  for (int i = 0; i < ncredits-1; i++){
+    GtkWidget *label = gtk_label_new(NULL);
+    gtk_box_pack_start(GTK_BOX(left_vbox), label, 0, true, false);
+  }
 }
 
 void gui_templates_window_credits(GtkWidget *w, gpointer data){
@@ -2536,17 +2540,30 @@ void gui_templates_window_credits(GtkWidget *w, gpointer data){
   gtk_window_set_title(wdw, _("Clavis acknowledgements"));
   gtk_window_set_resizable(wdw, false);
   gtk_container_set_border_width(GTK_CONTAINER(wdw), 10);
-  gtk_window_set_default_size(GTK_WINDOW(wdw), 420, 0);
+  // gtk_window_set_default_size(GTK_WINDOW(wdw), 420, 0);
 
   gtk_window_set_position(GTK_WINDOW(wdw), GTK_WIN_POS_CENTER);
 
+  GtkWidget *left_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  GtkWidget *right_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+
   const char *text_translationby = _("%s translation by:");
+  const char *original_text_by   = _("Original text in %s by:");
+  const char *developed_by       = _("Program developed by:");
+  const char *artwork_by         = _("Artwork by:");
 
   //Languages:
   const char *spanish = _("Spanish");
   const char *english = _("English");
   const char *catalan = _("Catalan");
   const char *russian = _("Russian");
+
+  //People:
+  const char *manel_castillo      = "Manel Castillo Giménez";
+  const char *manel_castillo_w    = "https://github.com/ManelCG/";
+  const char *polina_chainikova   = "Polina Chainikova";
+  const char *polina_chainikova_w = "https://github.com/polinatea";
 
   //Boxes
   GtkWidget *main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
@@ -2557,21 +2574,62 @@ void gui_templates_window_credits(GtkWidget *w, gpointer data){
     gtk_box_pack_start(GTK_BOX(main_vbox), label_app_name, 0, true, true);
   }
 
+  //Program Credits
+  {
+    const char *credits[] = {manel_castillo};
+    const char *webs[] = {manel_castillo_w};
+    gui_templates_get_credits_hbox(developed_by, NULL, credits, webs, 1, left_vbox, right_vbox);
+  }
+
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(left_vbox), separator, false, false, 5);}
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(right_vbox), separator, false, false, 5);}
+
   //Translation Credits
   {
-    const char *language = spanish;
-    const char *credits[] = {"Manel Castillo Giménez"};
-    const char *webs[] = {"https://github.com/ManelCG"};
-    GtkWidget *box = gui_templates_get_language_credits_hbox(text_translationby, language, credits, webs, 1);
-    gtk_box_pack_start(GTK_BOX(main_vbox), box, 0, true, true);
+    const char *language = english;
+    const char *credits[] = {manel_castillo};
+    const char *webs[] = {manel_castillo_w};
+    gui_templates_get_credits_hbox(original_text_by, language, credits, webs, 1, left_vbox, right_vbox);
   }
   {
     const char *language = russian;
-    const char *credits[] = {"Polina Chainikova"};
-    const char *webs[] = {"https://github.com/polinatea"};
-    GtkWidget *box = gui_templates_get_language_credits_hbox(text_translationby, language, credits, webs, 1);
-    gtk_box_pack_start(GTK_BOX(main_vbox), box, 0, true, true);
+    const char *credits[] = {polina_chainikova};
+    const char *webs[] = {polina_chainikova_w};
+    gui_templates_get_credits_hbox(text_translationby, language, credits, webs, 1, left_vbox, right_vbox);
   }
+  {
+    const char *language = spanish;
+    const char *credits[] = {manel_castillo};
+    const char *webs[] = {manel_castillo_w};
+    gui_templates_get_credits_hbox(text_translationby, language, credits, webs, 1, left_vbox, right_vbox);
+  }
+  {
+    const char *language = catalan;
+    const char *credits[] = {manel_castillo};
+    const char *webs[] = {manel_castillo_w};
+    gui_templates_get_credits_hbox(text_translationby, language, credits, webs, 1, left_vbox, right_vbox);
+  }
+
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(left_vbox), separator, false, false, 5);}
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(right_vbox), separator, false, false, 5);}
+
+  //Artwork
+  {
+    const char *credits[] = {"Manel Castillo Giménez"};
+    const char *webs[] = {"https://github.com/ManelCG"};
+    gui_templates_get_credits_hbox(artwork_by, NULL, credits, webs, 1, left_vbox, right_vbox);
+  }
+
+
+  gtk_box_pack_start(GTK_BOX(hbox), left_vbox, 0, true, true);
+  gtk_box_pack_end(GTK_BOX(hbox), right_vbox, 0, true, true);
+
+  gtk_box_pack_end(GTK_BOX(main_vbox), hbox, 0, true, true);
+
 
   gtk_container_add(GTK_CONTAINER(wdw), main_vbox);
   gtk_widget_show_all(GTK_WIDGET(wdw));

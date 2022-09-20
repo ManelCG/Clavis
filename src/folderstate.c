@@ -6,7 +6,8 @@
 
 #include <libintl.h>
 #include <locale.h>
-#define _(String) gettext(String)
+
+#include <clavis_macros.h>
 
 #include <folderstate.h>
 

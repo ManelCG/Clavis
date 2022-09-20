@@ -12,7 +12,8 @@
 
 #include <libintl.h>
 #include <locale.h>
-#define _(String) gettext(String)
+
+#include <clavis_macros.h>
 
 void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   gui_templates_clear_container(window);
@@ -405,7 +406,7 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   //Password label and output + separator
   {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
    gtk_box_pack_start(GTK_BOX(folder_vbox), separator, false, false, 0);}
-  GtkWidget *password_label = gtk_label_new(_(_("Decrypted password:")));
+  GtkWidget *password_label = gtk_label_new(_("Decrypted password:"));
   gtk_box_pack_start(GTK_BOX(folder_vbox), password_label, false, false, 0);
   gtk_box_pack_start(GTK_BOX(folder_vbox), password_hbox, false, false, 0);
 

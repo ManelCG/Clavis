@@ -11,7 +11,8 @@
 
 #include <libintl.h>
 #include <locale.h>
-#define _(String) gettext(String)
+
+#include <clavis_macros.h>
 
 void clavis_popup_draw_main_window(GtkWidget *window, gpointer data){
   gui_templates_clear_container(window);

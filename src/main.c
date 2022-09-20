@@ -21,6 +21,8 @@
 #include <windows.h>
 #endif
 
+#include <clavis_macros.h>
+
 void draw_main_window(GtkWidget *widget, gpointer data){
   printf("Drawing main window!\n");
 }
