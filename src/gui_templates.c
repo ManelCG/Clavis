@@ -336,7 +336,7 @@ void change_theme_handler(GtkWidget *widget, gpointer data){
     free(buffer);
   }
 
-  GtkWidget *dialog;
+  // GtkWidget *dialog;
 
   ////Reload?
   //dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Theme changed. Reload Clavis?");
@@ -530,6 +530,7 @@ int gui_templates_git_config_window(){
   dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, _("Configure your Git server:"));
 
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), _("Cancel"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
@@ -843,6 +844,7 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), _("Cancel"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
@@ -1071,6 +1073,9 @@ void button_newpassword_handler(GtkWidget *widget, gpointer data){
           #endif
         }
       }
+    } else {
+      valid_password = false;
+      break;
     }
   }
 
@@ -1093,6 +1098,7 @@ void button_newfolder_handler(GtkWidget *widget, gpointer data){
   gtk_box_pack_end(GTK_BOX(dialog_box), entry, false, false, 0);
 
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), _("Cancel"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
   gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
@@ -1573,6 +1579,7 @@ int gui_templates_password_store_init_handler(){
     gtk_window_set_title(GTK_WINDOW(dialog), _("Welcome to Clavis!"));
     gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
     GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+    gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), _("Cancel"));
     { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
     gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
     gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
@@ -1664,15 +1671,19 @@ void gui_templates_export_key_handler(const char *key, _Bool private){
   strcpy(filename, key);
 
   token = strchr(filename, '<');
-  if (token[0] == '<'){
+  if (token != NULL && token[0] == '<'){
     token[0] = '[';
   }
   token = strchr(filename, '>');
-  if (token[0] == '>'){
+  if (token != NULL && token[0] == '>'){
     token[0] = ']';
   }
+  token = strchr(filename, '\n');
+  if (token != NULL && token[0] == '\n'){
+    token[0] = '\0';
+  }
 
-  OPENFILENAMEA ofn;
+  OPENFILENAME ofn;
   memset(&ofn, 0, sizeof(ofn));
   ofn.lStructSize = sizeof(ofn);
   ofn.hwndOwner = NULL;
@@ -1851,6 +1862,7 @@ int gui_templates_create_key_handler(){
 
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), _("Cancel"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
@@ -2265,6 +2277,7 @@ int gui_templates_initialize_password_store(){
 
   GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), _("Cancel"));
   { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
   gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
   GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
