@@ -8,7 +8,7 @@ CCCMD = gcc
 CFLAGS = -I$(IDIR) `pkg-config --cflags --libs gtk+-3.0` -lcrypto -Wall -Wno-deprecated-declarations -DCLAVIS_LOCALE_=\"$(LOCALENAME)\"
 
 debug: CC = $(CCCMD) -DDEBUG_ALL -DCLAVIS_VERSION=\"$(CLAVIS_VERSION)_DEBUG\"
-debug: BDIR = debug
+debug: BDIR = build
 
 release: CC = $(CCCMD) -O2 -DCLAVIS_VERSION=\"$(CLAVIS_VERSION)\"
 release: BDIR = build
@@ -74,7 +74,7 @@ windows_GTKENV: windows
 debug: $(DOBJ)
 	mkdir -p $(BDIR)
 	mkdir -p $(DODIR)
-	$(CC) -o $(BDIR)/clavis $^ $(CFLAGS) $(LIBS)
+	$(CC) -o $(BDIR)/clavis_DEBUG $^ $(CFLAGS) $(LIBS)
 
 install: $(OBJ)
 	mkdir -p $(CLAVIS_DIR)
