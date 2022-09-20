@@ -26,6 +26,8 @@ archlinux: CC = $(CCCMD) -O2 -DMAKE_INSTALL -DCLAVIS_VERSION=\"$(CLAVIS_VERSION)
 locale: LOCALEDIR = locale
 
 ODIR=.obj
+WODIR=.wobj
+DODIR=.debug_obj
 LDIR=lib
 
 LIBS = -lm -lpthread
@@ -35,9 +37,19 @@ DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 _OBJ = main.o clavis_popup.o clavis_normal.o gui_templates.o file_io.o folderstate.o algorithms.o clavis_passgen.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
+WOBJ = $(patsubst %,$(WODIR)/%,$(_OBJ))
+DOBJ = $(patsubst %,$(DODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: $(SDIR)/%.c $(DEPS)
 	mkdir -p $(ODIR)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+$(WODIR)/%.o: $(SDIR)/%.c $(DEPS)
+	mkdir -p $(WODIR)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+$(DODIR)/%.o: $(SDIR)/%.c $(DEPS)
+	mkdir -p $(DODIR)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 release: $(OBJ)
@@ -45,12 +57,12 @@ release: $(OBJ)
 	mkdir -p $(ODIR)
 	$(CC) -o $(BDIR)/clavis $^ $(CFLAGS) $(LIBS)
 
-windows: $(OBJ)
-	windres __windows__/my.rc -O coff $(ODIR)/my.res
-	windres __windows__/appinfo.rc -O coff $(ODIR)/appinfo.res
+windows: $(WOBJ)
+	mkdir -p $(WODIR)
+	windres __windows__/my.rc -O coff $(WODIR)/my.res
+	windres __windows__/appinfo.rc -O coff $(WODIR)/appinfo.res
 	mkdir -p $(BDIR)
-	mkdir -p $(ODIR)
-	$(CC) -o $(BDIR)/clavis $^ $(CFLAGS) $(LIBS) $(ODIR)/my.res $(ODIR)/appinfo.res
+	$(CC) -o $(BDIR)/clavis $^ $(CFLAGS) $(LIBS) $(WODIR)/my.res $(WODIR)/appinfo.res
 
 windows_GTKENV: windows
 	ldd $(BDIR)/clavis.exe | grep '\/mingw.*\.dll' -o | xargs -I{} cp "{}" $(BDIR)/
@@ -59,9 +71,9 @@ windows_GTKENV: windows
 	cp -ru locale/ $(BDIR)/
 
 
-debug: $(OBJ)
+debug: $(DOBJ)
 	mkdir -p $(BDIR)
-	mkdir -p $(ODIR)
+	mkdir -p $(DODIR)
 	$(CC) -o $(BDIR)/clavis $^ $(CFLAGS) $(LIBS)
 
 install: $(OBJ)
@@ -97,7 +109,7 @@ $(LOCALEDIR)/$(LOCALENAME).pot: $(SDIR)/*
 
 .PHONY: clean
 clean:
-	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~
+	rm -f $(ODIR)/*.o $(WODIR)/*.o $(DODIR)/*.o *~ core $(INCDIR)/*~
 
 .PHONY: all
 all: release clean
