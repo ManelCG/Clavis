@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Clavis 1.2.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 22:06+0200\n"
+"POT-Creation-Date: 2022-09-20 22:09+0200\n"
 "PO-Revision-Date: 2022-09-18 20:35+0200\n"
 "Last-Translator:  <polinachainikova99@gmail.com>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -402,7 +402,7 @@ msgstr "Открыть файл"
 #: src/gui_templates.c:2618
 #, c-format
 msgid "Original text in %s by:"
-msgstr "Оригинальный текст на %s языке:"
+msgstr "Оригинальный текст на %s:"
 
 #: src/gui_templates.c:488 src/gui_templates.c:892 src/gui_templates.c:1985
 msgid "Password"
