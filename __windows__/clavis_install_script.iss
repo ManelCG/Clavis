@@ -75,6 +75,7 @@ Source: "G:\clavis\build\libstdc++-6.dll"; DestDir: "{app}"; Flags: ignoreversio
 Source: "G:\clavis\build\libthai-0.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "G:\clavis\build\libwinpthread-1.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "G:\clavis\build\zlib1.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "G:\clavis\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 Source: "G:\clavis\__windows__\windows_assets\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 Source: "G:\clavis\assets\*"; DestDir: "{app}\assets\"; Flags: ignoreversion recursesubdirs
 Source: "G:\clavis\locale\*"; DestDir: "{app}\locale\"; Flags: ignoreversion recursesubdirs

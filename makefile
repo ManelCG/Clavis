@@ -69,6 +69,7 @@ windows_GTKENV: windows
 	cp -ru __windows__/windows_assets/* $(BDIR)/
 	cp -ru assets $(BDIR)/
 	cp -ru locale/ $(BDIR)/
+	cp LICENSE $(BDIR)/
 
 
 debug: $(DOBJ)
@@ -80,8 +81,12 @@ install: $(OBJ)
 	mkdir -p $(CLAVIS_DIR)
 	mkdir -p $(BDIR)
 	mkdir -p $(ODIR)
+	mkdir -p /usr/lib/clavis
 	$(CC) -o $(BDIR)/clavis $^ $(CFLAGS) $(LIBS)
 	ln -sf $(BDIR)/clavis /usr/bin/clavis
+	cp -ru assets/ /usr/lib/clavis
+	cp -ru locale/ /usr/lib/clavis
+	cp LICENSE /usr/lib/clavis
 	cp assets/clavis.desktop /usr/share/applications/
 	cp assets/app_icon/256.png /usr/share/pixmaps/clavis.png
 
@@ -94,6 +99,7 @@ archlinux: $(OBJ) $(OBJ_GUI)
 	$(CC) -o $(BDIR)/usr/bin/clavis $^ $(CFLAGS) $(LIBS)
 	cp -ru assets/ $(BDIR)/usr/lib/clavis/
 	cp -ru locale/ $(BDIR)/usr/lib/clavis/
+	cp LICENSE /usr/lib/clavis
 	cp assets/clavis.desktop $(BDIR)/usr/share/applications/
 	cp assets/app_icon/256.png $(BDIR)/usr/share/pixmaps/clavis.png
 
