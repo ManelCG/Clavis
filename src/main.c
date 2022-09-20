@@ -26,14 +26,19 @@ void draw_main_window(GtkWidget *widget, gpointer data){
 }
 
 int main(int argc, char *argv[]){
-  //Set locale environment
+  #if defined(_WIN32) || defined (WIN32)
+  //Set Windows Locale environment
+  // setlocale(LC_ALL, "ru-ru");
+  // SetThreadLocale(1049);
   // setlocale(LC_ALL, "es-Es");
   // SetThreadLocale(1034);
-
+  // setlocale(LC_ALL, "ca");
+  // SetThreadLocale(1027);
+  #endif
 
   char localedir[strlen(file_io_get_clavis_folder()) + strlen("locale") + 8];
   #ifdef __unix__
-  sprintf(localedir, "%s/%s", getenv("PWD"), "locale");
+  sprintf(localedir, "%s/%s", file_io_get_clavis_folder(), "locale");
   #elif defined(_WIN32) || defined (WIN32)
   sprintf(localedir, "%s\\%s", file_io_get_clavis_folder(), "locale");
   #endif
