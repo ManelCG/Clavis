@@ -60,6 +60,9 @@ char *file_io_get_clavis_executable();
 char *file_io_get_clavis_folder();
 char *file_io_get_clavis_license_file_buffer();
 
+int file_io_save_clv_file(const char *to);
+int file_io_read_clv_file(const char *from);
+
 #ifdef __unix__
 #ifndef MAKE_INSTALL
 char *file_io_get_about_picture_png();

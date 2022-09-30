@@ -2790,3 +2790,55 @@ void gui_templates_show_about_window(GtkWidget *w, gpointer data){
   printf("Gui templates show about window called succesfully\n");
   #endif
 }
+
+void gui_templates_export_clv_handler(GtkWidget *w, gpointer data){
+  GtkWidget *dialog = gtk_file_chooser_dialog_new(_("Export Password Store"),
+                                                  NULL, GTK_FILE_CHOOSER_ACTION_SAVE,
+                                                  _("_Cancel"), GTK_RESPONSE_CANCEL,
+                                                  _("_Save"), GTK_RESPONSE_ACCEPT, NULL);
+
+  GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
+  gtk_file_chooser_set_do_overwrite_confirmation(chooser, true);
+  gtk_file_chooser_set_current_name(chooser, "ClavisPasswordStore.clv");
+
+  int response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+  if (response == GTK_RESPONSE_ACCEPT){
+    GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
+
+    gchar *file = gtk_file_chooser_get_filename(chooser);
+    destroy(dialog, dialog);
+
+    file_io_save_clv_file(file);
+
+    g_free(file);
+  } else {
+    destroy(dialog, dialog);
+  }
+}
+
+void gui_templates_import_clv_handler(GtkWidget *w, gpointer data){
+  GtkWidget *dialog = gtk_file_chooser_dialog_new(_("Import Password Store"),
+                                                  NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
+                                                  _("_Cancel"), GTK_RESPONSE_CANCEL,
+                                                  _("_Import"), GTK_RESPONSE_ACCEPT, NULL);
+
+  GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
+  // gtk_file_chooser_set_current_name(chooser, "ClavisPasswordStore.clv");
+  gtk_file_chooser_set_do_overwrite_confirmation(chooser, false);
+
+  int response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+  if (response == GTK_RESPONSE_ACCEPT){
+    GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
+
+    gchar *file = gtk_file_chooser_get_filename(chooser);
+    destroy(dialog, dialog);
+
+    file_io_read_clv_file(file);
+
+    g_free(file);
+  } else {
+    destroy(dialog, dialog);
+  }
+}

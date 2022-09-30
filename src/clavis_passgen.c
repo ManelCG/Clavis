@@ -47,6 +47,33 @@ passgen *passgen_new(){
   return pg;
 }
 
+const char *passgen_generate_random_filename(){
+  int conslen = strlen(CLAVIS_PASSGEN_CONSONANTS_LOWERCASE) + strlen(CLAVIS_PASSGEN_CONSONANTS_UPPERCASE);
+  int vowelen = strlen(CLAVIS_PASSGEN_VOWELS_LOWERCASE) + strlen(CLAVIS_PASSGEN_VOWELS_UPPERCASE);
+  char consonants[conslen + 1];
+  char vowels[vowelen + 1];
+
+  strcpy(consonants, CLAVIS_PASSGEN_CONSONANTS_LOWERCASE);
+  strcpy(vowels, CLAVIS_PASSGEN_VOWELS_LOWERCASE);
+  strcat(consonants, CLAVIS_PASSGEN_CONSONANTS_UPPERCASE);
+  strcat(vowels, CLAVIS_PASSGEN_VOWELS_UPPERCASE);
+
+  char *filename = calloc(sizeof(char) * 64, 1);
+  unsigned int randint;
+  for (int i = 0; i < 63; i++){
+    RAND_priv_bytes((unsigned char *) &randint, sizeof(randint));
+    if (i % 2 == 0){
+      randint = randint % conslen;
+      filename[i] = consonants[randint];
+    } else {
+      randint = randint % vowelen;
+      filename[i] = vowels[randint];
+    }
+  }
+  filename[63] = '\0';
+  return filename;
+}
+
 const char *passgen_generate_new_password(passgen *pg){
   if (pg->pronunceable){
     //Generating charset

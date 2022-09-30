@@ -42,6 +42,8 @@ _Bool passgen_get_uppercase(passgen *pg);
 _Bool passgen_get_lowercase(passgen *pg);
 GtkWidget *passgen_get_output_entry(passgen *pg);
 
+const char *passgen_generate_random_filename();
+
 const char *passgen_generate_new_password(passgen *pg);
 
 

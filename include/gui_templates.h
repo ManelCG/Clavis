@@ -61,6 +61,10 @@ void gui_templates_window_license(GtkWidget *w, gpointer data);
 _Bool gui_templates_overwrite_confirmation(const char *path);
 void gui_templates_message_dialog(const char *message);
 
+//CLV
+void gui_templates_export_clv_handler(GtkWidget *, gpointer data);
+void gui_templates_import_clv_handler(GtkWidget *, gpointer data);
+
 //GPG keys
 void gui_templates_export_key_handler_combobox(GtkWidget *wid, gpointer data);
 void gui_templates_export_key_handler_entry(GtkWidget *wid, gpointer data);

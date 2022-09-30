@@ -80,6 +80,8 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
   GtkWidget *menu_filemenu;
   GtkWidget *menu_fileMi;
   GtkWidget *menu_button_pass_stats;
+  GtkWidget *menu_button_export_clv;
+  GtkWidget *menu_button_import_clv;
   GtkWidget *menu_button_new_password;
   GtkWidget *menu_button_new_folder;
   GtkWidget *menu_button_export_public_gpg;
@@ -135,6 +137,32 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(menu_button_pass_stats), true);
   }
 
+
+  {
+    menu_button_import_clv = gtk_image_menu_item_new_with_label(_("Import Password Store"));
+    g_signal_connect(menu_button_import_clv, "activate", G_CALLBACK(gui_templates_import_clv_handler), NULL);
+    #ifdef __unix__
+    GtkWidget *icon = gtk_image_new_from_icon_name("insert-object-symbolic", 16);
+    #elif defined(_WIN32) || defined (WIN32)
+    GtkWidget *icon = gtk_image_new_from_icon_name("insert-object-symbolic", 16);
+    #endif
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_import_clv), icon);
+    gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(menu_button_import_clv), true);
+  }
+
+
+  {
+    menu_button_export_clv = gtk_image_menu_item_new_with_label(_("Export Password Store"));
+    g_signal_connect(menu_button_export_clv, "activate", G_CALLBACK(gui_templates_export_clv_handler), NULL);
+    #ifdef __unix__
+    GtkWidget *icon = gtk_image_new_from_icon_name("document-save-as-symbolic", 16);
+    #elif defined(_WIN32) || defined (WIN32)
+    GtkWidget *icon = gtk_image_new_from_icon_name("document-save-as-symbolic", 16);
+    #endif
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_export_clv), icon);
+    gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(menu_button_export_clv), true);
+  }
+
   {
     menu_button_export_public_gpg = gtk_image_menu_item_new_with_label(_("Export public GPG key"));
     g_signal_connect(menu_button_export_public_gpg, "activate", G_CALLBACK(menu_button_export_gpg_handler), NULL);
@@ -188,6 +216,11 @@ void clavis_normal_draw_main_window(GtkWidget *window, gpointer data){
 
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_new_folder);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_new_password);
+  {GtkWidget *separator = gtk_separator_menu_item_new();
+   gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), separator);}
+
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_import_clv);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_export_clv);
   {GtkWidget *separator = gtk_separator_menu_item_new();
    gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), separator);}
 

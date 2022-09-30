@@ -46,6 +46,8 @@
 #include <clavis_constants.h>
 #include <gui_templates.h>
 
+#include <clavis_passgen.h>
+
 const char *get_password_store_path(){
   int homelen;
   char *path;
@@ -1649,6 +1651,7 @@ void file_io_export_gpg_keys(const char *key, const char *path, _Bool private){
       exit(-1);
     }
   }
+  waitpid(pid, NULL, 0);
   return;
 #elif defined(_WIN32) || defined (WIN32)
   HANDLE child_OUT_rd = NULL;
@@ -2044,3 +2047,163 @@ char *windows_string(const char *s){
   return ret;
 }
 #endif
+
+int file_io_recursive_export_passwords(FILE *f, const char *path){
+  _Bool exported = false;
+  if (file_io_string_is_folder(path)){
+    int nfiles = file_io_folder_get_file_n(path, "");
+    char **files = file_io_folder_get_file_list(path, nfiles, "");
+
+    for (int i = 0; i < nfiles; i++){
+      char filepath[strlen(path) + strlen(files[i]) + 8];
+      sprintf(filepath, "%s/%s", path, files[i]);
+      if (file_io_string_is_file(filepath)){
+        char *trimmedpath = filepath;
+        if (filepath[0] == '.' && filepath[1] == '/'){
+          trimmedpath += 2;
+        }
+
+        //Exporting passwords
+        size_t size;
+        FILE *pwf = fopen(filepath, "r");
+        fseek(pwf, 0L, SEEK_END);
+        size = ftell(pwf);
+        fseek(pwf, 0L, SEEK_SET);
+
+        char pw[size];
+        fread(pw, 1, size, pwf);
+        pw[size] = '\0';
+
+        int len = strlen(trimmedpath);
+
+        fwrite(&len, sizeof(len), 1, f);
+        fwrite(trimmedpath, sizeof(char), len, f);
+
+        fwrite(&size, sizeof(size), 1, f);
+        fwrite(pw, sizeof(char), size, f);
+
+        fclose(pwf);
+      } else if (file_io_string_is_folder(filepath)){
+        if (file_io_recursive_export_passwords(f, filepath)){
+          exported = true;
+        }
+      }
+
+      if (files[i] != NULL){
+        free(files[i]);
+      }
+    }
+
+    if (files != NULL){
+      free(files);
+    }
+  }
+
+  return exported;
+  #ifdef __unix__
+
+  #elif defined(_WIN32) || defined (WIN32)
+
+  #endif
+}
+
+int file_io_save_clv_file(const char *to){
+  const char *rootdir = get_password_store_path();
+  const char *tempf = passgen_generate_random_filename();
+  char *gpgid = file_io_get_gpgid();
+  const char *str;
+  int auxint;
+
+  const char *field_url = "remote.origin.url";
+  const char *field_email = "user.email";
+  const char *field_name = "user.name";
+
+  const char *cwd;
+
+  #ifdef __unix__
+  FILE *f = fopen(to, "w");
+  cwd = getcwd(NULL, 0);
+  chdir(rootdir);
+
+  //Writing private key to clv file
+  {
+    char temp_f_name[strlen(tempf) + 32];
+    sprintf(temp_f_name, "/tmp/CLAVIS_TEMPFILE_%s.tmp", tempf);
+
+    // mkfifo(temp_f_name, O_RDWR | O_CREAT | O_TRUNC);
+
+    file_io_export_gpg_keys(gpgid, temp_f_name, true);
+
+    FILE *tempfp = fopen(temp_f_name, "r");
+
+    size_t size;
+    fseek(tempfp, 0L, SEEK_END);
+    size = ftell(tempfp);
+    fseek(tempfp, 0L, SEEK_SET);
+
+    char keyb[size + 1];
+    fread(keyb, sizeof(char), size, tempfp);
+    keyb[size] = '\0';
+
+    printf("%s\n", keyb);
+
+    fclose(tempfp);
+
+    remove(temp_f_name);
+
+    int gpgidlen = strlen(gpgid);
+
+    fwrite(&gpgidlen, sizeof(gpgidlen), 1, f);
+    fwrite(gpgid, sizeof(char), gpgidlen, f);
+
+    fwrite(&size, sizeof(size), 1, f);
+    fwrite(keyb, sizeof(char), size, f);
+  }
+
+  //Get git data
+  str = file_io_get_git_config_field(field_url);
+  if (str != NULL){
+    auxint = strlen(str);
+    fwrite(&auxint, sizeof(auxint), 1, f);
+    fwrite(str, sizeof(char), strlen(str), f);
+  }
+  str = file_io_get_git_config_field(field_email);
+  if (str != NULL){
+    auxint = strlen(str);
+    fwrite(&auxint, sizeof(auxint), 1, f);
+    fwrite(str, sizeof(char), strlen(str), f);
+  }
+  str = file_io_get_git_config_field(field_name);
+  if (str != NULL){
+    auxint = strlen(str);
+    fwrite(&auxint, sizeof(auxint), 1, f);
+    fwrite(str, sizeof(char), strlen(str), f);
+  }
+
+  int result = file_io_recursive_export_passwords(f, ".");
+
+  fclose(f);
+  chdir(cwd);
+
+  #elif defined(_WIN32) || defined (WIN32)
+  int result = 0;
+  #endif
+
+  free((char *) rootdir);
+  free((char *) tempf);
+  free((char *) gpgid);
+
+  return result;
+}
+
+int file_io_read_clv_file(const char *from){
+  const char *rootdir = get_password_store_path();
+
+  #ifdef __unix__
+
+  #elif defined(_WIN32) || defined (WIN32)
+
+  #endif
+
+  return -1;
+}
