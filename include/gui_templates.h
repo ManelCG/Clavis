@@ -60,6 +60,7 @@ void gui_templates_window_license(GtkWidget *w, gpointer data);
 
 _Bool gui_templates_overwrite_confirmation(const char *path);
 void gui_templates_message_dialog(const char *message);
+_Bool gui_templates_yesno_dialog(const char *message, const char *cancelmessage, const char *acceptmessage);
 
 //CLV
 void gui_templates_export_clv_handler(GtkWidget *, gpointer data);

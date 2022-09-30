@@ -1009,6 +1009,38 @@ const char *file_io_decrypt_password(const char *file){
   #endif
 }
 
+void mkdir_parents(const char *dir){
+  char tmp[PATH_MAX];
+  char *p = NULL;
+  size_t len;
+
+  snprintf(tmp, sizeof(tmp),"%s",dir);
+  len = strlen(tmp);
+  #ifdef __unix__
+  if (tmp[len - 1] == '/'){
+  #elif defined(_WIN32) || defined (WIN32)
+  if (tmp[len - 1] == '\\'){
+  #endif
+    tmp[len - 1] = 0;
+  }
+  for (p = tmp + 1; *p; p++){
+    #ifdef __unix__
+    if (*p == '/') {
+    #elif defined(_WIN32) || defined (WIN32)
+    if (*p == '\\') {
+    #endif
+      *p = 0;
+      mkdir(tmp, S_IRWXU);
+      #ifdef __unix__
+      *p = '/';
+      #elif defined(_WIN32) || defined (WIN32)
+      *p = '\\';
+      #endif
+    }
+  }
+  mkdir(tmp, S_IRWXU);
+}
+
 int mkdir_handler(const char *path){
   #ifdef __unix__
   if (mkdir(path, S_IRWXU) != 0){
@@ -2056,14 +2088,23 @@ int file_io_recursive_export_passwords(FILE *f, const char *path){
 
     for (int i = 0; i < nfiles; i++){
       char filepath[strlen(path) + strlen(files[i]) + 8];
+      #ifdef __unix__
       sprintf(filepath, "%s/%s", path, files[i]);
+      #elif defined(_WIN32) || defined (WIN32)
+      sprintf(filepath, "%s\\%s", path, files[i]);
+      #endif
       if (file_io_string_is_file(filepath)){
         char *trimmedpath = filepath;
+        #ifdef __unix__
         if (filepath[0] == '.' && filepath[1] == '/'){
+        #elif defined(_WIN32) || defined (WIN32)
+        if (filepath[0] == '.' && filepath[1] == '\\'){
+        #endif
           trimmedpath += 2;
         }
 
         //Exporting passwords
+        //Format: INT(pathlen) + path + size_t(passwordlen) + password (ENCRYPTED)
         size_t size;
         FILE *pwf = fopen(filepath, "r");
         fseek(pwf, 0L, SEEK_END);
@@ -2100,14 +2141,9 @@ int file_io_recursive_export_passwords(FILE *f, const char *path){
   }
 
   return exported;
-  #ifdef __unix__
-
-  #elif defined(_WIN32) || defined (WIN32)
-
-  #endif
 }
 
-int file_io_save_clv_file(const char *to){
+int file_io_save_clv_file(const char *to, _Bool embed_gpg){
   const char *rootdir = get_password_store_path();
   const char *tempf = passgen_generate_random_filename();
   char *gpgid = file_io_get_gpgid();
@@ -2125,8 +2161,40 @@ int file_io_save_clv_file(const char *to){
   cwd = getcwd(NULL, 0);
   chdir(rootdir);
 
-  //Writing private key to clv file
+  //Get git data
+  //INT (url len) + URL + INT (email len) + email + INT (user len) + username
   {
+    //This 1 means we DO use Git
+    auxint = 1;
+    fwrite(&auxint, sizeof(auxint), 1, f);
+
+    str = file_io_get_git_config_field(field_url);
+    if (str != NULL){
+      auxint = strlen(str);
+      fwrite(&auxint, sizeof(auxint), 1, f);
+      fwrite(str, sizeof(char), strlen(str), f);
+    }
+    str = file_io_get_git_config_field(field_email);
+    if (str != NULL){
+      auxint = strlen(str);
+      fwrite(&auxint, sizeof(auxint), 1, f);
+      fwrite(str, sizeof(char), strlen(str), f);
+    }
+    str = file_io_get_git_config_field(field_name);
+    if (str != NULL){
+      auxint = strlen(str);
+      fwrite(&auxint, sizeof(auxint), 1, f);
+      fwrite(str, sizeof(char), strlen(str), f);
+    }
+  }
+
+  //Writing private key to clv file
+  //INT (yesno) + INT (namelen) + name, + size_t (gpglen) + gpg
+  if (embed_gpg) {
+    //This 1 means we DO use GPG
+    auxint = 1;
+    fwrite(&auxint, sizeof(auxint), 1, f);
+
     char temp_f_name[strlen(tempf) + 32];
     sprintf(temp_f_name, "/tmp/CLAVIS_TEMPFILE_%s.tmp", tempf);
 
@@ -2145,8 +2213,6 @@ int file_io_save_clv_file(const char *to){
     fread(keyb, sizeof(char), size, tempfp);
     keyb[size] = '\0';
 
-    printf("%s\n", keyb);
-
     fclose(tempfp);
 
     remove(temp_f_name);
@@ -2158,27 +2224,12 @@ int file_io_save_clv_file(const char *to){
 
     fwrite(&size, sizeof(size), 1, f);
     fwrite(keyb, sizeof(char), size, f);
+  } else {
+    //This 0 means we DONT use GPG
+    auxint = 0;
+    fwrite(&auxint, sizeof(auxint), 1, f);
   }
 
-  //Get git data
-  str = file_io_get_git_config_field(field_url);
-  if (str != NULL){
-    auxint = strlen(str);
-    fwrite(&auxint, sizeof(auxint), 1, f);
-    fwrite(str, sizeof(char), strlen(str), f);
-  }
-  str = file_io_get_git_config_field(field_email);
-  if (str != NULL){
-    auxint = strlen(str);
-    fwrite(&auxint, sizeof(auxint), 1, f);
-    fwrite(str, sizeof(char), strlen(str), f);
-  }
-  str = file_io_get_git_config_field(field_name);
-  if (str != NULL){
-    auxint = strlen(str);
-    fwrite(&auxint, sizeof(auxint), 1, f);
-    fwrite(str, sizeof(char), strlen(str), f);
-  }
 
   int result = file_io_recursive_export_passwords(f, ".");
 
@@ -2200,7 +2251,148 @@ int file_io_read_clv_file(const char *from){
   const char *rootdir = get_password_store_path();
 
   #ifdef __unix__
+  FILE *f = fopen(from, "r");
 
+  int auxint;
+  int gpgidlen = 0;
+  size_t auxsize;
+  _Bool importgit = false;
+  _Bool importgpg = false;
+  char *gpgid = NULL;
+
+
+  //Does CLV file have embedded Git information??
+  //INT (url len) + URL + INT (email len) + email + INT (user len) + username
+  fread(&auxint, sizeof(auxint), 1, f);
+  if (auxint == 1){
+    int url_len, email_len, name_len;
+
+    //URL
+    fread(&url_len, sizeof(url_len), 1, f);
+    char URL[url_len + 1];
+    fread(URL, sizeof(URL[0]), url_len, f);
+    URL[url_len] = '\0';
+
+    //URL
+    fread(&email_len, sizeof(email_len), 1, f);
+    char email[email_len + 1];
+    fread(email, sizeof(email[0]), email_len, f);
+    email[email_len] = '\0';
+
+    //URL
+    fread(&name_len, sizeof(name_len), 1, f);
+    char name[name_len + 1];
+    fread(name, sizeof(name[0]), name_len, f);
+    name[name_len] = '\0';
+
+    printf("URL: %s\n", URL);
+    printf("email: %s\n", email);
+    printf("name: %s\n", name);
+
+    importgit = gui_templates_yesno_dialog(_("This CLV file contains Git server information. Clone repository, or use CLV embedded passwords?"), _("Use CLV passwords"), _("Ignore files and clone repo"));
+
+    if (importgit){
+      file_io_init_git_server(name, email, URL, false, false);
+    }
+  }
+
+  //Does CLV file have an embedded GPG key??
+  fread(&auxint, sizeof(auxint), 1, f);
+  if (auxint == 1){ //INT (yesno) + INT (namelen) + name, + size_t (gpglen) + gpg
+    fread(&gpgidlen, sizeof(gpgidlen), 1, f);
+    gpgid = malloc(sizeof(char) * (gpgidlen + 1));
+    fread(gpgid, sizeof(gpgid[0]), gpgidlen, f);
+    fread(&auxsize, sizeof(auxsize), 1, f);
+    char gpg[auxsize + 1];
+    fread(gpg, sizeof(gpg[0]), auxsize, f);
+
+    gpgid[gpgidlen] = '\0';
+    gpg[auxsize] = '\0';
+
+    importgpg = gui_templates_yesno_dialog(_("This CLV file contains a GPG key. Import this key?"), _("Cancel"), _("Accept"));
+    if (importgpg){
+      const char *tempf = passgen_generate_random_filename();
+      char temp_f_name[strlen(tempf) + 32];
+      sprintf(temp_f_name, "/tmp/CLAVIS_TEMPFILE_%s.tmp", tempf);
+
+      FILE *tempfp = fopen(temp_f_name, "w");
+      fwrite(gpg, sizeof(gpg[0]), auxsize, tempfp);
+
+      free((char *) tempf);
+      fclose(tempfp);
+
+      int pid = fork();
+      if (pid < 0){
+        perror("Could not fork");
+        exit(CLAVIS_ERROR_FORK);
+      }
+      if (pid == 0){  //Child
+        execlp("gpg", "gpg", "--import", temp_f_name, NULL);
+        exit(-1);
+      }
+      waitpid(pid, NULL, 0);
+
+      remove(temp_f_name);
+
+    }
+  }
+
+  if (gpgid != NULL){
+    if (gpgidlen > 0){
+      FILE *gpg_id_file = fopen(".gpg-id", "w");
+      fwrite(gpgid, sizeof(gpgid[0]), gpgidlen, gpg_id_file);
+      fclose(gpg_id_file);
+    }
+
+    free(gpgid);
+  }
+
+
+  if (importgit){
+    goto end;
+  }
+
+  //Import all passwords from CLV file
+  //Format: INT(pathlen) + path + size_t(passwordlen) + password (ENCRYPTED)
+  int pathlen;
+  size_t pwlen;
+  while (fread(&pathlen, sizeof(pathlen), 1, f)){
+    if (pathlen <= 0){
+      break;
+    }
+
+    char pwpath[pathlen + 1];
+    fread(pwpath, sizeof(pwpath[0]), pathlen, f);
+    pwpath[pathlen] = '\0';
+
+    fread(&pwlen, sizeof(pwlen), 1, f);
+    char pw[pwlen + 1];
+    fread(pw, sizeof(pw[0]), pwlen, f);
+    pw[pwlen] = '\0';
+
+    ////Trim out .gpg extension
+    //if (strlen(pwpath) >= 4 && strcmp(&pwpath[strlen(pwpath)-4], ".gpg") == 0){
+    //  pwpath[strlen(pwpath)-4] = '\0';
+    //}
+
+    char directory_path[pathlen + 1];
+    strcpy(directory_path, pwpath);
+    char *token = strrchr(directory_path, '/');
+    if (token != NULL && *token == '/'){
+      *token = '\0';
+      mkdir_parents(directory_path);
+    }
+
+
+    FILE *pwfile = fopen(pwpath, "w");
+    fwrite(pw, sizeof(pw[0]), pwlen, pwfile);
+    fclose(pwfile);
+  }
+
+  end:
+  fclose(f);
+
+  return 0;
   #elif defined(_WIN32) || defined (WIN32)
 
   #endif

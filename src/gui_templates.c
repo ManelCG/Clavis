@@ -118,6 +118,31 @@ void gui_templates_message_dialog(const char *message){
 
   destroy(dialog, dialog);
 }
+_Bool gui_templates_yesno_dialog(const char *message, const char *cancelmessage, const char *acceptmessage){
+  GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, message);
+  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+  gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+
+  GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), cancelmessage);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
+
+  GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), acceptmessage);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
+
+  int response = gtk_dialog_run(GTK_DIALOG(dialog));
+  destroy(dialog, dialog);
+  if (response == GTK_RESPONSE_OK){
+    return true;
+  } else {
+    return false;
+  }
+}
 _Bool gui_templates_overwrite_confirmation(const char *path){
   char dialog_prompt[strlen(path) + 32];
 
@@ -2267,9 +2292,19 @@ void menu_button_export_gpg_handler(GtkWidget *w, gpointer data){
   free(gpgid);
 }
 
+void set_boolean_true_handler(GtkWidget *w, gpointer booleanp){
+  _Bool *boolean = (_Bool *) booleanp;
+  *boolean = true;
+}
+void set_boolean_false_handler(GtkWidget *w, gpointer booleanp){
+  _Bool *boolean = (_Bool *) booleanp;
+  *boolean = false;
+}
+
 int gui_templates_initialize_password_store(){
   GtkWidget *dialog;
   int response;
+  _Bool initialized_via_clv = false;
 
   //Chose key
   dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, _("Choose a GPG key, import one or create a new one."));
@@ -2301,6 +2336,8 @@ int gui_templates_initialize_password_store(){
   GtkWidget *button_export;
   GtkWidget *button_create;
   GtkWidget *button_refresh;
+
+  GtkWidget *button_import_clv;
 
   //Git
   GtkWidget *name_vbox;
@@ -2351,6 +2388,17 @@ int gui_templates_initialize_password_store(){
   g_signal_connect(button_create, "activate", G_CALLBACK(gui_templates_create_key_handler), NULL);
   g_signal_connect(button_create, "pressed", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
   g_signal_connect(button_create, "activate", G_CALLBACK(button_refresh_keys_handler), (gpointer) key_combo_box);
+
+  button_import_clv = gtk_button_new_with_label(_("Restore from CLV file"));
+  { GtkWidget *icon = gtk_image_new_from_icon_name("insert-object-symbolic", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(button_import_clv), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(button_import_clv), true);
+  g_signal_connect(button_import_clv, "pressed", G_CALLBACK(gui_templates_import_clv_handler), NULL);
+  g_signal_connect(button_import_clv, "activate", G_CALLBACK(gui_templates_import_clv_handler), NULL);
+  g_signal_connect(button_import_clv, "pressed", G_CALLBACK(set_boolean_true_handler), (gpointer) &initialized_via_clv);
+  g_signal_connect(button_import_clv, "activate", G_CALLBACK(set_boolean_true_handler), (gpointer) &initialized_via_clv);
+  g_signal_connect(button_import_clv, "pressed", G_CALLBACK(destroy), (gpointer) dialog);
+  g_signal_connect(button_import_clv, "activate", G_CALLBACK(destroy), (gpointer) dialog);
 
   //Pack
   gui_templates_fill_combo_box_with_gpg_keys(key_combo_box);
@@ -2448,6 +2496,11 @@ int gui_templates_initialize_password_store(){
   {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
   gtk_box_pack_start(GTK_BOX(main_vbox), separator, false, false, 5);}
 
+  gtk_box_pack_start(GTK_BOX(main_vbox), button_import_clv, false, false, 0);
+
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(main_vbox), separator, false, false, 5);}
+
   gtk_box_pack_start(GTK_BOX(main_vbox), git_check_hbox, false, false, 0);
   gtk_box_pack_start(GTK_BOX(main_vbox), git_frame_vbox, false, false, 0);
 
@@ -2458,6 +2511,10 @@ int gui_templates_initialize_password_store(){
   gtk_widget_hide(git_frame_vbox);
 
   response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+  if (initialized_via_clv){
+    return 0;
+  }
 
   if (response != GTK_RESPONSE_OK){
     destroy(dialog, dialog);
@@ -2792,16 +2849,56 @@ void gui_templates_show_about_window(GtkWidget *w, gpointer data){
 }
 
 void gui_templates_export_clv_handler(GtkWidget *w, gpointer data){
-  GtkWidget *dialog = gtk_file_chooser_dialog_new(_("Export Password Store"),
+  //Confirm export
+  GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, _("Export Password Store as CLV file"));
+  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+  gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+
+  GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), _("Cancel"));
+  { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
+
+  GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), _("Export"));
+  { GtkWidget *icon = gtk_image_new_from_icon_name("document-save-as-symbolic", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
+
+  GtkWidget *dialog_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+
+  GtkWidget *embed_gpg_toggle = gtk_check_button_new_with_label(_("Embed GPG key in CLV file"));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(embed_gpg_toggle), false);
+  GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  gtk_box_pack_start(GTK_BOX(hbox), embed_gpg_toggle, true, false, 0);
+  gtk_box_pack_start(GTK_BOX(dialog_box), hbox, true, false, 0);
+
+  gtk_widget_show_all(dialog);
+
+  // GtkStyleContext *context = gtk_widget_get_style_context(dialog_button_ok);
+  // gtk_style_context_add_class(context, "destructive-action");
+
+  int response = gtk_dialog_run(GTK_DIALOG(dialog));
+  _Bool embed_gpg = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(embed_gpg_toggle));
+  destroy(dialog, dialog);
+
+  if (response != GTK_RESPONSE_OK){
+    return;
+  }
+
+  //Save to
+  dialog = gtk_file_chooser_dialog_new(_("Export Password Store"),
                                                   NULL, GTK_FILE_CHOOSER_ACTION_SAVE,
                                                   _("_Cancel"), GTK_RESPONSE_CANCEL,
                                                   _("_Save"), GTK_RESPONSE_ACCEPT, NULL);
+
 
   GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
   gtk_file_chooser_set_do_overwrite_confirmation(chooser, true);
   gtk_file_chooser_set_current_name(chooser, "ClavisPasswordStore.clv");
 
-  int response = gtk_dialog_run(GTK_DIALOG(dialog));
+  response = gtk_dialog_run(GTK_DIALOG(dialog));
 
   if (response == GTK_RESPONSE_ACCEPT){
     GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
@@ -2809,7 +2906,7 @@ void gui_templates_export_clv_handler(GtkWidget *w, gpointer data){
     gchar *file = gtk_file_chooser_get_filename(chooser);
     destroy(dialog, dialog);
 
-    file_io_save_clv_file(file);
+    file_io_save_clv_file(file, embed_gpg);
 
     g_free(file);
   } else {

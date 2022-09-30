@@ -36,6 +36,7 @@ int file_io_encrypt_password(const char *password, const char *path);
 const char *get_password_store_path();
 
 int mkdir_handler(const char *path);
+void mkdir_parents(const char *dir);
 int cp(const char *from, const char *to);
 
 const char *file_io_get_git_config_field(const char *field);
@@ -60,7 +61,7 @@ char *file_io_get_clavis_executable();
 char *file_io_get_clavis_folder();
 char *file_io_get_clavis_license_file_buffer();
 
-int file_io_save_clv_file(const char *to);
+int file_io_save_clv_file(const char *to, _Bool embed_gpg);
 int file_io_read_clv_file(const char *from);
 
 #ifdef __unix__
