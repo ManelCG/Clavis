@@ -1016,29 +1016,34 @@ void mkdir_parents(const char *dir){
 
   snprintf(tmp, sizeof(tmp),"%s",dir);
   len = strlen(tmp);
-  #ifdef __unix__
-  if (tmp[len - 1] == '/'){
-  #elif defined(_WIN32) || defined (WIN32)
-  if (tmp[len - 1] == '\\'){
-  #endif
+  // #ifdef __unix__
+  if (tmp[len - 1] == '/' || tmp[len - 1] == '\\'){
+  // #elif defined(_WIN32) || defined (WIN32)
+  // if (tmp[len - 1] == '\\'){
+  // #endif
     tmp[len - 1] = 0;
   }
   for (p = tmp + 1; *p; p++){
-    #ifdef __unix__
-    if (*p == '/') {
-    #elif defined(_WIN32) || defined (WIN32)
-    if (*p == '\\') {
-    #endif
+    // #ifdef __unix__
+    if (*p == '/' || *p == '\\') {
+    // #elif defined(_WIN32) || defined (WIN32)
+    // if (*p == '\\') {
+    // #endif
       *p = 0;
-      mkdir(tmp, S_IRWXU);
       #ifdef __unix__
+      mkdir(tmp, S_IRWXU);
       *p = '/';
       #elif defined(_WIN32) || defined (WIN32)
+      mkdir(tmp);
       *p = '\\';
       #endif
     }
   }
+  #ifdef __unix__
   mkdir(tmp, S_IRWXU);
+  #elif defined(_WIN32) || defined (WIN32)
+  mkdir(tmp);
+  #endif
 }
 
 int mkdir_handler(const char *path){
@@ -1739,6 +1744,7 @@ void file_io_export_gpg_keys(const char *key, const char *path, _Bool private){
                      NULL);
 
   if (hFile == INVALID_HANDLE_VALUE){
+    printf("Invalid path: '%s'\n", path);
     return;
   }
 
@@ -2248,10 +2254,7 @@ int file_io_save_clv_file(const char *to, _Bool embed_gpg){
 }
 
 int file_io_read_clv_file(const char *from){
-  const char *rootdir = get_password_store_path();
-
-  #ifdef __unix__
-  FILE *f = fopen(from, "r");
+  // const char *rootdir = get_password_store_path();
 
   int auxint;
   int gpgidlen = 0;
@@ -2260,29 +2263,78 @@ int file_io_read_clv_file(const char *from){
   _Bool importgpg = false;
   char *gpgid = NULL;
 
+  #ifdef __unix__
+  FILE *f = fopen(from, "r");
+  #elif defined(_WIN32) || defined (WIN32)
+  HANDLE hFile;
+  hFile = CreateFile(from,
+                     GENERIC_READ,
+                     FILE_SHARE_READ,
+                     NULL,
+                     OPEN_EXISTING,
+                     FILE_ATTRIBUTE_NORMAL,
+                     NULL);
+
+  if (hFile == INVALID_HANDLE_VALUE){
+    return -1;
+  }
+  DWORD bread;
+  #endif
+
 
   //Does CLV file have embedded Git information??
   //INT (url len) + URL + INT (email len) + email + INT (user len) + username
+  #ifdef __unix__
   fread(&auxint, sizeof(auxint), 1, f);
+  #elif defined(_WIN32) || defined (WIN32)
+  ReadFile(hFile, &auxint, sizeof(auxint), &bread, NULL);
+  #endif
   if (auxint == 1){
     int url_len, email_len, name_len;
 
     //URL
+    #ifdef __unix__
     fread(&url_len, sizeof(url_len), 1, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    ReadFile(hFile, &url_len, sizeof(url_len), &bread, NULL);
+    #endif
     char URL[url_len + 1];
+    #ifdef __unix__
     fread(URL, sizeof(URL[0]), url_len, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    ReadFile(hFile, URL, sizeof(URL[0]) * url_len, &bread, NULL);
+    #endif
     URL[url_len] = '\0';
 
+    printf("URL: %s\n", URL);
+    printf("URL SIZE: %d\n", url_len);
+
     //URL
+    #ifdef __unix__
     fread(&email_len, sizeof(email_len), 1, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    ReadFile(hFile, &email_len, sizeof(email_len), &bread, NULL);
+    #endif
     char email[email_len + 1];
+    #ifdef __unix__
     fread(email, sizeof(email[0]), email_len, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    ReadFile(hFile, email, sizeof(email[0]) * email_len, &bread, NULL);
+    #endif
     email[email_len] = '\0';
 
     //URL
+    #ifdef __unix__
     fread(&name_len, sizeof(name_len), 1, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    ReadFile(hFile, &name_len, sizeof(name_len), &bread, NULL);
+    #endif
     char name[name_len + 1];
+    #ifdef __unix__
     fread(name, sizeof(name[0]), name_len, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    ReadFile(hFile, name, sizeof(name[0]) * name_len, &bread, NULL);
+    #endif
     name[name_len] = '\0';
 
     printf("URL: %s\n", URL);
@@ -2297,14 +2349,31 @@ int file_io_read_clv_file(const char *from){
   }
 
   //Does CLV file have an embedded GPG key??
+  #ifdef __unix__
   fread(&auxint, sizeof(auxint), 1, f);
+  #elif defined(_WIN32) || defined (WIN32)
+  ReadFile(hFile, &auxint, sizeof(auxint), &bread, NULL);
+  #endif
   if (auxint == 1){ //INT (yesno) + INT (namelen) + name, + size_t (gpglen) + gpg
+    #ifdef __unix__
     fread(&gpgidlen, sizeof(gpgidlen), 1, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    ReadFile(hFile, &gpgidlen, sizeof(gpgidlen), &bread, NULL);
+    #endif
     gpgid = malloc(sizeof(char) * (gpgidlen + 1));
+    #ifdef __unix__
     fread(gpgid, sizeof(gpgid[0]), gpgidlen, f);
     fread(&auxsize, sizeof(auxsize), 1, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    ReadFile(hFile, gpgid, sizeof(gpgid[0]) * gpgidlen, &bread, NULL);
+    ReadFile(hFile, &auxsize, sizeof(auxsize), &bread, NULL);
+    #endif
     char gpg[auxsize + 1];
+    #ifdef __unix__
     fread(gpg, sizeof(gpg[0]), auxsize, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    ReadFile(hFile, gpg, sizeof(gpg[0]) * auxsize, &bread, NULL);
+    #endif
 
     gpgid[gpgidlen] = '\0';
     gpg[auxsize] = '\0';
@@ -2313,14 +2382,33 @@ int file_io_read_clv_file(const char *from){
     if (importgpg){
       const char *tempf = passgen_generate_random_filename();
       char temp_f_name[strlen(tempf) + 32];
-      sprintf(temp_f_name, "/tmp/CLAVIS_TEMPFILE_%s.tmp", tempf);
 
+      #ifdef __unix__
+      sprintf(temp_f_name, "/tmp/CLAVIS_TEMPFILE_%s.tmp", tempf);
       FILE *tempfp = fopen(temp_f_name, "w");
       fwrite(gpg, sizeof(gpg[0]), auxsize, tempfp);
+      fclose(tempfp);
+      #elif defined(_WIN32) || defined (WIN32)
+      sprintf(temp_f_name, "CLAVIS_TEMPFILE_%s.tmp", tempf);
+      HANDLE tempfp;
+      tempfp = CreateFile(temp_f_name,
+                         GENERIC_WRITE,
+                         0,
+                         NULL,
+                         CREATE_ALWAYS,
+                         FILE_ATTRIBUTE_NORMAL,
+                         NULL);
+
+      if (tempfp == INVALID_HANDLE_VALUE){
+        return -1;
+      }
+      WriteFile(tempfp, gpg, sizeof(gpg[0]) * auxsize, NULL, NULL);
+      CloseHandle(tempfp);
+      #endif
 
       free((char *) tempf);
-      fclose(tempfp);
 
+      #ifdef __unix__
       int pid = fork();
       if (pid < 0){
         perror("Could not fork");
@@ -2332,16 +2420,78 @@ int file_io_read_clv_file(const char *from){
       }
       waitpid(pid, NULL, 0);
 
-      remove(temp_f_name);
+      #elif defined(_WIN32) || defined (WIN32)
+      HANDLE child_SYNC_rd = NULL;
+      HANDLE child_SYNC_wr = NULL;
 
+      SECURITY_ATTRIBUTES saAttr;
+      saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+      saAttr.bInheritHandle = true;
+      saAttr.lpSecurityDescriptor = NULL;
+
+      CreatePipe(&child_SYNC_rd, &child_SYNC_wr, &saAttr, 0);
+      SetHandleInformation(child_SYNC_rd, HANDLE_FLAG_INHERIT, 0);
+
+      PROCESS_INFORMATION piProcInfo;
+      STARTUPINFO siStartInfo;
+      ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+      ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+      siStartInfo.cb = sizeof(STARTUPINFO);
+      siStartInfo.hStdError = NULL;
+      siStartInfo.hStdOutput = child_SYNC_wr;
+      siStartInfo.hStdInput = NULL;
+      siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+      char gpg_parms[strlen(temp_f_name) + 64];
+      sprintf(gpg_parms, "gpg.exe --import \"%s\"", temp_f_name);
+
+      CreateProcessA("C:\\Program Files (x86)\\GnuPG\\bin\\gpg.exe",
+                     gpg_parms,
+                     NULL,
+                     NULL,
+                     true,
+                     CREATE_NO_WINDOW,
+                     NULL,
+                     NULL,
+                     &siStartInfo,
+                     &piProcInfo);
+
+      CloseHandle(piProcInfo.hProcess);
+      CloseHandle(piProcInfo.hThread);
+      CloseHandle(child_SYNC_wr);
+
+      char blackhole;
+      while(ReadFile(child_SYNC_rd, &blackhole, 1, NULL, NULL)){
+      }
+      CloseHandle(child_SYNC_rd);
+      #endif
+
+      remove(temp_f_name);
     }
   }
 
   if (gpgid != NULL){
     if (gpgidlen > 0){
+      #ifdef __unix__
       FILE *gpg_id_file = fopen(".gpg-id", "w");
       fwrite(gpgid, sizeof(gpgid[0]), gpgidlen, gpg_id_file);
       fclose(gpg_id_file);
+      #elif defined(_WIN32) || defined (WIN32)
+      HANDLE gpg_id_file;
+      gpg_id_file = CreateFile(".gpg-id",
+                               GENERIC_WRITE,
+                               0,
+                               NULL,
+                               CREATE_ALWAYS,
+                               FILE_ATTRIBUTE_NORMAL,
+                               NULL);
+
+      if (gpg_id_file == INVALID_HANDLE_VALUE){
+        return -1;
+      }
+      WriteFile(gpg_id_file, gpgid, sizeof(gpgid[0]) * gpgidlen, NULL, NULL);
+      CloseHandle(gpg_id_file);
+      #endif
     }
 
     free(gpgid);
@@ -2356,18 +2506,37 @@ int file_io_read_clv_file(const char *from){
   //Format: INT(pathlen) + path + size_t(passwordlen) + password (ENCRYPTED)
   int pathlen;
   size_t pwlen;
-  while (fread(&pathlen, sizeof(pathlen), 1, f)){
+  #ifdef __unix__
+  while(fread(&pathlen, sizeof(pathlen), 1, f)){
+  #elif defined(_WIN32) || defined (WIN32)
+  while(ReadFile(hFile, &pathlen, sizeof(pathlen), &bread, NULL)){
+    if (bread == 0){
+      break;
+    }
+  #endif
     if (pathlen <= 0){
       break;
     }
 
     char pwpath[pathlen + 1];
+    #ifdef __unix__
     fread(pwpath, sizeof(pwpath[0]), pathlen, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    ReadFile(hFile, pwpath, sizeof(pwpath[0]) * pathlen, &bread, NULL);
+    #endif
     pwpath[pathlen] = '\0';
 
+    #ifdef __unix__
     fread(&pwlen, sizeof(pwlen), 1, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    ReadFile(hFile, &pwlen, sizeof(pwlen), &bread, NULL);
+    #endif
     char pw[pwlen + 1];
+    #ifdef __unix__
     fread(pw, sizeof(pw[0]), pwlen, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    ReadFile(hFile, pw, sizeof(pw[0]) * pwlen, &bread, NULL);
+    #endif
     pw[pwlen] = '\0';
 
     ////Trim out .gpg extension
@@ -2380,22 +2549,45 @@ int file_io_read_clv_file(const char *from){
     char *token = strrchr(directory_path, '/');
     if (token != NULL && *token == '/'){
       *token = '\0';
+      printf("MKDIR %s\n", directory_path);
       mkdir_parents(directory_path);
     }
 
 
+    #ifdef __unix__
     FILE *pwfile = fopen(pwpath, "w");
     fwrite(pw, sizeof(pw[0]), pwlen, pwfile);
     fclose(pwfile);
+    #elif defined(_WIN32) || defined (WIN32)
+    HANDLE pwfile;
+    pwfile = CreateFile(pwpath,
+                       GENERIC_WRITE,
+                       0,
+                       NULL,
+                       CREATE_ALWAYS,
+                       FILE_ATTRIBUTE_NORMAL,
+                       NULL);
+
+    if (pwfile == INVALID_HANDLE_VALUE){
+      printf("Invalid handle %s\n", pwpath);
+      return -1;
+    }
+    WriteFile(pwfile, pw, sizeof(pw[0]) * pwlen, NULL, NULL);
+    printf("%s\n", pw);
+    printf("%s\n", pwpath);
+    CloseHandle(pwfile);
+    #endif
   }
 
   end:
+  #ifdef __unix__
   fclose(f);
-
-  return 0;
   #elif defined(_WIN32) || defined (WIN32)
-
+  CloseHandle(hFile);
   #endif
 
-  return -1;
+  return 0;
+
+  // ReadFile(hFile, ret, 4095, &bread, NULL);
+  // ret[bread] = '\0';
 }

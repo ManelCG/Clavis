@@ -1710,7 +1710,7 @@ void gui_templates_export_key_handler(const char *key, _Bool private){
     token[0] = '\0';
   }
 
-  OPENFILENAME ofn;
+  OPENFILENAMEA ofn;
   memset(&ofn, 0, sizeof(ofn));
   ofn.lStructSize = sizeof(ofn);
   ofn.hwndOwner = NULL;
@@ -1719,7 +1719,7 @@ void gui_templates_export_key_handler(const char *key, _Bool private){
   ofn.lpstrFile = filename;
   ofn.nMaxFile = MAX_PATH;
   ofn.lpstrTitle = _("Save your GPG key");
-  ofn.Flags = OFN_NONETWORKBUTTON | OFN_FILEMUSTEXIST;
+  ofn.Flags = OFN_NONETWORKBUTTON;
 
   if (!GetSaveFileName(&ofn)){
     chdir(cwd);
@@ -2887,16 +2887,19 @@ void gui_templates_export_clv_handler(GtkWidget *w, gpointer data){
     return;
   }
 
+  const char *prompt = _("Export Password Store");
+  const char *default_name = _("ClavisPasswordStore.clv");
   //Save to
-  dialog = gtk_file_chooser_dialog_new(_("Export Password Store"),
-                                                  NULL, GTK_FILE_CHOOSER_ACTION_SAVE,
-                                                  _("_Cancel"), GTK_RESPONSE_CANCEL,
-                                                  _("_Save"), GTK_RESPONSE_ACCEPT, NULL);
+  #ifdef __unix__
+  dialog = gtk_file_chooser_dialog_new(prompt,
+                                       NULL, GTK_FILE_CHOOSER_ACTION_SAVE,
+                                       _("_Cancel"), GTK_RESPONSE_CANCEL,
+                                       _("_Save"), GTK_RESPONSE_ACCEPT, NULL);
 
 
   GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
   gtk_file_chooser_set_do_overwrite_confirmation(chooser, true);
-  gtk_file_chooser_set_current_name(chooser, "ClavisPasswordStore.clv");
+  gtk_file_chooser_set_current_name(chooser, default_name);
 
   response = gtk_dialog_run(GTK_DIALOG(dialog));
 
@@ -2912,10 +2915,38 @@ void gui_templates_export_clv_handler(GtkWidget *w, gpointer data){
   } else {
     destroy(dialog, dialog);
   }
+  #elif defined(_WIN32) || defined (WIN32)
+  const char *cwd = _getcwd(NULL, 0);
+
+  char filename[MAX_PATH];
+  filename[0] = '\0';
+  strcpy(filename, default_name);
+  OPENFILENAMEA ofn;
+  memset(&ofn, 0, sizeof(ofn));
+  ofn.lStructSize = sizeof(ofn);
+  ofn.hwndOwner = NULL;
+  ofn.hInstance = NULL;
+  ofn.lpstrFilter = "Clavis Files (.clv)\0*.clv\0\0";
+  ofn.lpstrFile = filename;
+  ofn.nMaxFile = MAX_PATH;
+  ofn.lpstrTitle = prompt;
+  ofn.Flags = OFN_NONETWORKBUTTON;
+
+  if (!GetOpenFileName(&ofn)){
+    chdir(cwd);
+    free((char *) cwd);
+    return;
+  }
+  chdir(cwd);
+
+  file_io_read_clv_file(filename);
+  #endif
 }
 
 void gui_templates_import_clv_handler(GtkWidget *w, gpointer data){
-  GtkWidget *dialog = gtk_file_chooser_dialog_new(_("Import Password Store"),
+  const char *prompt = _("Import Password Store");
+  #ifdef __unix__
+  GtkWidget *dialog = gtk_file_chooser_dialog_new(prompt,
                                                   NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
                                                   _("_Cancel"), GTK_RESPONSE_CANCEL,
                                                   _("_Import"), GTK_RESPONSE_ACCEPT, NULL);
@@ -2938,4 +2969,29 @@ void gui_templates_import_clv_handler(GtkWidget *w, gpointer data){
   } else {
     destroy(dialog, dialog);
   }
+  #elif defined(_WIN32) || defined (WIN32)
+  const char *cwd = _getcwd(NULL, 0);
+
+  char filename[MAX_PATH];
+  filename[0] = '\0';
+  OPENFILENAMEA ofn;
+  memset(&ofn, 0, sizeof(ofn));
+  ofn.lStructSize = sizeof(ofn);
+  ofn.hwndOwner = NULL;
+  ofn.hInstance = NULL;
+  ofn.lpstrFilter = "Clavis Files (.clv)\0*.clv\0\0";
+  ofn.lpstrFile = filename;
+  ofn.nMaxFile = MAX_PATH;
+  ofn.lpstrTitle = prompt;
+  ofn.Flags = OFN_NONETWORKBUTTON | OFN_FILEMUSTEXIST;
+
+  if (!GetOpenFileName(&ofn)){
+    chdir(cwd);
+    free((char *) cwd);
+    return;
+  }
+  chdir(cwd);
+
+  file_io_read_clv_file(filename);
+  #endif
 }
