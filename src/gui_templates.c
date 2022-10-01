@@ -2939,7 +2939,7 @@ void gui_templates_export_clv_handler(GtkWidget *w, gpointer data){
   }
   chdir(cwd);
 
-  file_io_read_clv_file(filename);
+  file_io_save_clv_file(filename, embed_gpg);
   #endif
 }
 

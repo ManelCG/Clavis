@@ -2086,11 +2086,20 @@ char *windows_string(const char *s){
 }
 #endif
 
+#ifdef __unix__
 int file_io_recursive_export_passwords(FILE *f, const char *path){
+#elif defined(_WIN32) || defined (WIN32)
+int file_io_recursive_export_passwords(HANDLE f, const char *path){
+#endif
   _Bool exported = false;
   if (file_io_string_is_folder(path)){
+    // #ifdef __unix__
     int nfiles = file_io_folder_get_file_n(path, "");
     char **files = file_io_folder_get_file_list(path, nfiles, "");
+    // #elif defined(_WIN32) || defined (WIN32)
+    // int nfiles = file_io_folder_get_file_n(path, ".");
+    // char **files = file_io_folder_get_file_list(path, nfiles, ".");
+    // #endif
 
     for (int i = 0; i < nfiles; i++){
       char filepath[strlen(path) + strlen(files[i]) + 8];
@@ -2112,17 +2121,40 @@ int file_io_recursive_export_passwords(FILE *f, const char *path){
         //Exporting passwords
         //Format: INT(pathlen) + path + size_t(passwordlen) + password (ENCRYPTED)
         size_t size;
+
+        #ifdef __unix__
         FILE *pwf = fopen(filepath, "r");
         fseek(pwf, 0L, SEEK_END);
         size = ftell(pwf);
         fseek(pwf, 0L, SEEK_SET);
+        #elif defined(_WIN32) || defined (WIN32)
+        HANDLE pwf;
+        pwf = CreateFile(filepath,
+                         GENERIC_READ,
+                         FILE_SHARE_READ,
+                         NULL,
+                         OPEN_EXISTING,
+                         FILE_ATTRIBUTE_NORMAL,
+                         NULL);
+
+        if (pwf == INVALID_HANDLE_VALUE){
+          return false;
+        }
+
+        size = GetFileSize(pwf, NULL);
+        #endif
 
         char pw[size];
+        #ifdef __unix__
         fread(pw, 1, size, pwf);
+        #elif defined(_WIN32) || defined (WIN32)
+        ReadFile(pwf, pw, size, NULL, NULL);
+        #endif
         pw[size] = '\0';
 
         int len = strlen(trimmedpath);
 
+        #ifdef __unix__
         fwrite(&len, sizeof(len), 1, f);
         fwrite(trimmedpath, sizeof(char), len, f);
 
@@ -2130,6 +2162,16 @@ int file_io_recursive_export_passwords(FILE *f, const char *path){
         fwrite(pw, sizeof(char), size, f);
 
         fclose(pwf);
+        #elif defined(_WIN32) || defined (WIN32)
+        WriteFile(f, &len, sizeof(len) * 1, NULL, NULL);
+        WriteFile(f, trimmedpath, sizeof(char) * len, NULL, NULL);
+
+        WriteFile(f, &size, sizeof(size) * 1, NULL, NULL);
+        WriteFile(f, pw, sizeof(char) * size, NULL, NULL);
+
+        CloseHandle(pwf);
+        #endif
+
       } else if (file_io_string_is_folder(filepath)){
         if (file_io_recursive_export_passwords(f, filepath)){
           exported = true;
@@ -2165,33 +2207,79 @@ int file_io_save_clv_file(const char *to, _Bool embed_gpg){
   #ifdef __unix__
   FILE *f = fopen(to, "w");
   cwd = getcwd(NULL, 0);
+  #elif defined(_WIN32) || defined (WIN32)
+  HANDLE f;
+  f = CreateFile(to,
+                 GENERIC_WRITE,
+                 0,
+                 NULL,
+                 CREATE_ALWAYS,
+                 FILE_ATTRIBUTE_NORMAL,
+                 NULL);
+
+  if (f == INVALID_HANDLE_VALUE){
+    return -1;
+  }
+  cwd = _getcwd(NULL, 0);
+  #endif
   chdir(rootdir);
 
   //Get git data
   //INT (url len) + URL + INT (email len) + email + INT (user len) + username
-  {
+  #ifdef __unix__
+  if (true) {
+  #elif defined(_WIN32) || defined (WIN32)
+  if (false) {
+  #endif
     //This 1 means we DO use Git
     auxint = 1;
+    #ifdef __unix__
     fwrite(&auxint, sizeof(auxint), 1, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    WriteFile(f, &auxint, sizeof(auxint) * 1, NULL, NULL);
+    #endif
 
     str = file_io_get_git_config_field(field_url);
     if (str != NULL){
       auxint = strlen(str);
+      #ifdef __unix__
       fwrite(&auxint, sizeof(auxint), 1, f);
       fwrite(str, sizeof(char), strlen(str), f);
+      #elif defined(_WIN32) || defined (WIN32)
+      WriteFile(f, &auxint, sizeof(auxint) * 1, NULL, NULL);
+      WriteFile(f, str, sizeof(char) * strlen(str), NULL, NULL);
+      #endif
     }
     str = file_io_get_git_config_field(field_email);
     if (str != NULL){
       auxint = strlen(str);
+      #ifdef __unix__
       fwrite(&auxint, sizeof(auxint), 1, f);
       fwrite(str, sizeof(char), strlen(str), f);
+      #elif defined(_WIN32) || defined (WIN32)
+      WriteFile(f, &auxint, sizeof(auxint) * 1, NULL, NULL);
+      WriteFile(f, str, sizeof(char) * strlen(str), NULL, NULL);
+      #endif
     }
     str = file_io_get_git_config_field(field_name);
     if (str != NULL){
       auxint = strlen(str);
+      #ifdef __unix__
       fwrite(&auxint, sizeof(auxint), 1, f);
       fwrite(str, sizeof(char), strlen(str), f);
+      #elif defined(_WIN32) || defined (WIN32)
+      WriteFile(f, &auxint, sizeof(auxint) * 1, NULL, NULL);
+      WriteFile(f, str, sizeof(char) * strlen(str), NULL, NULL);
+      #endif
     }
+  } else {
+    //This 0 means we DONT use GPG
+    auxint = 0;
+    #ifdef __unix__
+    fwrite(&auxint, sizeof(auxint), 1, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    WriteFile(f, &auxint, sizeof(auxint) * 1, NULL, NULL);
+    #endif
   }
 
   //Writing private key to clv file
@@ -2199,12 +2287,18 @@ int file_io_save_clv_file(const char *to, _Bool embed_gpg){
   if (embed_gpg) {
     //This 1 means we DO use GPG
     auxint = 1;
+    #ifdef __unix__
     fwrite(&auxint, sizeof(auxint), 1, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    WriteFile(f, &auxint, sizeof(auxint) * 1, NULL, NULL);
+    #endif
 
     char temp_f_name[strlen(tempf) + 32];
+    #ifdef __unix__
     sprintf(temp_f_name, "/tmp/CLAVIS_TEMPFILE_%s.tmp", tempf);
-
-    // mkfifo(temp_f_name, O_RDWR | O_CREAT | O_TRUNC);
+    #elif defined(_WIN32) || defined (WIN32)
+    sprintf(temp_f_name, "CLAVIS_TEMPFILE_%s.tmp", tempf);
+    #endif
 
     file_io_export_gpg_keys(gpgid, temp_f_name, true);
 
@@ -2225,26 +2319,40 @@ int file_io_save_clv_file(const char *to, _Bool embed_gpg){
 
     int gpgidlen = strlen(gpgid);
 
+    #ifdef __unix__
     fwrite(&gpgidlen, sizeof(gpgidlen), 1, f);
     fwrite(gpgid, sizeof(char), gpgidlen, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    WriteFile(f, &gpgidlen, sizeof(gpgidlen) * 1, NULL, NULL);
+    WriteFile(f, gpgid, sizeof(char) * gpgidlen, NULL, NULL);
+    #endif
 
+    #ifdef __unix__
     fwrite(&size, sizeof(size), 1, f);
     fwrite(keyb, sizeof(char), size, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    WriteFile(f, &size, sizeof(size) * 1, NULL, NULL);
+    WriteFile(f, keyb, sizeof(char) * size, NULL, NULL);
+    #endif
   } else {
     //This 0 means we DONT use GPG
     auxint = 0;
+    #ifdef __unix__
     fwrite(&auxint, sizeof(auxint), 1, f);
+    #elif defined(_WIN32) || defined (WIN32)
+    WriteFile(f, &auxint, sizeof(auxint) * 1, NULL, NULL);
+    #endif
   }
 
 
   int result = file_io_recursive_export_passwords(f, ".");
 
+  #ifdef __unix__
   fclose(f);
-  chdir(cwd);
-
   #elif defined(_WIN32) || defined (WIN32)
-  int result = 0;
+  CloseHandle(f);
   #endif
+  chdir(cwd);
 
   free((char *) rootdir);
   free((char *) tempf);
@@ -2547,7 +2655,10 @@ int file_io_read_clv_file(const char *from){
     char directory_path[pathlen + 1];
     strcpy(directory_path, pwpath);
     char *token = strrchr(directory_path, '/');
-    if (token != NULL && *token == '/'){
+    if (token == NULL){
+      token = strrchr(directory_path, '\\');
+    }
+    if (token != NULL && (*token == '/' || *token == '\\')){
       *token = '\0';
       printf("MKDIR %s\n", directory_path);
       mkdir_parents(directory_path);
@@ -2555,6 +2666,12 @@ int file_io_read_clv_file(const char *from){
 
 
     #ifdef __unix__
+    char *token2 = strchr(pwpath, '\\');
+    while (token2 != NULL){
+      *token2 = '/';
+      token2 = strchr(pwpath, '\\');
+    }
+
     FILE *pwfile = fopen(pwpath, "w");
     fwrite(pw, sizeof(pw[0]), pwlen, pwfile);
     fclose(pwfile);
