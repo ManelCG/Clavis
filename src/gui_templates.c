@@ -185,6 +185,8 @@ void type_entry_with_keyboard_handler(GtkWidget *widget, gpointer data){
   if (strlen(pw) != 0){
     gtk_main_quit();
     #ifdef __unix__
+      int session = file_io_get_linux_session();
+
       int p[2];
       if (pipe(p) < 0){
         perror("Could not pipe");
@@ -201,9 +203,21 @@ void type_entry_with_keyboard_handler(GtkWidget *widget, gpointer data){
         close(p[0]);
         close(p[1]);
 
-        execlp("xdotool", "xdotool", "type", "--clearmodifiers", "--file", "-", NULL);
-        printf("Post execlp ERROR\n");
-        exit(-1);
+        switch(session){
+          case CLAVIS_SESSION_WAYLAND:
+            execlp("wtype", "wtype", "-", NULL);
+            printf("Post execlp ERROR\n");
+            exit(-1);
+            break;
+          case CLAVIS_SESSION_XORG:
+            execlp("xdotool", "xdotool", "type", "--clearmodifiers", "--file", "-", NULL);
+            printf("Post execlp ERROR\n");
+            exit(-1);
+            break;
+          case CLAVIS_SESSION_UNKNOWN:
+            printf("Unknown session. Cannot simulate keyboard presses\n");
+            break;
+        }
       }
       //Parent
       close(p[0]);

@@ -65,6 +65,7 @@ int file_io_save_clv_file(const char *to, _Bool embed_gpg);
 int file_io_read_clv_file(const char *from);
 
 #ifdef __unix__
+int file_io_get_linux_session();
 #ifndef MAKE_INSTALL
 char *file_io_get_about_picture_png();
 #endif

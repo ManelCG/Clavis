@@ -2708,3 +2708,29 @@ int file_io_read_clv_file(const char *from){
   // ReadFile(hFile, ret, 4095, &bread, NULL);
   // ret[bread] = '\0';
 }
+
+#ifdef __unix__
+int file_io_get_linux_session(){
+  const char *session = getenv("XDG_SESSION_TYPE");
+  if (session == NULL){
+    const char *wdisplay = getenv("WAYLAND_DISPLAY");
+    if (wdisplay != NULL){
+      return CLAVIS_SESSION_WAYLAND;
+    }
+
+    const char *xdisplay = getenv("DISPLAY");
+    if (xdisplay != NULL){
+      return CLAVIS_SESSION_XORG;
+    }
+
+  } else if (strcmp(session, "wayland") == 0){
+    return CLAVIS_SESSION_WAYLAND;
+  } else if (strcmp(session, "x11") == 0){
+    return CLAVIS_SESSION_XORG;
+  } else {
+    return CLAVIS_SESSION_UNKNOWN;
+  }
+
+  return CLAVIS_SESSION_UNKNOWN;
+}
+#endif
