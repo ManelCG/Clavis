@@ -2712,23 +2712,30 @@ int file_io_read_clv_file(const char *from){
 #ifdef __unix__
 int file_io_get_linux_session(){
   const char *session = getenv("XDG_SESSION_TYPE");
-  if (session == NULL){
-    const char *wdisplay = getenv("WAYLAND_DISPLAY");
-    if (wdisplay != NULL){
+  if (session != NULL){
+    if (strcmp(session, "wayland") == 0){
+      printf("Wayland (from session)\n");
       return CLAVIS_SESSION_WAYLAND;
     }
 
-    const char *xdisplay = getenv("DISPLAY");
-    if (xdisplay != NULL){
+    if (strcmp(session, "x11") == 0){
+      printf("X (from session)\n");
       return CLAVIS_SESSION_XORG;
     }
+  }
 
-  } else if (strcmp(session, "wayland") == 0){
+  //If session is NULL or we got a different text, like 'tty':
+
+  //This is only not null if wayland
+  const char *wdisplay = getenv("WAYLAND_DISPLAY");
+  if (wdisplay != NULL){
     return CLAVIS_SESSION_WAYLAND;
-  } else if (strcmp(session, "x11") == 0){
+  }
+
+  //This is only not null if X
+  const char *xdisplay = getenv("DISPLAY");
+  if (xdisplay != NULL){
     return CLAVIS_SESSION_XORG;
-  } else {
-    return CLAVIS_SESSION_UNKNOWN;
   }
 
   return CLAVIS_SESSION_UNKNOWN;
