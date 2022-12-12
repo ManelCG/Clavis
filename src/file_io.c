@@ -2714,12 +2714,10 @@ int file_io_get_linux_session(){
   const char *session = getenv("XDG_SESSION_TYPE");
   if (session != NULL){
     if (strcmp(session, "wayland") == 0){
-      printf("Wayland (from session)\n");
       return CLAVIS_SESSION_WAYLAND;
     }
 
     if (strcmp(session, "x11") == 0){
-      printf("X (from session)\n");
       return CLAVIS_SESSION_XORG;
     }
   }
