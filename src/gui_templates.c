@@ -70,9 +70,19 @@ void gui_templates_window_set_clavis_icon(GtkWindow *window){
 
 //HANDLERS
 void copy_entry_to_clipboard_handler(GtkWidget *widget, gpointer data){
-  GtkWidget *entry = (GtkWidget *) data;
-  const char *pw = gtk_entry_get_text(GTK_ENTRY(entry));
-  if (strlen(pw) != 0){
+  GtkWidget *widget_casted = (GtkWidget *) data;
+  const char *text;
+
+  if (G_TYPE_CHECK_INSTANCE_TYPE(widget_casted, GTK_TYPE_ENTRY)){
+    text = gtk_entry_get_text(GTK_ENTRY(widget_casted));
+  } else if (G_TYPE_CHECK_INSTANCE_TYPE(widget_casted, GTK_TYPE_LABEL)){
+    text = gtk_label_get_text(GTK_LABEL(widget_casted));
+  } else {  //Not implemented
+    fprintf(stderr, "Copy to clipboard is not implemented with selected GTK Widget type\n");
+    return;
+  }
+
+  if (strlen(text) != 0){
     #ifdef __unix__
       int p[2];
       if (pipe(p) < 0){
@@ -96,13 +106,13 @@ void copy_entry_to_clipboard_handler(GtkWidget *widget, gpointer data){
       }
       //Parent
       close(p[0]);
-      write(p[1], pw, strlen(pw));
+      write(p[1], text, strlen(text));
       close(p[1]);
 
     #elif defined(_WIN32) || defined (WIN32)
-      const size_t len = strlen(pw) + 1;
+      const size_t len = strlen(text) + 1;
       HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, len);
-      memcpy(GlobalLock(hMem), pw, len);
+      memcpy(GlobalLock(hMem), text, len);
       GlobalUnlock(hMem);
       OpenClipboard(0);
       EmptyClipboard();
@@ -2577,23 +2587,41 @@ void gui_templates_show_password_store_info_window(GtkWidget *w, gpointer data){
   gtk_window_set_title(window, _("Password Store data"));
   gtk_window_set_resizable(window, false);
   gtk_container_set_border_width(GTK_CONTAINER(window), 10);
-  gtk_window_set_default_size(GTK_WINDOW(window), 320, 0);
+  gtk_window_set_default_size(GTK_WINDOW(window), 0, 0);
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
 
   //Boxes
   GtkWidget *main_vbox;
 
+  GtkWidget *label_pass_dir_hbox;
+  GtkWidget *label_pass_dir_vbox;
+
   //Widgets
-  GtkWidget *entry_pass_dir;
+  GtkWidget *label_pass_dir_frame;
+  GtkWidget *label_pass_dir;
+
+  GtkWidget *copy_label_pass_dir_button;
 
   //Packing
-  entry_pass_dir = gtk_entry_new();
-  gtk_editable_set_editable(GTK_EDITABLE(entry_pass_dir), false);
-  gtk_entry_set_text(GTK_ENTRY(entry_pass_dir), getcwd(NULL, 0));
+  label_pass_dir = gtk_label_new(getcwd(NULL, 0));
+  label_pass_dir_frame = gtk_frame_new(_("Password Store directory"));
+
+  copy_label_pass_dir_button = gtk_button_new();
+  { GtkWidget *icon = gtk_image_new_from_icon_name("edit-copy-symbolic", GTK_ICON_SIZE_MENU);
+  gtk_button_set_image(GTK_BUTTON(copy_label_pass_dir_button), icon); }
+  g_signal_connect(copy_label_pass_dir_button, "pressed", G_CALLBACK(copy_entry_to_clipboard_handler), (gpointer) label_pass_dir);
+
+
+  label_pass_dir_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  gtk_box_pack_start(GTK_BOX(label_pass_dir_hbox), label_pass_dir, true, true, 5);
+  gtk_box_pack_start(GTK_BOX(label_pass_dir_hbox), copy_label_pass_dir_button, false, false, 5);
+
+  label_pass_dir_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(label_pass_dir_vbox), label_pass_dir_hbox, false, false, 5);
 
   main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-  gtk_box_pack_start(GTK_BOX(main_vbox), gtk_label_new(_("Password Store directory")), false, false, 0);
-  gtk_box_pack_start(GTK_BOX(main_vbox), entry_pass_dir, false, false, 0);
+  gtk_container_add(GTK_CONTAINER(label_pass_dir_frame), label_pass_dir_vbox);
+  gtk_box_pack_start(GTK_BOX(main_vbox), label_pass_dir_frame, false, false, 0);
 
   //Showing window
   gtk_container_add(GTK_CONTAINER(window), main_vbox);
