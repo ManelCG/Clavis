@@ -87,6 +87,24 @@ namespace Clavis::System {
 		Init(s, args, workingDir);
 	}
 
+#ifdef __WINDOWS__
+	std::string GeneratePipeName()
+	{
+		SYSTEMTIME st;
+		GetSystemTime(&st);
+
+		std::ostringstream oss;
+		oss << "\\\\.\\pipe\\clavis_pipe_"
+			<< st.wYear << st.wMonth << st.wDay << "_"
+			<< std::setw(2) << std::setfill('0') << st.wHour
+			<< std::setw(2) << std::setfill('0') << st.wMinute
+			<< std::setw(2) << std::setfill('0') << st.wSecond << "_"
+			<< st.wMilliseconds;
+
+		return oss.str();
+	}
+#endif
+
 	void ProcessWrapper::Init(std::string executable, std::vector<std::string> args, const std::filesystem::path& workingDir) {
 
 	#ifdef __WINDOWS__
@@ -94,10 +112,7 @@ namespace Clavis::System {
 		saAttr.bInheritHandle = TRUE;
 		saAttr.lpSecurityDescriptor = NULL;
 
-		// TODO: ADD A RANDOM SUFFIX TO ALLOW MULTIPLE RENDERING SIMULTANEOUSLY
-		srand((unsigned)time(nullptr));
-		std::string pipeSuffix = std::to_string(rand());
-		std::string pipeName = "\\\\.\\pipe\\clavis_pipe_" + pipeSuffix;
+		std::string pipeName = GeneratePipeName();
 
 		ProcessData->Pipe.NamedPipe= CreateNamedPipe(
 			pipeName.c_str(),
@@ -111,7 +126,7 @@ namespace Clavis::System {
 		);
 
 		if (ProcessData->Pipe.NamedPipe == INVALID_HANDLE_VALUE)
-			RaiseClavisError(_(ERROR_CREATING_NAMED_PIPE, std::to_string(GetLastError())));
+			RaiseClavisError(_(ERROR_CREATING_NAMED_PIPE, std::to_string(GetLastError())) + pipeName);
 
 		ProcessData->Pipe.PipeEnd = CreateFile(
 			pipeName.c_str(),

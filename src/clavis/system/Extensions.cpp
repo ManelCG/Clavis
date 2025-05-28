@@ -141,7 +141,7 @@ namespace Clavis::System {
 	}
 
 	std::filesystem::path GetGPGIDPath() {
-		return GetPasswordStoreDefaultFolder() / ".gpg-id";
+		return GetPasswordStoreFolder() / ".gpg-id";
 	}
 
 
