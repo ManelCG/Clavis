@@ -52,8 +52,8 @@ namespace Clavis::System {
 	int ProcessWrapper::GetExitCode() const {
 #ifdef __WINDOWS__
 		DWORD exitCode = 0;
-		if (WaitForSingleObject(ProcessData->ProcessHandle, INFINITE) == WAIT_OBJECT_0) {
-			if (GetExitCodeProcess(ProcessData->ProcessHandle, &exitCode))
+		if (WaitForSingleObject(ProcessData->HProcess, INFINITE) == WAIT_OBJECT_0) {
+			if (GetExitCodeProcess(ProcessData->HProcess, &exitCode))
 				return static_cast<int>(exitCode);
 		}
 		return -1; // wait or exit code retrieval failed

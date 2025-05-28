@@ -97,7 +97,7 @@ namespace Clavis::System {
 #ifdef __WINDOWS__
 		// Get documents folder in Microsoft's wchar format.
 		WCHAR my_documents[MAX_PATH];
-		SHGetFolderPathW(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, my_documents);
+		SHGetFolderPathW(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, my_documents);
 
 		std::wstring ws(my_documents);
 		auto s = UnicodeToUTF8(ws);
@@ -107,9 +107,22 @@ namespace Clavis::System {
 #endif
 	}
 
+#ifdef __WINDOWS__
+	std::filesystem::path GetAppDataFolder() {
+		// Get documents folder in Microsoft's wchar format.
+		WCHAR my_documents[MAX_PATH];
+		SHGetFolderPathW(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, my_documents);
+
+		std::wstring ws(my_documents);
+		auto s = UnicodeToUTF8(ws);
+		return std::filesystem::path(s);
+		return std::string(getenv("HOME"));
+	}
+#endif
+
 	std::filesystem::path GetConfigFolder() {
 #ifdef __WINDOWS__
-		return GetHomeFolder();
+		return GetAppDataFolder();
 #elif defined __LINUX__
 		return GetHomeFolder() / ".config";
 #endif

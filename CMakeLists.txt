@@ -1,17 +1,10 @@
 ﻿cmake_minimum_required (VERSION 3.8)
 
-# TODO: Make vcpkg relative
-if (WIN32)
-	include("C:/vcpkg/scripts/buildsystems/vcpkg.cmake")
-    include_directories("C:/vcpkg/installed/x64-windows/include/gtkmm-4.0/gtkmm")
-endif()
-
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
-
 
 # CMake Standard
 if (CMAKE_VERSION VERSION_GREATER 3.12)
@@ -61,6 +54,26 @@ target_link_libraries(${PROJECTNAME} PRIVATE PkgConfig::GTKMM)
 
 pkg_check_modules(GPGME REQUIRED IMPORTED_TARGET gpgme)
 target_link_libraries(${PROJECTNAME} PRIVATE PkgConfig::GPGME)
+
+if(WIN32 AND MINGW)
+    # Your output dir for the built executable
+    set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/$<CONFIG>")  # Adjust if needed
+
+    # Directory where GTK and all DLLs live
+    set(GTK_DLL_DIR "C:/msys64/mingw64/bin")  # Change to your actual path!
+
+    # Get all DLL files in that directory
+    file(GLOB GTK_DLLS "${GTK_DLL_DIR}/*.dll")
+
+    # After build, copy all DLLs to output folder
+    add_custom_command(TARGET ${PROJECTNAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${GTK_DLLS}
+            ${OUTPUT_DIR}
+    )
+endif()
+
+
 
 # Copy all assets
 # file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/bundled/assets" DESTINATION  "${CMAKE_CURRENT_BINARY_DIR}/")

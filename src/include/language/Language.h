@@ -561,6 +561,11 @@ _(ERROR_CREATING_PIPE,
     __(ESP, "Error creando canal"),
     __(VAL, "Error creant canal")
 )
+_(ERROR_CREATING_NAMED_PIPE,
+    __(ENG, "Error creating named pipe: {0}"),
+    __(ESP, "Error creando canal con nombre: {0}"),
+    __(VAL, "Error creant canal amb nom: {0}")
+)
 _(ERROR_CALLING_FORK,
     __(ENG, "Error calling fork"),
     __(ESP, "Error llamando fork"),

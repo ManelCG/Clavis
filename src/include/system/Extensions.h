@@ -15,6 +15,10 @@ namespace Clavis::System {
     std::filesystem::path GetPasswordStoreDefaultFolder();
     std::filesystem::path GetPasswordStoreFolder();
 
+#ifdef __WINDOWS__
+    std::filesystem::path GetAppDataFolder();
+#endif
+
     std::filesystem::path GetGPGIDPath();
 
     bool DirectoryExists(const std::filesystem::path& path);

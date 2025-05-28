@@ -4,6 +4,12 @@
 #include <system/Extensions.h>
 #include <extensions/StringHelper.h>
 
+#include <cstdint>
+
+#ifdef __WINDOWS__
+#define uint uint32_t
+#endif
+
 namespace Clavis {
     PasswordStore::PasswordStore(std::filesystem::path path) {
         root_path = path;

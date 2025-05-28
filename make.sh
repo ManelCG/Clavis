@@ -11,7 +11,7 @@ fi
 
 clear
 
-cmake -B out
+cmake -B out -G "Unix Makefiles"
 
 if [ "$?" != "0" ]; then
   echo ERROR!

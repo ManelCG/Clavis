@@ -47,11 +47,11 @@ namespace Clavis::GUI {
     void MainWindow::setCustomTitlebar() {
         windowTitlebar = std::make_shared<Titlebar>("Clavis", true, true, true);
 
-#ifdef __WINDOWS__
-        signal_show().connect([this]() {
-            SetupWindowsAPI();
-        });
-#endif
+//#ifdef __WINDOWS__
+//        signal_show().connect([this]() {
+//            SetupWindowsAPI();
+//        });
+//#endif
 
         windowTitlebar->LinkWindow(this);
 
