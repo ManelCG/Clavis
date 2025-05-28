@@ -9,6 +9,17 @@ if [ "$1" == "clean" ]; then
   exit
 fi
 
+if [ "$1" == "deploymingw" ]; then
+  pacman -Syu --needed \
+    git                                       \
+    base-devel                                \
+    mingw-w64-x86_64-toolchain                \
+    mingw-w64-x86_64-cmake                    \
+    mingw-w64-x86_64-gtkmm4                   \
+    mingw-w64-x86_64-gpgme
+  exit
+fi
+
 clear
 
 cmake -B out -G "Unix Makefiles"

@@ -14,10 +14,15 @@ namespace Clavis::Git {
     }
 
     bool IsGitRepo(const std::filesystem::path& path) {
-        auto pw = System::ProcessWrapper();
-        pw.Init("git", {"rev-parse", "--is-inside-work-tree"}, path);
+        try {
+            auto pw = System::ProcessWrapper();
+            pw.Init("git", {"rev-parse", "--is-inside-work-tree"}, path);
 
-        return pw.GetExitCode() == 0;
+            return pw.GetExitCode() == 0;
+        } catch (...) {
+            std::cout << "Error checking if we have a git repo. Is git installed?";
+            return false;
+        }
     }
 
     bool IsGitRepo() {
