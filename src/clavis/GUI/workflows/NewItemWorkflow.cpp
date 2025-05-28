@@ -59,8 +59,10 @@ namespace Clavis::GUI::Workflows {
         if (!password.TrySaveEncrypted(fullpath))
             RaiseClavisError(_(ERROR_SAVING_PASSWORD, name));
 
+        auto relpath = std::filesystem::relative(fullpath, passwordStore.GetRoot());
+
         if (Git::IsGitRepo())
-            Git::CommitNewFile(fullpath, name);
+            Git::CommitNewFile(relpath, name);
 
         passwordStoreManager->Refresh();
 
@@ -84,14 +86,17 @@ namespace Clavis::GUI::Workflows {
         if (! palette->Run())
             return;
 
+        auto passwordStore = passwordStoreManager->GetPasswordStore();
+        auto relpath = std::filesystem::relative(fullpath, passwordStore.GetRoot());
+
         if (element.IsFolder()) {
             if (Git::IsGitRepo())
-                Git::RemoveFolder(fullpath, name);
+                Git::RemoveFolder(relpath, name);
             else
                 std::filesystem::remove_all(fullpath);
         } else {
             if (Git::IsGitRepo())
-                Git::RemoveFile(fullpath, name);
+                Git::RemoveFile(relpath, name);
             else
                 std::filesystem::remove(fullpath);
         }
@@ -119,10 +124,13 @@ namespace Clavis::GUI::Workflows {
         if (System::FileExists(newFullPath) || System::DirectoryExists(newFullPath))
             RaiseClavisError(_(ERROR_DIRECTORY_ALREADY_EXISTS, newPath));
 
+        auto oldRelPath = std::filesystem::relative(oldFullPath, passwordStore.GetRoot());
+        auto newRelPath = std::filesystem::relative(newFullPath, passwordStore.GetRoot());
+
         if (!Git::IsGitRepo() || (element.IsFolder() && System::DirectoryIsEmpty(oldFullPath)))
             std::filesystem::rename(oldFullPath, newFullPath);
         else
-            Git::Move(oldFullPath, newFullPath);
+            Git::Move(oldRelPath, newRelPath);
 
         passwordStoreManager->Refresh();
     }

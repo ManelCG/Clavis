@@ -35,8 +35,13 @@ namespace Clavis::Git {
         pw.Init("git", args, gitPath);
         pw.Wait();
 
-        if (pw.GetExitCode() != 0)
+        if (pw.GetExitCode() != 0) {
+            std::string command = "git";
+            for (const auto& arg : args)
+                command += std::string(" ") + arg;
+            std::cerr << "Error performing " + command + "\n";
             return false;
+        }
 
         return true;
     }
@@ -51,25 +56,29 @@ namespace Clavis::Git {
         return TryPull() && TryPush();
     }
 
+    std::string FormatCommitMessage(const std::string message) {
+#ifdef __WINDOWS__
+        return std::string("\"" + message + "\"");
+#elif defined __LINUX__
+        return message;
+#endif
+    }
+
     void CommitNewFile(const std::filesystem::path& path, const std::string& name) {
-        PerformGitCommand({"add", path.string()});
-        PerformGitCommand({"commit", "-m", _(GIT_ADDED_PASSWORD_COMMIT_MESSAGE, name)});
+        PerformGitCommand({"add", path.string()}) && PerformGitCommand({"commit", "-m", FormatCommitMessage(_(GIT_ADDED_PASSWORD_COMMIT_MESSAGE, name))});
     }
     void RemoveFile(const std::filesystem::path& path, const std::string& name) {
-        PerformGitCommand({"rm", path.string()});
-        PerformGitCommand({"commit", "-m", _(GIT_REMOVED_PASSWORD_COMMIT_MESSAGE, name)});
+        PerformGitCommand({"rm", path.string()}) && PerformGitCommand({"commit", "-m", FormatCommitMessage(_(GIT_REMOVED_PASSWORD_COMMIT_MESSAGE, name))});
     }
     void RemoveFolder(const std::filesystem::path &path, const std::string &name) {
-        PerformGitCommand({"rm", "-r", path.string()});
-        PerformGitCommand({"commit", "-m", _(GIT_REMOVED_DIRECTORY_COMMIT_MESSAGE, name)});
+        PerformGitCommand({"rm", "-r", path.string()}) && PerformGitCommand({"commit", "-m", FormatCommitMessage(_(GIT_REMOVED_DIRECTORY_COMMIT_MESSAGE, name))});
 
         // Git won't remove the folder if it's empty
         if (System::DirectoryExists(path))
             std::filesystem::remove_all(path);
     }
     void Move(const std::filesystem::path &from, const std::filesystem::path &to) {
-        PerformGitCommand({"mv", from.string(), to.string()});
-        PerformGitCommand({"commit", "-m", _(GIT_MOVED_ELEMENT_COMMIT_MESSAGE, from.string(), to.string())});
+        PerformGitCommand({"mv", from.string(), to.string()}) && PerformGitCommand({"commit", "-m", FormatCommitMessage(_(GIT_MOVED_ELEMENT_COMMIT_MESSAGE, from.string(), to.string()))});
     }
 
 

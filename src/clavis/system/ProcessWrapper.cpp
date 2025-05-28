@@ -154,6 +154,8 @@ namespace Clavis::System {
 		for (auto arg : args)
 			cmd += " " + arg;
 
+		auto wpath = workingDir.string();
+
 		auto success = CreateProcess(
 			NULL,
 			(LPSTR)cmd.c_str(),
@@ -162,7 +164,7 @@ namespace Clavis::System {
 			TRUE,
 			CREATE_NEW_CONSOLE,
 			NULL,
-			NULL,
+			wpath.c_str(),
 			&si,
 			&pi
 		);
