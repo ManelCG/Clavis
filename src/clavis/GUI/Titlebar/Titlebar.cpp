@@ -18,13 +18,15 @@ namespace Clavis::GUI {
 		set_margin(0);
 
 		Icon.SetIcon(Icons::Logos::Logo32px);
-		Icon.set_halign(Gtk::Align::START);
+		Icon.set_halign(Gtk::Align::CENTER);
 		Icon.set_valign(Gtk::Align::CENTER);
+		Icon.set_vexpand(false);
 		Icon.set_can_shrink(false);
 		Icon.set_margin(2);
+		Icon.set_margin_end(0);
 
 		TitleLabel = Gtk::Label(Title);
-		TitleLabel.set_margin_start(5);
+		TitleLabel.set_margin_start(0);
 		Gtk::Box dummy;
 		set_title_widget(dummy);
 

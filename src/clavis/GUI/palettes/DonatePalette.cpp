@@ -94,9 +94,9 @@ namespace Clavis::GUI {
         qrimg->SetIcon(qr);
         qrimg->Resize(150, 150);
 
+        tabber->AddTab(_(DONATE_PALETTE_QRCODE_TAB), qrimg);
         tabber->AddTab(_(DONATE_PALETTE_OPENALIAS_TAB), openaliasLabel);
         tabber->AddTab(_(DONATE_PALETTE_ADDRESS_TAB), addressLabel);
-        tabber->AddTab(_(DONATE_PALETTE_QRCODE_TAB), qrimg);
 
         tabber->set_margin(10);
     }

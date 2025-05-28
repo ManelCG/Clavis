@@ -24,7 +24,8 @@ file (GLOB_RECURSE SOURCE_CXX CONFIGURE_DEPENDS
   ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c
 )
 
-add_executable (${PROJECTNAME} ${SOURCE_CXX})
+add_executable (${PROJECTNAME} WIN32 ${SOURCE_CXX})
+
 target_include_directories(${PROJECTNAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/include/")
 
 target_compile_definitions(
