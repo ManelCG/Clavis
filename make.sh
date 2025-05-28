@@ -20,7 +20,7 @@ fi
 
 cd out
 
-make
+make -j$(nproc)
 if [ "$?" != "0" ]; then
   echo ERROR!
   exit

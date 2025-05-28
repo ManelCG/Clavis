@@ -83,6 +83,12 @@ endif()
 # Copy all assets
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/bundled/assets" DESTINATION  "${CMAKE_CURRENT_BINARY_DIR}/")
 
+if (WIN32)
+    file(GLOB GPG_BINARIES "${CMAKE_CURRENT_SOURCE_DIR}/bundled/gpgbin/*")
+    file(COPY ${GPG_BINARIES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
+endif()
+
+
 
 # Compiler defines for Iffing
 if (WIN32)

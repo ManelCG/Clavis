@@ -39,7 +39,7 @@ namespace Clavis::GUI {
         mainVBox.append(sep);
 
         AddDonationCard("Monero (XMR)", Icons::Currencies::XMR_32x32, Icons::Currencies::XMR_QR, "85Sd3zhghTJKULdEH6VXfn5BgxMB29MCnKhyvVggkWJcDywzSE8Nud3NK48T9Je7DtavooV8RufTsPPAsXNSqSvDQZLCqeG", "donate@clavis.manelcg.com", 19);
-        AddDonationCard("Bitcoin (BTC)", Icons::Currencies::BTC_32x32, Icons::Currencies::BTC_QR, "bc1qzxzydxsmyg9dhe9f8trnhednc85ccfmcvgxusc", "donate@clavis.manelcg.com", 21);
+        AddDonationCard("Bitcoin (BTC)", Icons::Currencies::BTC_32x32, Icons::Currencies::BTC_QR, "bc1qdtr7r6rrm098sxd9nvdasf7z23jgpprk2wegmu", "donate@clavis.manelcg.com", 21);
         donationsTabber.set_margin(20);
         mainVBox.append(donationsTabber);
 
