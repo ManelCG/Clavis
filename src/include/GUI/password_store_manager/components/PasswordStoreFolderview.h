@@ -35,7 +35,7 @@ namespace Clavis::GUI {
 
         Gtk::Box mainVBox;
 
-        std::vector<std::shared_ptr<GUI::FolderviewElement>> folderviewElements;
+        std::vector<FolderviewElement*> folderviewElements;
 
         std::function<void(const PasswordStoreElements::PasswordStoreElement&)> onElementClicked;
 

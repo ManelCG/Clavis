@@ -13,6 +13,7 @@ namespace Clavis::GUI {
 
         set_child(mainVBox);
         mainVBox.set_vexpand(true);
+
         focusedItem = 0;
     }
 
@@ -34,7 +35,7 @@ namespace Clavis::GUI {
             currentType = element.GetType();
             startedDrawing = true;
 
-            auto button = std::make_shared<FolderviewElement>(element);
+            auto button = Gtk::make_managed<FolderviewElement>(element);
 
             button->signal_clicked().connect([this, button, i]() {
                 if (const auto element = button->GetElement(); element.IsFolder()) {
@@ -110,11 +111,8 @@ namespace Clavis::GUI {
     void Folderview::Clear() {
         auto children = Extensions::GetAllChildren(&mainVBox);
 
-        for (auto& c : children)
-            mainVBox.remove(*c);
-
         for (auto& elem : folderviewElements)
-            elem = nullptr;
+            mainVBox.remove(*elem);
 
         folderviewElements.clear();
     }

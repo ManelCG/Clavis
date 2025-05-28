@@ -12,6 +12,11 @@ namespace Clavis::GUI {
 
         SetIcon(icon);
         SetupContextMenu();
+
+        this->signal_unmap().connect([this]() {
+            contextMenu.unparent();
+        });
+
     }
 
     void FolderviewElement::ResolveIcon() {
@@ -86,6 +91,7 @@ namespace Clavis::GUI {
         });
         add_controller(clickGesture);
     }
+
 
     void FolderviewElement::SetOnDeleteItem(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
         deleteItemCallback = lambda;
