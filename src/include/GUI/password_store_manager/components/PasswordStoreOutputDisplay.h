@@ -7,6 +7,8 @@
 #include <GUI/components/IconButton.h>
 #include <GUI/components/ToggleIconButton.h>
 
+#include <GUI/signals/UniqueSignalTimeout.h>
+
 namespace Clavis::GUI {
     class PasswordStoreOutputDisplay : public Gtk::Box {
     public:
@@ -28,5 +30,8 @@ namespace Clavis::GUI {
         IconButton copyButton;
         IconButton writeButton;
         ToggleIconButton showPasswordButton;
+
+        Glib::Dispatcher displayErrorDispatcher;
+        UniqueSignalTimeout styleSignalTimeout;
     };
 }

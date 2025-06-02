@@ -151,7 +151,6 @@ namespace Clavis::GUI {
 
         // This is just needed because the 3s delay to remove style can act janky
         // So we make it remember "who is the last thread that set its style" kinda
-        int styleSetterID = Extensions::RNG::GetInt32();
         auto button = buttons[buttonID];
         auto action = gitActions[buttonID];
 
@@ -163,9 +162,7 @@ namespace Clavis::GUI {
         button->set_sensitive(true);
         button->ApplyState(StateIconButton::State::PROGRESS);
 
-        button->RegisterSetterID(styleSetterID);
-
-        std::thread t([this, button, action, styleSetterID, buttonID]() {
+        std::thread t([this, button, action, buttonID]() {
             // Start the git action
             const auto success = action();
 
@@ -182,18 +179,13 @@ namespace Clavis::GUI {
                 isGitActionRunning = false;
             }
 
-
             // This should refresh the folderView, but they must set their own lambda for it
             onSync();
 
             // Remove success/error style after 3 seconds.
-            Glib::signal_timeout().connect_once(
-                [this, button, styleSetterID, buttonID]() {
-                    if (button->GetSetterID() == styleSetterID)
-                        RemoveStateThreadsafe(buttonID);
-                },
-                3000
-            );
+            uniqueSignalTimeout.ConnectOnce([this, buttonID]() {
+                RemoveStateThreadsafe(buttonID);
+            }, 3000);
         });
         t.detach();
     }

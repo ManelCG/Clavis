@@ -5,6 +5,7 @@
 #include <gtkmm.h>
 
 #include <GUI/components/StateIconButton.h>
+#include <GUI/signals/UniqueSignalTimeout.h>
 
 namespace Clavis::GUI {
     class GitManagerToolbar : public Gtk::Box {
@@ -35,6 +36,8 @@ namespace Clavis::GUI {
         Glib::Dispatcher buttonStyleDispatcher;
         Glib::Dispatcher removeStyleDispatcher;
         Glib::Dispatcher sensitiveDispatcher;
+
+        UniqueSignalTimeout uniqueSignalTimeout;
 
         std::mutex mutex;
         Action buttonIDApplyStypeThreadSafe;

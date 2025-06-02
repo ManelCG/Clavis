@@ -57,6 +57,10 @@ namespace Clavis::GUI {
             RaiseClavisError(_(ERROR_NOT_IMPLEMENTED));
         });
 
+        displayErrorDispatcher.connect([this]() {
+            outputTextBox.remove_css_class("error");
+        });
+
         append(outputHbox);
     }
 
@@ -79,11 +83,9 @@ namespace Clavis::GUI {
         outputTextBox.set_text("");
         outputTextBox.add_css_class("error");
 
-        Glib::signal_timeout().connect_once(
-        [this]() {
-            outputTextBox.remove_css_class("error");
-        },
-        3000);
+        styleSignalTimeout.ConnectOnce([this]() {
+            displayErrorDispatcher.emit();
+        }, 3000);
     }
 
 
