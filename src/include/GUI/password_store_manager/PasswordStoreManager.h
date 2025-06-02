@@ -32,6 +32,8 @@ namespace Clavis::GUI {
 
         bool on_key_pressed(guint keyval, guint keycode, Gdk::ModifierType state);
 
+        Glib::Dispatcher refreshDispatcher;
+
         // The actual passwordStore that manages the files and passwords.
         // This class is a GUI wrapper of this.
         PasswordStore passwordStore;

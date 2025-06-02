@@ -38,6 +38,9 @@ namespace Clavis::GUI {
 
         add_controller(key_controller);  // Attach to the entry
 
+        refreshDispatcher.connect([this]() {
+            Refresh();
+        });
     }
 
     PasswordStore PasswordStoreManager::GetPasswordStore() const {
@@ -88,7 +91,7 @@ namespace Clavis::GUI {
             Refresh();
         });
         tools.SetOnGitSync([this]() {
-            Refresh();
+            refreshDispatcher.emit();
         });
 
         Refresh();
