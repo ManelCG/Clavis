@@ -70,6 +70,10 @@ namespace Clavis::GUI {
         gitToolbar.SetOnSync(callback);
     }
 
+    void PasswordStoreManagerTools::PerformGitAction(GitManagerToolbar::Action action) {
+        gitToolbar.PerformGitAction(action);
+    }
+
 
 
 }

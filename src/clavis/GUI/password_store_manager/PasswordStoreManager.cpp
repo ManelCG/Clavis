@@ -181,6 +181,9 @@ namespace Clavis::GUI {
         tools.SetPath(passwordStore.GetPath(true));
     }
 
+    void PasswordStoreManager::PerformGitAction(GitManagerToolbar::Action action) {
+        tools.PerformGitAction(action);
+    }
 
 
 }

@@ -116,15 +116,15 @@ namespace Clavis::GUI {
     }
 
     void MainWindow::TryPullPasswords() {
-        Git::TryPull();
+        passwordStoreManager.PerformGitAction(GitManagerToolbar::Action::Pull);
     }
 
     void MainWindow::TryPushPasswords() {
-        Git::TryPush();
+        passwordStoreManager.PerformGitAction(GitManagerToolbar::Action::Push);
     }
 
     void MainWindow::TrySyncPasswords() {
-        Git::TrySync();
+        passwordStoreManager.PerformGitAction(GitManagerToolbar::Action::Sync);
     }
 
 

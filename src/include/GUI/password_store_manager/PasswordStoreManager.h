@@ -21,6 +21,8 @@ namespace Clavis::GUI {
         void Initialize();
         void Refresh();
 
+        void PerformGitAction(GitManagerToolbar::Action action);
+
 
     protected:
 

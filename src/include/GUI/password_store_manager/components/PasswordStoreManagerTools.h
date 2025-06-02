@@ -22,6 +22,8 @@ namespace Clavis::GUI {
         // Make sure to pass a relative path here, or it will be very ugly.
         void SetPath(const std::filesystem::path& path);
 
+        void PerformGitAction(GitManagerToolbar::Action action);
+
     protected:
 
     private:

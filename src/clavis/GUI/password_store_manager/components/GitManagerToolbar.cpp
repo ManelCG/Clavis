@@ -6,14 +6,12 @@
 #include <extensions/RNG.h>
 #include <language/Language.h>
 
-#include "settings/SettingsDefinitions.h"
-
-
 namespace Clavis::GUI {
     GitManagerToolbar::GitManagerToolbar() :
         Gtk::Box(Gtk::Orientation::HORIZONTAL)
     {
         InitializeButton(
+            Action::Pull,
             Icons::Git::Pull,
             _(GIT_PULL_PASSWORDS),
             _(GIT_PULLING_PASSWORDS),
@@ -23,6 +21,7 @@ namespace Clavis::GUI {
         );
 
         InitializeButton(
+            Action::Push,
             Icons::Git::Push,
             _(GIT_PUSH_PASSWORDS),
             _(GIT_PUSHING_PASSWORDS),
@@ -32,6 +31,7 @@ namespace Clavis::GUI {
         );
 
         InitializeButton(
+            Action::Sync,
             Icons::Git::Sync,
             _(GIT_SYNC_PASSWORDS),
             _(GIT_SYNCING_PASSWORDS),
@@ -86,7 +86,7 @@ namespace Clavis::GUI {
         onSync = action;
     }
 
-    void GitManagerToolbar::SetStateThreadsafe(int button, StateIconButton::State state) {
+    void GitManagerToolbar::SetStateThreadsafe(Action button, StateIconButton::State state) {
         std::lock_guard lock(mutex);
 
         buttonIDApplyStypeThreadSafe = button;
@@ -95,25 +95,25 @@ namespace Clavis::GUI {
         buttonStyleDispatcher.emit();
     }
 
+    void GitManagerToolbar::RemoveStateThreadsafe(Action button) {
+        std::lock_guard lock(mutex);
+        buttonIDRemoveStyleThreadSafe = button;
+        removeStyleDispatcher.emit();
+    }
+
     void GitManagerToolbar::SetSensitiveThreadsafe(bool sensitive) {
         std::lock_guard lock(mutex);
         sensitiveThreadSafe = sensitive;
         sensitiveDispatcher.emit();
     }
 
-    void GitManagerToolbar::RemoveStateThreadsafe(int button) {
-        std::lock_guard lock(mutex);
-        buttonIDRemoveStyleThreadSafe = button;
-        removeStyleDispatcher.emit();
-    }
 
-
-    void GitManagerToolbar::InitializeButton(const Icons::IconDefinition &defaultIcon, const std::string &defaultTooltip, const std::string &textProgress, const std::string &textSuccess, const std::string &textError, std::function<bool()> action) {
+    void GitManagerToolbar::InitializeButton(Action gitAction, const Icons::IconDefinition &defaultIcon, const std::string &defaultTooltip, const std::string &textProgress, const std::string &textSuccess, const std::string &textError, std::function<bool()> action) {
         auto button = Gtk::make_managed<StateIconButton>();
-        auto buttonID = static_cast<int>(buttons.size());
 
-        button->set_name(std::to_string(buttonID));
-        buttons.insert({buttonID, button});
+        button->set_name(std::to_string(static_cast<int>(gitAction)));
+        buttons.insert({gitAction, button});
+        gitActions.insert({gitAction, action});
 
         button->SetDefaultIcon(defaultIcon);
         button->SetDefaultTooltip(defaultTooltip);
@@ -128,8 +128,8 @@ namespace Clavis::GUI {
 
         button->set_margin_start(1);
 
-        button->signal_clicked().connect([this, action, button]() {
-            PerformGitAction(button, action);
+        button->signal_clicked().connect([this, gitAction]() {
+            PerformGitAction(gitAction);
         });
 
         if (!Git::IsGitRepo())
@@ -139,7 +139,7 @@ namespace Clavis::GUI {
     }
 
 
-    void GitManagerToolbar::PerformGitAction(StateIconButton* button, std::function<bool()> action){
+    void GitManagerToolbar::PerformGitAction(Action buttonID) {
         // Disallow more git actions to avoid corruption or something
         {
             std::lock_guard lock(mutex);
@@ -152,7 +152,8 @@ namespace Clavis::GUI {
         // This is just needed because the 3s delay to remove style can act janky
         // So we make it remember "who is the last thread that set its style" kinda
         int styleSetterID = Extensions::RNG::GetInt32();
-        int buttonID = std::stoi(button->get_name());
+        auto button = buttons[buttonID];
+        auto action = gitActions[buttonID];
 
         // Disallow pressing other buttons. Also remove their style.
         SetSensitive(false);
