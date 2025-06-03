@@ -57,6 +57,14 @@ namespace Clavis::GUI {
         return passwordEntry.get_text();
     }
 
+    void NewPasswordPalette::NewPasswordWidget::SetFixedName(const std::string &name) {
+        nameEntry.set_text(name);
+        nameEntry.set_sensitive(false);
+        nameEntry.set_editable(false);
+
+        setPasswordNameLabel.set_text(_(NEW_PASSWORD_PALETTE_CURRENT_PASSWORD_NAME_LABEL_TEXT));
+    }
+
 
 #pragma endregion
 
@@ -151,8 +159,12 @@ namespace Clavis::GUI {
 #pragma endregion
 
 #pragma region PALETTE
-    NewPasswordPalette::NewPasswordPalette() :
-        DualChoicePalette(_(NEW_PASSWORD_PALETTE_TITLE)),
+    NewPasswordPalette::NewPasswordPalette(const std::string& name) :
+        DualChoicePalette(
+            name.empty()
+            ? _(NEW_PASSWORD_PALETTE_TITLE)
+            : _(NEW_PASSWORD_PALETTE_EDIT_TITLE)
+        ),
 
         passwordGeneratorController(PasswordGenerator::GetDefaultSettings()),
 
@@ -162,9 +174,18 @@ namespace Clavis::GUI {
         //set_default_size(530, 290);
         set_default_size(530, -1);
 
+        bool isEditing = !(name.empty());
+
         SetYesSuggested();
 
-        titleLabel.set_text(_(NEW_PASSWORD_PALETTE_LABEL_TITLE));
+        if (! isEditing) {
+            titleLabel.set_text(_(NEW_PASSWORD_PALETTE_LABEL_TITLE));
+        }
+        else {
+            titleLabel.set_text(_(NEW_PASSWORD_PALETTE_EDIT_LABEL_TITLE));
+            newPasswordWidget.SetFixedName(name);
+        }
+
         titleLabel.set_margin(10);
         mainVBox.append(titleLabel);
 

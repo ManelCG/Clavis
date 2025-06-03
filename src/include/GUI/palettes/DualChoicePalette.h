@@ -79,10 +79,8 @@ namespace Clavis::GUI {
             noButton.SetLabel(text);
         }
 
-        static Derived* Create(Gtk::Widget* parent = nullptr) {
-            auto palette = Extensions::SpawnWindowNoSafeDelete<Derived>([]() {
-                return new Derived();
-            }, parent);
+        static Derived* Create(Gtk::Widget* parent = nullptr, std::function<Derived*()> constructor = [](){return new Derived();}) {
+            auto palette = Extensions::SpawnWindowNoSafeDelete<Derived>(constructor, parent);
 
             return palette;
         }
@@ -101,6 +99,12 @@ namespace Clavis::GUI {
         /// Static function that creates and returns the result from a modal dialog
         static bool Spawn(Gtk::Widget* parent = nullptr, std::function<void(Derived*, bool)> callback = [](Derived*, bool){}) {
             auto palette = Create(parent);
+
+            return palette->Run(callback);
+        }
+
+        static bool Spawn(Gtk::Widget* parent = nullptr, std::function<Derived*()> constructor = [](){return new Derived*();}, std::function<void(Derived*, bool)> callback = [](Derived*, bool){}) {
+            auto palette = Create(parent, constructor);
 
             return palette->Run(callback);
         }

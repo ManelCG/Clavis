@@ -58,6 +58,7 @@ namespace Clavis::Icons {
 		constexpr IconDefinition Import = IconDefinition("Actions/Import.png");
 
 		constexpr IconDefinition Draw = IconDefinition("Actions/Draw.png");
+		constexpr IconDefinition Rename = IconDefinition("Actions/Rename.png");
 		constexpr IconDefinition Build = IconDefinition("Actions/Build.png");
 
 		constexpr IconDefinition NewWindow = IconDefinition("Actions/NewWindow.png");

@@ -14,7 +14,7 @@ endif()
 
 # Define project
 set(PROJECTNAME "Clavis")
-set(CLAVIS_VERSION "2.0.1")
+set(CLAVIS_VERSION "2.0.0")
 
 project (${PROJECTNAME})
 

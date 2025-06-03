@@ -21,6 +21,8 @@ namespace Clavis::GUI {
             std::string GetPassword() const;
             std::string GetPasswordName() const;
 
+            void SetFixedName(const std::string& name);
+
         private:
             std::function<PasswordGenerator::GeneratorSettings()> settingsProvider = [](){return PasswordGenerator::GeneratorSettings();};
 
@@ -65,7 +67,7 @@ namespace Clavis::GUI {
             Gtk::CheckButton pronounceableToggle;
         };
 
-        NewPasswordPalette();
+        NewPasswordPalette(const std::string& name);
 
         std::string GetPasswordName() const;
         Password GetPassword() const;

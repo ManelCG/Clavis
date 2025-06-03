@@ -291,6 +291,23 @@ _(NEW_PASSWORD_PALETTE_SET_PASSWORD_NAME_LABEL_TEXT,
     __(VAL, "Nom de la contrasenya")
 )
 
+_(NEW_PASSWORD_PALETTE_EDIT_TITLE,
+    __(ENG, "Edit existing password"),
+    __(ENG, "Editar contraseña"),
+    __(VAL, "Editar contrasenya")
+)
+_(NEW_PASSWORD_PALETTE_EDIT_LABEL_TITLE,
+    __(ENG, "Edit password:"),
+    __(ENG, "Editar contraseña:"),
+    __(VAL, "Editar contrasenya:")
+)
+
+_(NEW_PASSWORD_PALETTE_CURRENT_PASSWORD_NAME_LABEL_TEXT,
+    __(ENG, "Password name:"),
+    __(ESP, "Nombre de la contraseña:"),
+    __(VAL, "Nom de la contrasenya")
+)
+
 _(NEW_PASSWORD_PALETTE_DEFAULT_PASSWORD_NAME,
     __(ENG, "new_password"),
     __(ESP, "nueva_contra"),
@@ -342,6 +359,18 @@ _(NEW_PASSWORD_PALETTE_PASSWORD_GENERATOR_PRONOUNCEABLE,
     __(ENG, "Pronounceable"),
     __(ESP, "Pronunciable"),
     __(VAL, "Pronunciable")
+)
+
+_(NEW_PASSWORD_PALETTE_ELEMENT_ALREADY_EXISTS_TITLE,
+    __(ENG, "Overwrite?"),
+    __(ESP, "¿Sobreescribir?"),
+    __(VAL, "Sobreescriure?")
+)
+
+_(NEW_PASSWORD_PALETTE_ELEMENT_ALREADY_EXISTS_TEXT,
+    __(ENG, "{0} already exists. Overwrite?"),
+    __(ESP, "{0} ya existe. Sobreescribir?"),
+    __(VAL, "{0} ja existeix. Sobreescriure?")
 )
 
 #pragma endregion
@@ -432,6 +461,12 @@ _(MISC_NO_BUTTON,
     __(ENG, "No"),
     __(ESP, "No"),
     __(VAL, "No")
+)
+
+_(MISC_OVERWRITE_BUTTON,
+    __(ENG, "Overwrite"),
+    __(ESP, "Sobreescribir"),
+    __(VAL, "Sobreescriure")
 )
 
 #pragma endregion

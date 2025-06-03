@@ -10,8 +10,8 @@
 #include <GUI/palettes/SimpleYesNoQuestionPalette.h>
 
 
-namespace Clavis::GUI::Workflows {
-    void NewFolderWorkflow(PasswordStoreManager *passwordStoreManager) {
+namespace Clavis::GUI {
+    void Workflows::NewFolderWorkflow(PasswordStoreManager *passwordStoreManager) {
         auto palette = SimpleEntryPalette::Create(passwordStoreManager);
         palette->SetTitle(_(NEW_FOLDER_PALETTE_TITLE));
         palette->SetLabelText(_(NEW_FOLDER_PALETTE_LABEL_TITLE));
@@ -36,16 +36,27 @@ namespace Clavis::GUI::Workflows {
         // Don't commit empty folders
         passwordStoreManager->Refresh();
     }
-
-    void NewPasswordWorkflow(PasswordStoreManager *passwordStoreManager) {
+    void Workflows::NewPasswordWorkflow_IMPL(PasswordStoreManager *passwordStoreManager, const std::string& defaultName) {
         Password password;
-        std::string name = "";
-        if (!NewPasswordPalette::Spawn(passwordStoreManager, [&password, &name](NewPasswordPalette *p, bool r) {
-            if (r) {
-                password = p->GetPassword();
-                name = p->GetPasswordName();
+
+        bool isEditing = !defaultName.empty();
+        auto name = defaultName;
+        size_t dotPos = name.rfind('.');
+        if (dotPos != std::string::npos)
+            name = name.substr(0, dotPos);
+
+        if (!NewPasswordPalette::Spawn(
+            passwordStoreManager,
+            [&name]() {
+                return new NewPasswordPalette(name);
+            },
+            [&password, &name](NewPasswordPalette *p, bool r) {
+                if (r) {
+                    password = p->GetPassword();
+                    name = p->GetPasswordName();
+                }
             }
-        }))
+        ))
             return;
 
         auto passwordStore = passwordStoreManager->GetPasswordStore();
@@ -53,8 +64,18 @@ namespace Clavis::GUI::Workflows {
         auto filename = name + ".gpg";
         auto fullpath = passwordStore.GetPath() / filename;
 
-        if (passwordStore.DoesPasswordExist(filename))
-            RaiseClavisError("ALREADY EXISTS. TODO: ASK FOR CONFIRMATION OF OVERWRITE");
+        if (!isEditing && passwordStore.DoesPasswordExist(filename)) {
+            auto confirmPalette = SimpleYesNoQuestionPalette::Create(passwordStoreManager);
+
+            confirmPalette->SetTitle(_(NEW_PASSWORD_PALETTE_ELEMENT_ALREADY_EXISTS_TITLE));
+            confirmPalette->AddText(_(NEW_PASSWORD_PALETTE_ELEMENT_ALREADY_EXISTS_TEXT, filename));
+            confirmPalette->SetYesDestructive();
+            confirmPalette->SetYesText(_(MISC_OVERWRITE_BUTTON));
+            confirmPalette->SetNoText(_(MISC_CANCEL_BUTTON));
+
+            if (! confirmPalette->Run())
+                return;
+        }
 
         if (!password.TrySaveEncrypted(fullpath))
             RaiseClavisError(_(ERROR_SAVING_PASSWORD, name));
@@ -65,10 +86,17 @@ namespace Clavis::GUI::Workflows {
             Git::CommitNewFile(relpath, name);
 
         passwordStoreManager->Refresh();
-
     }
 
-    void DeleteElementWorkflow(PasswordStoreManager *passwordStoreManager, const PasswordStoreElements::PasswordStoreElement &element) {
+    void Workflows::NewPasswordWorkflow(PasswordStoreManager *passwordStoreManager) {
+        NewPasswordWorkflow_IMPL(passwordStoreManager, "");
+    }
+
+    void Workflows::EditPasswordWorkflow(PasswordStoreManager *passwordStoreManager, const PasswordStoreElements::PasswordStoreElement &element) {
+        NewPasswordWorkflow_IMPL(passwordStoreManager, element.GetName());
+    }
+
+    void Workflows::DeleteElementWorkflow(PasswordStoreManager *passwordStoreManager, const PasswordStoreElements::PasswordStoreElement &element) {
         auto palette = SimpleYesNoQuestionPalette::Create(passwordStoreManager);
 
         auto name = element.GetName();
@@ -90,10 +118,11 @@ namespace Clavis::GUI::Workflows {
         auto relpath = std::filesystem::relative(fullpath, passwordStore.GetRoot());
 
         if (element.IsFolder()) {
-            if (Git::IsGitRepo())
-                Git::RemoveFolder(relpath, name);
-            else
+            // Git wont remove empty folders
+            if (!Git::IsGitRepo() || (System::DirectoryExists(fullpath) && System::ListContents(fullpath).empty()))
                 std::filesystem::remove_all(fullpath);
+            else
+                Git::RemoveFolder(relpath, name);
         } else {
             if (Git::IsGitRepo())
                 Git::RemoveFile(relpath, name);
@@ -101,10 +130,17 @@ namespace Clavis::GUI::Workflows {
                 std::filesystem::remove(fullpath);
         }
 
+        // Ensure parent directory exists (in case Git removed it)
+        auto parentPath = fullpath.parent_path();
+        if (!std::filesystem::exists(parentPath)) {
+            System::mkdir_p(parentPath);
+        }
+
+
         passwordStoreManager->Refresh();
     }
 
-    void RenameElementWorkflow(PasswordStoreManager *passwordStoreManager, const PasswordStoreElements::PasswordStoreElement &element) {
+    void Workflows::RenameElementWorkflow(PasswordStoreManager *passwordStoreManager, const PasswordStoreElements::PasswordStoreElement &element) {
         auto palette = SimpleEntryPalette::Create(passwordStoreManager);
         palette->SetTitle(_(RENAME_ELEMENT_PALETTE_TITLE));
         palette->SetLabelText(_(RENAME_ELEMENT_PALETTE_LABEL_TITLE, element.GetName()));
@@ -134,11 +170,6 @@ namespace Clavis::GUI::Workflows {
 
         passwordStoreManager->Refresh();
     }
-
-    void EditPasswordWorkflow(PasswordStoreManager *passwordStoreManager, const PasswordStoreElements::PasswordStoreElement &element) {
-        RaiseClavisError(_(ERROR_NOT_IMPLEMENTED));
-    }
-
 
 
 }

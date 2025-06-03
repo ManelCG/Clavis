@@ -60,7 +60,7 @@ namespace Clavis::GUI {
 
         if (element.IsGPGFile()) {
             contextMenuVBox.append(editPasswordButton);
-            editPasswordButton.SetIcon(Icons::Placeholders::Placeholder16x16);
+            editPasswordButton.SetIcon(Icons::Actions::Draw);
             editPasswordButton.SetLabel(_(PASSWORD_STORE_MANAGER_CONTEXT_MENU_EDIT_PASSWORD_BUTTON));
             editPasswordButton.signal_clicked().connect([this]() {
                 contextMenu.hide();
@@ -69,7 +69,7 @@ namespace Clavis::GUI {
         }
 
         contextMenuVBox.append(renameItemButton);
-        renameItemButton.SetIcon(Icons::Actions::Draw);
+        renameItemButton.SetIcon(Icons::Actions::Rename);
         renameItemButton.SetLabel(_(PASSWORD_STORE_MANAGER_CONTEXT_MENU_RENAME_ITEM_BUTTON));
         renameItemButton.signal_clicked().connect([this]() {
             contextMenu.hide();
