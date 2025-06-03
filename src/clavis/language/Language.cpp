@@ -20,5 +20,32 @@ namespace Clavis::Language {
 		return s;
 	}
 
+	std::string GetLanguageCode(const LanguagesEnum language) {
+		return std::string(LanguagesMap[language]);
+	}
+
+	std::string GetLanguageName(const LanguagesEnum language) {
+		return std::string(LanguagesNames[language]);
+	}
+
+	std::pair<std::string, std::string> GetLanguageData(const LanguagesEnum language) {
+		return {GetLanguageCode(language), GetLanguageName(language)};
+	}
+
+	std::vector<LanguagesEnum> GetAllLanguages() {
+		std::vector<LanguagesEnum> result;
+
+		for (const auto& lang : LanguagesArray) {
+			result.push_back(lang);
+		}
+
+		return result;
+	}
+
+	LanguagesEnum GetLanguageFromCode(const std::string &code) {
+		return LanguagesMapInverted[code];
+	}
+
+
 
 }

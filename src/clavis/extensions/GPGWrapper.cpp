@@ -170,6 +170,140 @@ namespace Clavis {
         return id;
     }
 
+    std::vector<GPG::Key> GPG::GetAllKeys() {
+        std::vector<GPG::Key> result;
+
+        // Initialize GPGME
+        gpgme_check_version(nullptr);
+        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+
+        gpgme_ctx_t ctx;
+        gpgme_error_t err = gpgme_new(&ctx);
+        if (err != GPG_ERR_NO_ERROR) {
+            std::cerr << "GPGME context error: " << gpgme_strerror(err) << "\n";
+            return result;
+        }
+
+        // Start key listing (false = list public keys)
+        err = gpgme_op_keylist_start(ctx, nullptr, true);
+        if (err != GPG_ERR_NO_ERROR) {
+            std::cerr << "Keylist start error: " << gpgme_strerror(err) << "\n";
+            gpgme_release(ctx);
+            return result;
+        }
+
+        gpgme_key_t key;
+        while ((err = gpgme_op_keylist_next(ctx, &key)) == GPG_ERR_NO_ERROR) {
+            for (gpgme_user_id_t uid = key->uids; uid != nullptr; uid = uid->next) {
+                GPG::Key k;
+
+                if (uid->name)
+                    k.username = uid->name;
+                if (uid->email)
+                    k.keyname = uid->email;
+                if (uid->comment)
+                    k.comment = uid->comment;
+
+                result.push_back(k);
+            }
+
+            gpgme_key_unref(key);
+        }
+
+        if (err != GPG_ERR_EOF && err != 117456895) {
+            std::cerr << "Keylist iteration error: " << gpgme_strerror(err) << "\n";
+        }
+
+        gpgme_op_keylist_end(ctx);
+        gpgme_release(ctx);
+
+        return result;
+
+    }
+
+    std::string GPG::KeyToString(const Key &key) {
+        std::string ret;
+
+        ret += key.username;
+
+        if (! key.comment.empty())
+            ret += " (" + key.comment + ")";
+
+        ret += " <" + key.keyname + ">";
+
+        return ret;
+    }
+
+    std::string GPG::KeyTypeToString(KeyType type) {
+        switch (type) {
+            case KeyType::RSA_DSA:
+                return "RSA + DSA";
+            case KeyType::DSA_ELGAMAL:
+                return "DSA + Elgamal";
+            case KeyType::ECC_25519:
+                return "ECC Curve 25519 (" + _(MISC_RECOMMENDED) + ")";
+            case KeyType::ECC_NIST_P384:
+                return "ECC NIST P-384";
+            case KeyType::ECC_BRAINPOOL_P256:
+                return "ECC Brainpool P-256";
+
+            default:
+                RaiseClavisError(_(ERROR_INVALID_KEY_TYPE, std::to_string(static_cast<int>(type))));
+        }
+    }
+
+    std::string GPG::KeyTypeToStringCode(KeyType type) {
+        int v = static_cast<int>(type);
+        return std::to_string(v);
+    }
+
+    GPG::KeyType GPG::StringCodeToKeyType(const std::string &str) {
+        try {
+            int v = std::stoi(str);
+            return KeyType(v);
+        } catch (...) {
+            RaiseClavisError(_(UNABLE_TO_PARSE_KEYTYPE_CODE, str));
+        }
+    }
+
+    std::vector<GPG::KeyType> GPG::GetAllKeyTypes() {
+        return {
+            KeyType::ECC_25519,
+            KeyType::RSA_DSA,
+            KeyType::DSA_ELGAMAL,
+            KeyType::ECC_NIST_P384,
+            KeyType::ECC_BRAINPOOL_P256,
+        };
+    }
+
+    GPG::KeySizeRange GPG::GetKeySizeRange(const KeyType &type) {
+        KeySizeRange range;
+
+        switch (type) {
+            case KeyType::ECC_25519:
+            case KeyType::ECC_BRAINPOOL_P256:
+            case KeyType::ECC_NIST_P384:
+                range.min = -1; range.max = -1; range.def = -1;
+                return range;
+
+            case KeyType::RSA_DSA:
+                range.min = 1024; range.max = 4096; range.def = 3072;
+                return range;
+
+            case KeyType::DSA_ELGAMAL:
+                range.min = 1024; range.max = 3072; range.def = 2048;
+                return range;
+
+            default:
+                RaiseClavisError(_(ERROR_INVALID_KEY_TYPE, std::to_string(static_cast<int>(type))));
+        }
+    }
+
+
+
+
+
+
 
 
 }

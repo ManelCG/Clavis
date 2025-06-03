@@ -9,6 +9,12 @@
 #include <GUI/palettes/NewPasswordPalette.h>
 #include <GUI/palettes/SimpleYesNoQuestionPalette.h>
 
+#include <GUI/palettes/first_run/WelcomePalette.h>
+#include <GUI/palettes/first_run/ChoosePasswordStoreLocationPalette.h>
+#include <GUI/palettes/first_run/GPGKeyConfigurationPalette.h>
+#include <GUI/palettes/first_run/ExportGPGKeyPalette.h>
+#include <GUI/palettes/first_run/ImportGPGKeyPalette.h>
+#include <GUI/palettes/first_run/CreateNewGPGKeyPalette.h>
 
 namespace Clavis::GUI {
     void Workflows::NewFolderWorkflow(PasswordStoreManager *passwordStoreManager) {
@@ -170,6 +176,109 @@ namespace Clavis::GUI {
 
         passwordStoreManager->Refresh();
     }
+
+    void Workflows::ConfigGPGKeyWorkflow(PasswordStoreManager *passwordStoreManager) {
+        auto palette = GPGKeyConfigurationPalette::Create(passwordStoreManager);
+        std::string gpgid;
+        auto response = palette->Run([&gpgid](GPGKeyConfigurationPalette* p, bool r) {
+            if (r)
+                gpgid = p->GetGPGID();
+        });
+
+        if (!response)
+            return;
+
+        RaiseClavisError("Selected GPGID: ", gpgid);
+    }
+
+    bool Workflows::ExportGPGWorkflow(Gtk::Window *parent) {
+        auto exportKeyPalette = ExportGPGKeyPalette::Create(parent);
+
+        auto response = exportKeyPalette->Run([](ExportGPGKeyPalette *p, bool r) {
+
+        });
+
+        return response;
+
+    }
+
+    bool Workflows::ImportGPGWorkflow(Gtk::Window *parent) {
+        auto importKeyPalette = ImportGPGKeyPalette::Create(parent);
+
+        auto response = importKeyPalette->Run([](ImportGPGKeyPalette *p, bool r) {
+
+        });
+
+        return response;
+
+    }
+
+
+    bool Workflows::CreateGPGWorkflow(Gtk::Window* parent) {
+        auto newKeyPalette = CreateNewGPGKeyPalette::Create(parent);
+
+        auto response = newKeyPalette->Run([](CreateNewGPGKeyPalette *p, bool r) {
+
+        });
+
+        return response;
+    }
+
+
+
+    void Workflows::FirstRunWorkflow(const Glib::RefPtr<Gtk::Application> &app) {
+
+        {
+            auto initializeClavisQuestion = WelcomePalette::Create();
+
+            app->add_window(*initializeClavisQuestion);
+
+            auto response = initializeClavisQuestion->Run([](WelcomePalette* p, bool r) {
+                if (r)
+                    Settings::CLAVIS_LANGUAGE.SetValue(GetLanguageCode(p->GetSelectedLanguage()));
+            });
+
+            if (!response)
+                return;
+        }
+
+
+        std::filesystem::path passwordStoreLocation;
+
+        {
+            auto passwordStoreLocationQuestion = ChoosePasswordStoreLocationPalette::Create();
+
+            app->add_window(*passwordStoreLocationQuestion);
+
+            auto response = passwordStoreLocationQuestion->Run([&passwordStoreLocation](ChoosePasswordStoreLocationPalette *p, bool r) {
+                if (r)
+                    passwordStoreLocation = p->GetSelectedPath();
+            });
+
+            if (!response)
+                return;
+        }
+
+        std::string gpgid;
+
+        {
+            auto gpgKeyPalette = GPGKeyConfigurationPalette::Create();
+
+            app->add_window(*gpgKeyPalette);
+
+            auto response = gpgKeyPalette->Run([&gpgid](GPGKeyConfigurationPalette *p, bool r) {
+                if (r)
+                    gpgid = p->GetGPGID();
+            });
+
+            if (!response)
+                return;
+        }
+
+        std::cerr << passwordStoreLocation.string() << std::endl;
+        std::cerr << gpgid << std::endl;
+    }
+
 
 
 }

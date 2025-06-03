@@ -88,6 +88,10 @@ namespace Clavis::GUI {
                     MenuBar::MenuItem(_(GIT_PUSH_PASSWORDS), "push"),
                     MenuBar::MenuItem(_(GIT_SYNC_PASSWORDS), "sync"),
                 }),
+                MenuBar::MenuSection({
+                MenuBar::MenuItem(_(MAINMENU_EDIT_MENU_GIT_SERVER_SETTINGS), "git_server_config"),
+                MenuBar::MenuItem(_(MAINMENU_EDIT_MENU_GPG_KEY_SETTINGS), "gpg_key_settings"),
+                }),
             }),
             MenuBar::MenuSubmenu(_(MAINMENU_HELP_MENU), {
                 MenuBar::MenuSection({
@@ -108,6 +112,9 @@ namespace Clavis::GUI {
         def->AddAction("pull", [this](){TryPullPasswords();});
         def->AddAction("sync", [this](){TrySyncPasswords();});
 
+        def->AddAction("git_server_settings", [this](){GitServerSettings();});
+        def->AddAction("gpg_key_settings", [this](){GPGKeySettings();});
+
         // HELP
         def->AddAction("help", [this](){Extensions::SpawnWindow<HelpPalette>(this);});
         def->AddAction("about", [this](){Extensions::SpawnWindow<AboutPalette>(this);});
@@ -126,6 +133,15 @@ namespace Clavis::GUI {
     void MainWindow::TrySyncPasswords() {
         passwordStoreManager.PerformGitAction(GitManagerToolbar::Action::Sync);
     }
+
+    void MainWindow::GitServerSettings() {
+        RaiseClavisError(_(ERROR_NOT_IMPLEMENTED));
+    }
+
+    void MainWindow::GPGKeySettings() {
+        Workflows::ConfigGPGKeyWorkflow(&passwordStoreManager);
+    }
+
 
 
 

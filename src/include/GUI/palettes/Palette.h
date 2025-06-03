@@ -7,7 +7,7 @@
 #include <GUI/Titlebar/Titlebar.h>
 
 namespace Clavis::GUI {
-    class Palette : public Gtk::Dialog {
+    class Palette : public Gtk::Window {
     public:
         explicit Palette(Glib::ustring title);
     protected:

@@ -14,6 +14,14 @@ namespace Clavis::GUI {
         static void RenameElementWorkflow(PasswordStoreManager* passwordStoreManager, const PasswordStoreElements::PasswordStoreElement& element);
         static void EditPasswordWorkflow(PasswordStoreManager* passwordStoreManager, const PasswordStoreElements::PasswordStoreElement& element);
 
+        static void ConfigGPGKeyWorkflow(PasswordStoreManager* passwordStoreManager);
+
+        static bool ExportGPGWorkflow(Gtk::Window* parent);
+        static bool ImportGPGWorkflow(Gtk::Window* parent);
+        static bool CreateGPGWorkflow(Gtk::Window* parent);
+
+        static void FirstRunWorkflow(const Glib::RefPtr<Gtk::Application> &app);
+
     private:
         static void NewPasswordWorkflow_IMPL(PasswordStoreManager* passwordStoreManager, const std::string& name = "");
     };

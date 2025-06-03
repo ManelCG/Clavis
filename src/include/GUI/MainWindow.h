@@ -23,6 +23,8 @@ namespace Clavis::GUI {
         void TryPullPasswords();
         void TrySyncPasswords();
 
+        void GitServerSettings();
+        void GPGKeySettings();
 
 
         int Width;

@@ -37,7 +37,7 @@ namespace Clavis::GUI {
             yesButton.SetLabel(_(MISC_YES_BUTTON));
             noButton.SetLabel(_(MISC_NO_BUTTON));
             yesButton.SetIcon(Icons::Check);
-            noButton.SetIcon(Icons::Cross);
+            noButton.SetIcon(Icons::Actions::Cancel);
 
             mainVBox.append(contentBox);
             mainVBox.append(buttonsHBox);
@@ -78,6 +78,9 @@ namespace Clavis::GUI {
         void SetNoText(const std::string& text) {
             noButton.SetLabel(text);
         }
+        void set_margin(int margin) {
+            contentBox.set_margin(margin);
+        }
 
         static Derived* Create(Gtk::Widget* parent = nullptr, std::function<Derived*()> constructor = [](){return new Derived();}) {
             auto palette = Extensions::SpawnWindowNoSafeDelete<Derived>(constructor, parent);
@@ -110,7 +113,7 @@ namespace Clavis::GUI {
         }
 
     protected:
-        void DoGiveResponse(bool r) {
+        virtual void DoGiveResponse(bool r) {
             if (isResponseGiven)
                 return;
 

@@ -6,7 +6,7 @@
 #include <error/ClavisError.h>
 
 namespace Clavis::Settings {
-
+	bool IsSettingsInitializedOnDisk();
     bool SettingsInitialize();
 
 	bool SetValue(const std::string& key, const std::string& val);

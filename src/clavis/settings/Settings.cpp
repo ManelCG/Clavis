@@ -66,6 +66,11 @@ namespace Clavis::Settings {
 		return false;
 	}
 
+	bool IsSettingsInitializedOnDisk() {
+		return System::FileExists(GetSettingsFilePath());
+	}
+
+
 	bool SetValue(const std::string& key, const std::string& val) {
 		globalSettings.settings[key] = val;
 
@@ -246,6 +251,7 @@ namespace Clavis::Settings {
 
 	const std::vector<std::pair<std::string, std::string>> DefaultSettings() {
 		return {
+			BoolSetting::Kvp(IS_FIRST_RUN, true),
 			BoolSetting::Kvp(DO_USE_DARK_THEME, true),
 			BoolSetting::Kvp(DISABLE_SHADOWS, false),
 			BoolSetting::Kvp(SHOW_HIDDEN_FILES, false),

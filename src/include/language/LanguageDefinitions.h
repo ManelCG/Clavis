@@ -55,7 +55,14 @@ namespace Clavis::Language {
 		#undef _LANG_
 	};
 
-	static constexpr auto LanguagesArray = std::array<std::string_view, NLanguages>
+	static constexpr auto LanguagesArray = std::array<LanguagesEnum, NLanguages>
+	{
+		#define _LANG_(x, ...) LanguagesEnum::x,	// Stringify each value of the enum and turn it into a string view with the syntax "data"sv.
+		LANGUAGES
+		#undef _LANG_
+	};
+
+	static constexpr auto LanguageCodesArray = std::array<std::string_view, NLanguages>
 	{
 		#define _LANG_(x, ...) #x##sv,	// Stringify each value of the enum and turn it into a string view with the syntax "data"sv.
 		LANGUAGES
@@ -68,11 +75,24 @@ namespace Clavis::Language {
 		#undef _LANG_
 	}} };
 
-	namespace LanguageNames {
-		#define _LANG_(val, str) const std::string val = u8##str;
-		LANGUAGES
+	static constexpr auto LanguagesNames = Map<LanguagesEnum, std::string_view, LanguagesArray.size()>{ {{
+		#define _LANG_(code, name) {LanguagesEnum::code, name##sv },
+			LANGUAGES
 		#undef _LANG_
-	}
+	}}};
+
+	static constexpr auto LanguagesMapInverted = Map<std::string_view, LanguagesEnum, LanguagesArray.size()>{ {{
+		#define _LANG_(x, ...) {#x##sv, LanguagesEnum::x},	// Turn each enum value into a kvp with the enum value and the stringview version
+			LANGUAGES
+		#undef _LANG_
+	}}};
+
+
+	// namespace LanguageNames {
+	// 	#define _LANG_(val, str) const std::string val = u8##str;
+	// 	LANGUAGES
+	// 	#undef _LANG_
+	// }
 
 	//static constexpr auto LanguageNames = Map<LanguagesEnum, std::string_view, LanguagesArray.size()>{ {{
 	//	#define _LANG_(val, str) {LanguagesEnum::val, str},

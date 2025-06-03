@@ -15,8 +15,14 @@
 
 
 namespace Clavis::Language {
-
     Glib::ustring GetResourceString(_I18N_MAP_ strings, std::vector<std::string> arguments);
+
+    std::pair<std::string, std::string> GetLanguageData(LanguagesEnum language);
+    std::string GetLanguageCode(LanguagesEnum language);
+    std::string GetLanguageName(LanguagesEnum language);
+    LanguagesEnum GetLanguageFromCode(const std::string &code);
+
+    std::vector<LanguagesEnum> GetAllLanguages();
 }
 
 using namespace Clavis::Language;
@@ -91,6 +97,18 @@ _(MAINMENU_FILE_MENU_QUIT,
 #pragma endregion
 
 #pragma region Edit Menu
+
+_(MAINMENU_EDIT_MENU_GIT_SERVER_SETTINGS,
+    __(ENG, "Git server settings"),
+    __(ESP, "Configurar servidor Git"),
+    __(VAL, "Configurar servidor Git")
+)
+
+_(MAINMENU_EDIT_MENU_GPG_KEY_SETTINGS,
+    __(ENG, "GPG key Settings"),
+    __(ESP, "Configurar clave GPG"),
+    __(VAL, "Configurar clau GPG")
+)
 
 #pragma endregion
 
@@ -267,6 +285,12 @@ _(RENAME_ELEMENT_PALETTE_LABEL_TITLE,
     __(ENG, "Rename {0} to:"),
     __(ESP, "Renombrar {0} a:"),
     __(VAL, "Renombrar {0} a:")
+)
+
+_(MISC_LANGUAGE,
+    __(ENG, "Language"),
+    __(ESP, "Idioma"),
+    __(VAL, "Idioma")
 )
 
 #pragma endregion
@@ -450,6 +474,11 @@ _(MISC_CANCEL_BUTTON,
     __(ESP, "Cancelar"),
     __(VAL, "Cancel·lar"),
 )
+_(MISC_ACCEPT_BUTTON,
+    __(ENG, "Accept"),
+    __(ESP, "Aceptar"),
+    __(VAL, "Acceptar")
+)
 
 _(MISC_YES_BUTTON,
     __(ENG, "Yes"),
@@ -467,6 +496,12 @@ _(MISC_OVERWRITE_BUTTON,
     __(ENG, "Overwrite"),
     __(ESP, "Sobreescribir"),
     __(VAL, "Sobreescriure")
+)
+
+_(MISC_CONFIRM_SELECTION_BUTTON,
+    __(ENG, "Confirm selection"),
+    __(ESP, "Confirmar selección"),
+    __(VAL, "Confirmar selecció")
 )
 
 #pragma endregion
@@ -740,6 +775,161 @@ _(ERROR_GIT_OPERATION_FAILED,
 
 #pragma endregion
 
+#pragma region Create GPG Key Palette
+
+
+_(CREATE_NEW_KEY_PALETTE_TITLE,
+    __(ENG, "Clavis Master Key creation"),
+    __(ESP, "Crear Clave Maestra de Clavis"),
+    __(VAL, "Crear Clau Mestra de Clavis")
+)
+_(CREATE_NEW_KEY_PALETTE_MAIN_LABEL,
+    __(ENG, "Configure your new GPG key:"),
+    __(ESP, "Configura tu nueva clave GPG:"),
+    __(VAL, "Configura la teva nova clau GPG:")
+)
+_(CREATE_NEW_KEY_PALETTE_PERSONAL_INFORMATION_LABEL,
+    __(ENG, "Personal information:"),
+    __(ESP, "Información personal:"),
+    __(VAL, "Informació personal:")
+)
+_(CREATE_NEW_KEY_PALETTE_USERNAME_PLACEHOLDER,
+    __(ENG, "Your name"),
+    __(ESP, "Tu nombre"),
+    __(VAL, "El teu nom")
+)
+_(CREATE_NEW_KEY_PALETTE_KEY_NAME_PLACEHOLDER,
+    __(ENG, "Key name"),
+    __(ESP, "Nombre de la clave"),
+    __(VAL, "Nom de la clau")
+)
+_(CREATE_NEW_KEY_PALETTE_COMMENT_PLACEHOLDER,
+    __(ENG, "Comment (Optional)"),
+    __(ESP, "Comentario (Opcional)"),
+    __(VAL, "Comentari (Opcional)")
+)
+_(CREATE_NEW_KEY_SET_KEY_PASSWORD_LABEL,
+    __(ENG, "Set key's passord:"),
+    __(ESP, "Contraseña de la clave:"),
+    __(VAL, "Contrasenya de la clau:")
+)
+_(CREATE_NEW_KEY_PASSWORD_PLACEHOLDER,
+    __(ENG, "Password"),
+    __(ESP, "Contraseña"),
+    __(VAL, "Contrasenya")
+)
+_(CREATE_NEW_KEY_REPEAT_PASSWORD_PLACEHOLDER,
+    __(ENG, "Repeat password"),
+    __(ESP, "Repetir contraseña"),
+    __(VAL, "Repetir contrasenya")
+)
+
+_(CREATE_NEW_KEY_ADVANCED_OPTIONS_LABEL,
+    __(ENG, "Show advanced options"),
+    __(ESP, "Mostrar opciones avanzadas"),
+    __(VAL, "Mostrar opcions avançades")
+)
+_(CREATE_NEW_KEY_KEY_TYPE_LABEL,
+    __(ENG, "Key type:"),
+    __(ESP, "Tipo de clave:"),
+    __(VAL, "Tipus de clau:")
+)
+_(CREATE_NEW_KEY_KEY_LENGTH_LABEL,
+    __(ENG, "Key length:"),
+    __(ESP, "Longitud de la clave:"),
+    __(VAL, "Longitud de la clau:")
+)
+_(DO_CREATE_KEY_BUTTON,
+    __(ENG, "Create key"),
+    __(ESP, "Crear clave"),
+    __(VAL, "Crear clau")
+)
+
+#pragma endregion
+
+#pragma region First Run Workflow
+
+// FIRST WINDOW
+_(FIRST_RUN_WORKFLOW_TITLE,
+    __(ENG, "Welcome to Clavis!"),
+    __(ESP, "¡Bienvenido a Clavis!"),
+    __(VAL, "Benvingut a Clavis!")
+)
+
+_(FIRST_RUN_WORKFLOW_LABEL_1,
+    __(ENG, "Hey! It seems this is your first time running Clavis."),
+    __(ESP, "¡Hola! Parece que es tu primera vez usando Clavis."),
+    __(VAL, "Hola! Pareix que es la primera vegada que uses Clavis.")
+)
+
+_(FIRST_RUN_WORKFLOW_LABEL_2,
+    __(ENG, "Initialize Password Store?"),
+    __(ESP, "¿Inicializar el Repositorio de Contraseñas?"),
+    __(VAL, "Inicialitzar el Repositori de Contrasenyes?")
+)
+
+// SECOND WINDOW (PATH SELECTION)
+_(FIRST_RUN_CHOOSE_PASSWORD_STORE_PATH_TITLE,
+    __(ENG, "Choose passwords location"),
+    __(ESP, "Localización de las contraseñas"),
+    __(VAL, "Localització de les contrasenyes")
+)
+_(FIRST_RUN_CHOOSE_PASSWORD_STORE_PATH_LABEL_TEXT,
+    __(ENG, "Choose where to store the passwords:"),
+    __(ESP, "Elige dónde guardar las contraseñas:"),
+    __(VAL, "Tria on guardar les contrasenyes:")
+)
+
+// THIRD WINDOW (GPG KEY)
+_(FIRST_RUN_GPG_KEY_PALETTE_TITLE,
+    __(ENG, "Select your Clavis Master Key"),
+    __(ESP, "Selecciona tu Clave Maestra de Clavis"),
+    __(VAL, "Selecciona la teua Clau Mestra de Clavis")
+)
+_(FIRST_RUN_GPG_KEY_PALETTE_LABEL,
+    __(ENG, "Choose a GPG key, import one or create a new one"),
+    __(ESP, "Selecciona una clave GPG, impórtala o crea una nueva"),
+    __(VAL, "Selecciona una clau GPG, importa-la o crea una nova")
+)
+_(GPG_KEY_PALETTE_IMPORT_KEY_BUTTON,
+    __(ENG, "Import key"),
+    __(ESP, "Importar clave"),
+    __(VAL, "Importar clau")
+)
+_(GPG_KEY_PALETTE_EXPORT_KEY_BUTTON,
+    __(ENG, "Export key"),
+    __(ESP, "Exportar clave"),
+    __(VAL, "Exportar clau")
+)
+_(GPG_KEY_PALETTE_CREATE_NEW_KEY_BUTTON,
+    __(ENG, "Create new key"),
+    __(ESP, "Crear nueva clave"),
+    __(VAL, "Crear nova clau")
+)
+
+#pragma endregion
+
+#pragma region GPG Wrapper
+
+_(ERROR_INVALID_KEY_TYPE,
+    __(ENG, "Invalid key type: {0}"),
+    __(ESP, "Tipo de clave inválido: {0}"),
+    __(VAL, "Tipus de clau invàlid: {0}")
+)
+
+_(UNABLE_TO_PARSE_KEYTYPE_CODE,
+    __(ENG, "Unable to parse keytype code: {0}"),
+    __(ESP, "No se pudo parsear el código de clave: {0}"),
+    __(VAL, "No s'ha pogut parsejar el codi de la clau: {0}")
+)
+
+_(MISC_RECOMMENDED,
+    __(ENG, "Recommended"),
+    __(ESP, "Recomendado"),
+    __(VAL, "Recomanat")
+)
+
+#pragma endregion
 
 #pragma region Macros and Cleanup
 #ifdef _
