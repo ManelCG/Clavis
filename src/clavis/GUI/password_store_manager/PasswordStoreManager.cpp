@@ -175,9 +175,8 @@ namespace Clavis::GUI {
         else
             folderview.DisplayElements(passwordStore.GetElements(filter));
 
-        // searchEntry.grab_focus();
-        //
-        // tools.SetGoUpButtonActive(!passwordStore.IsAtRoot());
+        searchEntry.grab_focus();
+        tools.SetGoUpButtonActive(!passwordStore.IsAtRoot());
         tools.SetPath(passwordStore.GetPath(true));
     }
 
