@@ -6,23 +6,26 @@
 namespace Clavis {
     class GPG {
     public:
-        enum class KeyType {
-            RSA_DSA                 = 1,
-            DSA_ELGAMAL             = 2,
-            ECC_25519               = 3,
-            ECC_NIST_P384           = 4,
-            ECC_BRAINPOOL_P256      = 5,
-        };
         struct KeySizeRange {
             int min;
             int max;
             int def;
+        };
+        enum class KeyType {
+            RSA_DSA                 = 1001,
+            DSA_ELGAMAL             = 1002,
+            ECC_25519               = 2001,
+            ECC_NIST_P256           = 3020,
+            ECC_NIST_P384           = 3030,
+            ECC_NIST_P521           = 3050,
+            ECC_BRAINPOOL_P256      = 4020,
         };
         struct Key {
             std::string username;
             std::string keyname;
             std::string comment;
 
+            std::string password;
             KeyType type;
             int length;
         };
@@ -31,6 +34,8 @@ namespace Clavis {
         static bool TryDecrypt(const std::vector<uint8_t>& data, std::string& out);
 
         static bool TryEncrypt(const std::string& data, std::vector<uint8_t>& out);
+
+        static bool TryCreateKey(const Key& data);
 
         static std::vector<Key> GetAllKeys();
         static std::string KeyToString(const Key& key);
@@ -45,6 +50,6 @@ namespace Clavis {
 
     private:
         static std::string GetGPGID();
-
+        static std::string GetKeyParams(Key data);
     };
 }

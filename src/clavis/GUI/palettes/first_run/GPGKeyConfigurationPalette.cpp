@@ -76,7 +76,7 @@ namespace Clavis::GUI {
     }
 
     std::string GPGKeyConfigurationPalette::GetGPGID() {
-        return "dummy_gpg_id";
+        return gpgKeysComboBox.get_active_text();
     }
 
     void GPGKeyConfigurationPalette::PopulateKeysComboBox() {

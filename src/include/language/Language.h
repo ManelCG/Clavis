@@ -663,6 +663,12 @@ _(ERROR_DIRECTORY_ALREADY_EXISTS,
     __(ESP, "La carpeta ya existe: {0}"),
     __(VAL, "La carpeta ja existeix: {0}")
 )
+
+_(ERROR_UNKNOWN_ENUM_VALUE,
+    __(ENG, "Unknown value: {0}"),
+    __(ESP, "Valor desconocido: {0}"),
+    __(VAL, "Valor desconegut: {0}")
+)
 #pragma endregion
 
 #pragma region Git
@@ -880,6 +886,27 @@ _(FIRST_RUN_CHOOSE_PASSWORD_STORE_PATH_LABEL_TEXT,
     __(VAL, "Tria on guardar les contrasenyes:")
 )
 
+_(FIRST_RUN_CHOOSE_PASSWORD_STORE_PATH_FOLDER_DOES_NOT_EXIST_INFO_LABEL,
+    __(ENG, "Folder does not exist and will be created"),
+    __(ESP, "La carpeta no existe y será creada"),
+    __(VAL, "La carpeta no existeix i serà creada")
+)
+_(FIRST_RUN_CHOOSE_PASSWORD_STORE_PATH_PATH_IS_FILE_INFO_LABEL,
+    __(ENG, "The given path is a file"),
+    __(ESP, "La dirección dada es un archivo"),
+    __(VAL, "La direcció donada es un arxiu")
+)
+_(FIRST_RUN_CHOOSE_PASSWORD_STORE_PATH_FOLDER_EMPTY_INFO_LABEL,
+    __(ENG, "Folder already exists and is empty"),
+    __(ESP, "La carpeta ya existe y está vacía"),
+    __(VAL, "La carpeta ja existeix i està buida")
+)
+_(FIRST_RUN_CHOOSE_PASSWORD_STORE_PATH_FOLDER_NOT_EMPTY_INFO_LABEL,
+    __(ENG, "Folder already exists and is not empty"),
+    __(ESP, "La carpeta ya existe y no está vacía"),
+    __(VAL, "La carpeta ja existeix i no està buida")
+)
+
 // THIRD WINDOW (GPG KEY)
 _(FIRST_RUN_GPG_KEY_PALETTE_TITLE,
     __(ENG, "Select your Clavis Master Key"),
@@ -927,6 +954,18 @@ _(MISC_RECOMMENDED,
     __(ENG, "Recommended"),
     __(ESP, "Recomendado"),
     __(VAL, "Recomanat")
+)
+
+_(ERROR_GPG_KEY_IS_NOT_VALID,
+    __(ENG, "Key is not valid"),
+    __(ESP, "La clave no es válida"),
+    __(ENG, "La clau no es vàlida")
+)
+
+_(ERROR_FAILED_CREATING_KEY,
+    __(ENG, "Could not create key:\n{0}"),
+    __(ESP, "No se pudo crear la clave:\n{0}"),
+    __(VAL, "No s'ha pogut crear la clau: \n{0}")
 )
 
 #pragma endregion

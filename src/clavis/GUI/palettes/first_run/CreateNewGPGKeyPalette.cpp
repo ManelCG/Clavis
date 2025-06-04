@@ -1,7 +1,10 @@
+#include <gpgme.h>
 #include <iostream>
 #include <GUI/palettes/first_run/CreateNewGPGKeyPalette.h>
 
 #include <language/Language.h>
+
+#include <error/ClavisError.h>
 
 namespace Clavis::GUI {
     CreateNewGPGKeyPalette::CreateNewGPGKeyPalette() :
@@ -20,21 +23,37 @@ namespace Clavis::GUI {
             advancedOptionsHBox.set_visible(state);
         });
 
-        styleDispatcher.connect([this]() {
-            passwordEntry.remove_css_class("error");
-            repeatPasswordEntry.remove_css_class("error");
-            keyLengthEntry.remove_css_class("error");
-        });
-
         keyTypeEntry.signal_changed().connect([this]() {
             UpdateKeylength();
+        });
+
+        passwordEntry.SetCorrectnessCheck([this]() {
+            return passwordEntry.get_text().size() > 3;
+        });
+        repeatPasswordEntry.SetCorrectnessCheck([this]() {
+            return passwordEntry.get_text() == repeatPasswordEntry.get_text();
+        });
+        keyLengthEntry.SetCorrectnessCheck([this]() {
+            // keySize not available so always valid
+            if (keySizeRange.first == -1 && keySizeRange.second == -1)
+                return true;
+
+            const auto text = keyLengthEntry.get_text();
+            int size = -1;
+            try {
+                size = std::stoi(text);
+            } catch (...) { return false; }
+
+            if (size >= keySizeRange.first && size <= keySizeRange.second)
+                return true;
+
+            return false;
         });
 
         ApplyDisplayPasswordState();
         advancedOptionsHBox.hide();
 
         PopulateKeytypes();
-
     }
     void CreateNewGPGKeyPalette::SetTexts() {
         SetYesText(_(DO_CREATE_KEY_BUTTON));
@@ -150,73 +169,49 @@ namespace Clavis::GUI {
         repeatPasswordEntry.set_visibility(state);
     }
 
+    bool CreateNewGPGKeyPalette::CheckBoxCorrectnessAndDisplayErrors() {
+        bool success = true;
+
+        if (!usernameEntry.IsValid()) {
+            usernameEntry.DisplayError();
+            success = false;
+        }
+
+        if (!keynameEntry.IsValid()) {
+            keynameEntry.DisplayError();
+            success = false;
+        }
+
+        if (!passwordEntry.IsValid()) {
+            passwordEntry.DisplayError();
+            repeatPasswordEntry.DisplayError();
+            success = false;;
+        }
+
+        if (!repeatPasswordEntry.IsValid()) {
+            repeatPasswordEntry.DisplayError();
+            success = false;
+        }
+
+        if (!keyLengthEntry.IsValid()) {
+            keyLengthEntry.DisplayError();
+            success = false;
+        }
+
+        return success;
+    }
+
+
     void CreateNewGPGKeyPalette::DoGiveResponse(bool r) {
         if (!r) {
             DualChoicePalette::DoGiveResponse(false);
             return;
         }
 
-        bool success = true;
-
-        if (!ArePasswordsValid()) {
-            DisplayPasswordsError();
-            success = false;;
-        }
-
-        if (!IsKeySizeValid()) {
-            DisplayKeySizeError();
-            success = false;
-        }
+        auto success = CheckBoxCorrectnessAndDisplayErrors();
 
         if (success)
             DualChoicePalette::DoGiveResponse(true);
-    }
-
-    bool CreateNewGPGKeyPalette::ArePasswordsValid() {
-        auto p1 = passwordEntry.get_text();
-        auto p2 = repeatPasswordEntry.get_text();
-
-        if (p1 != p2)
-            return false;
-
-        if (p1.size() <= 3)
-            return false;
-
-        return true;
-    }
-
-    bool CreateNewGPGKeyPalette::IsKeySizeValid() {
-        // keySize not available so always valid
-        if (keySizeRange.first == -1 && keySizeRange.second == -1)
-            return true;
-
-        auto text = keyLengthEntry.get_text();
-        int size = -1;
-        try {
-            size = std::stoi(text);
-        } catch (...) { return false; }
-
-        if (size >= keySizeRange.first && size <= keySizeRange.second)
-            return true;
-
-        return false;
-    }
-
-
-    void CreateNewGPGKeyPalette::DisplayPasswordsError() {
-        passwordEntry.add_css_class("error");
-        repeatPasswordEntry.add_css_class("error");
-
-        styleSignalTimeout.ConnectOnce([this]() {
-            styleDispatcher.emit();
-        }, 3000);
-    }
-    void CreateNewGPGKeyPalette::DisplayKeySizeError() {
-        keyLengthEntry.add_css_class("error");
-
-        styleSignalTimeout.ConnectOnce([this]() {
-            styleDispatcher.emit();
-        }, 3000);
     }
 
 
@@ -231,6 +226,8 @@ namespace Clavis::GUI {
         }
 
         keyTypeEntry.set_active_id(GPG::KeyTypeToStringCode(GPG::KeyType::ECC_25519));
+
+        UpdateKeylength();
     }
 
     void CreateNewGPGKeyPalette::UpdateKeylength() {
@@ -243,7 +240,7 @@ namespace Clavis::GUI {
         if (range.def == -1) {
             keyLengthEntry.set_visible(false);
             keyLengthLabel.set_visible(false);
-            keyLengthEntry.set_text("");
+            keyLengthEntry.set_text("-1");
         } else {
             keyLengthEntry.set_visible(true);
             keyLengthLabel.set_visible(true);
@@ -255,4 +252,22 @@ namespace Clavis::GUI {
     GPG::KeyType CreateNewGPGKeyPalette::GetSelectedKeyType() {
         return GPG::StringCodeToKeyType(keyTypeEntry.get_active_id());
     }
+
+    GPG::Key CreateNewGPGKeyPalette::GetKey() {
+        if (!CheckBoxCorrectnessAndDisplayErrors())
+            RaiseClavisError(_(ERROR_GPG_KEY_IS_NOT_VALID));
+        GPG::Key key;
+
+        key.username = usernameEntry.get_text();
+        key.keyname = keynameEntry.get_text();
+        key.comment = commentEntry.get_text();
+
+        key.type = GetSelectedKeyType();
+        key.length = std::stoi(keyLengthEntry.get_text());
+
+        key.password = passwordEntry.get_text();
+
+        return key;
+    }
+
 }

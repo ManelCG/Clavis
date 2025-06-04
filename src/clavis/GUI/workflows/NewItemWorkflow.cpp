@@ -9,6 +9,7 @@
 #include <GUI/palettes/NewPasswordPalette.h>
 #include <GUI/palettes/SimpleYesNoQuestionPalette.h>
 
+#include <GUI/palettes/ExceptionPalette.h>
 #include <GUI/palettes/first_run/WelcomePalette.h>
 #include <GUI/palettes/first_run/ChoosePasswordStoreLocationPalette.h>
 #include <GUI/palettes/first_run/GPGKeyConfigurationPalette.h>
@@ -218,7 +219,11 @@ namespace Clavis::GUI {
         auto newKeyPalette = CreateNewGPGKeyPalette::Create(parent);
 
         auto response = newKeyPalette->Run([](CreateNewGPGKeyPalette *p, bool r) {
-
+            if (r) {
+                auto key = p->GetKey();
+                if (!GPG::TryCreateKey(key))
+                    RaiseClavisError(_(ERROR_FAILED_CREATING_KEY, GPG::KeyToString(key)));
+            }
         });
 
         return response;
@@ -227,6 +232,12 @@ namespace Clavis::GUI {
 
 
     void Workflows::FirstRunWorkflow(const Glib::RefPtr<Gtk::Application> &app) {
+        Glib::add_exception_handler([]() {
+            auto data = Error::ClavisException::GetLastException();
+
+            auto p = Gtk::make_managed<ExceptionPalette>(data);
+            p->show();
+        });
 
         {
             auto initializeClavisQuestion = WelcomePalette::Create();

@@ -33,10 +33,10 @@ namespace Clavis::GUI {
         void RemoveStateThreadsafe(Action button);
         void SetSensitiveThreadsafe(bool sensitive);
 
+        // These don't make sense to turn into the combined UniqueSignalTimeoutDispatcher, because they are quite more complex
         Glib::Dispatcher buttonStyleDispatcher;
         Glib::Dispatcher removeStyleDispatcher;
         Glib::Dispatcher sensitiveDispatcher;
-
         UniqueSignalTimeout uniqueSignalTimeout;
 
         std::mutex mutex;

@@ -242,8 +242,12 @@ namespace Clavis {
                 return "DSA + Elgamal";
             case KeyType::ECC_25519:
                 return "ECC Curve 25519 (" + _(MISC_RECOMMENDED) + ")";
+            case KeyType::ECC_NIST_P256:
+                return "ECC NIST P-256";
             case KeyType::ECC_NIST_P384:
                 return "ECC NIST P-384";
+            case KeyType::ECC_NIST_P521:
+                return "ECC NIST P-521";
             case KeyType::ECC_BRAINPOOL_P256:
                 return "ECC Brainpool P-256";
 
@@ -271,7 +275,9 @@ namespace Clavis {
             KeyType::ECC_25519,
             KeyType::RSA_DSA,
             KeyType::DSA_ELGAMAL,
+            KeyType::ECC_NIST_P256,
             KeyType::ECC_NIST_P384,
+            KeyType::ECC_NIST_P521,
             KeyType::ECC_BRAINPOOL_P256,
         };
     }
@@ -282,7 +288,9 @@ namespace Clavis {
         switch (type) {
             case KeyType::ECC_25519:
             case KeyType::ECC_BRAINPOOL_P256:
+            case KeyType::ECC_NIST_P256:
             case KeyType::ECC_NIST_P384:
+            case KeyType::ECC_NIST_P521:
                 range.min = -1; range.max = -1; range.def = -1;
                 return range;
 
@@ -299,7 +307,128 @@ namespace Clavis {
         }
     }
 
+    std::string GPG::GetKeyParams(Key data) {
+        std::ostringstream params;
+        params.imbue(std::locale::classic());
 
+        if (data.type == KeyType::RSA_DSA || data.type == KeyType::DSA_ELGAMAL) {
+            std::string type;
+
+            if (data.type == KeyType::RSA_DSA)
+                type = "RSA";
+            else
+                type = "DSA";
+
+            params << "Key-Type: " << type << "\n";
+            params << "Key-Length: " << data.length << "\n";
+
+            return params.str();
+        }
+
+        std::string type;
+        std::string curve;
+        std::string subtype;
+        std::string subcurve;
+
+        if (data.type == KeyType::ECC_25519) {
+            type = "EDDSA";
+            curve = "ed25519";
+            subtype = "ECDH";
+            subcurve = "cv25519";
+        }
+
+        if (data.type == KeyType::ECC_NIST_P256 ||
+            data.type == KeyType::ECC_NIST_P384 ||
+            data.type == KeyType::ECC_NIST_P521)
+        {
+            type = "ECDSA";
+            subtype = "ECDH";
+            curve = "nistp";
+
+            if (data.type == KeyType::ECC_NIST_P256)
+                curve += "256";
+            if (data.type == KeyType::ECC_NIST_P384)
+                curve += "384";
+            if (data.type == KeyType::ECC_NIST_P521)
+                curve += "521";
+
+            subcurve = curve;
+        }
+
+        if (data.type == KeyType::ECC_BRAINPOOL_P256) {
+            type = "ECDSA";
+            curve = "brainpoolP256r1";
+            subtype = "ECDH";
+            subcurve = "brainpoolP256r1";
+        }
+
+        params << "Key-Type: " << type << "\n";
+        params << "Key-Curve: " << curve << "\n";
+        params << "Subkey-Type: " << subtype << "\n";
+        params << "Subkey-Curve: " << subcurve << "\n";
+
+        return params.str();
+    }
+
+
+    bool GPG::TryCreateKey(const Key& data) {
+        gpgme_check_version(nullptr);
+        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+
+        gpgme_ctx_t ctx = nullptr;
+        gpgme_error_t err = gpgme_new(&ctx);
+        if (err != GPG_ERR_NO_ERROR)
+            return false;
+
+        gpgme_set_armor(ctx, 1); // Make output ASCII armored
+
+        // Create parameter string
+        std::ostringstream params;
+        params << "<GnupgKeyParms format=\"internal\">\n";
+
+        params << GetKeyParams(data);
+
+        params << "Name-Real: " << data.username << "\n";
+        params << "Name-Comment: " << data.comment << "\n";
+        params << "Name-Email: " << data.keyname << "\n";
+
+        if (!data.password.empty())
+            params << "Passphrase: " << data.password << "\n";
+        else
+            params << "Passphrase: \n"; // empty password
+
+        params << "Expire-Date: 0\n"; // Never expires
+        params << "</GnupgKeyParms>\n";
+
+        gpgme_data_t key_params;
+        err = gpgme_data_new_from_mem(&key_params, params.str().c_str(), params.str().size(), 0);
+        if (err != GPG_ERR_NO_ERROR) {
+            std::cerr << "error gpgme_data_new_from_mem: " << gpgme_strerror(err) << "\n";
+            gpgme_release(ctx);
+            return false;
+        }
+
+        auto paramsStr = params.str();
+        auto cstr = paramsStr.c_str();
+        // Generate the key
+        err = gpgme_op_genkey(ctx,cstr, nullptr, nullptr);
+        gpgme_data_release(key_params);
+
+        if (err != GPG_ERR_NO_ERROR) {
+            std::cerr << "error gpgme_op_genkey: " << gpgme_strerror(err) << "\n";
+            gpgme_release(ctx);
+            return false;
+        }
+
+        // Optional: get generated key info
+        gpgme_genkey_result_t result = gpgme_op_genkey_result(ctx);
+        if (result && result->fpr) {
+            std::cout << "Key generated with fingerprint: " << result->fpr << "\n";
+        }
+
+        gpgme_release(ctx);
+        return true;
+    }
 
 
 

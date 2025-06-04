@@ -5,7 +5,7 @@
 #include <GUI/palettes/DualChoicePalette.h>
 
 #include <GUI/components/ToggleIconButton.h>
-#include <GUI/signals/UniqueSignalTimeout.h>
+#include <GUI/components/RequiredEntry.h>
 
 #include <extensions/GPGWrapper.h>
 
@@ -13,6 +13,8 @@ namespace Clavis::GUI {
     class CreateNewGPGKeyPalette : public DualChoicePalette<CreateNewGPGKeyPalette> {
     public:
         CreateNewGPGKeyPalette();
+
+        GPG::Key GetKey();
 
     protected:
 
@@ -23,12 +25,8 @@ namespace Clavis::GUI {
 
         void ApplyDisplayPasswordState();
 
-        bool ArePasswordsValid();
-        bool IsKeySizeValid();
         void DoGiveResponse(bool r) override;
-
-        void DisplayPasswordsError();
-        void DisplayKeySizeError();
+        bool CheckBoxCorrectnessAndDisplayErrors();
 
         void PopulateKeytypes();
         void UpdateKeylength();
@@ -40,14 +38,14 @@ namespace Clavis::GUI {
         Gtk::Label personalInfoLabel;
 
         Gtk::Box personalInfoHBox;
-        Gtk::Entry usernameEntry;
-        Gtk::Entry keynameEntry;
+        RequiredEntry usernameEntry;
+        RequiredEntry keynameEntry;
         Gtk::Entry commentEntry;
 
         Gtk::Label keyPasswordLabel;
         Gtk::Box passwordHBox;
-        Gtk::Entry passwordEntry;
-        Gtk::Entry repeatPasswordEntry;
+        RequiredEntry passwordEntry;
+        RequiredEntry repeatPasswordEntry;
         ToggleIconButton displayPasswordIconButton;
 
         Gtk::CheckButton advancedOptionsCheckButton;
@@ -58,10 +56,8 @@ namespace Clavis::GUI {
         Gtk::Label keyTypeLabel;
         Gtk::ComboBoxText keyTypeEntry;
         Gtk::Label keyLengthLabel;
-        Gtk::Entry keyLengthEntry;
+        RequiredEntry keyLengthEntry;
 
         std::pair<int, int> keySizeRange;
-        Glib::Dispatcher styleDispatcher;
-        UniqueSignalTimeout styleSignalTimeout;
     };
 }
