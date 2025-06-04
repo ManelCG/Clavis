@@ -24,8 +24,10 @@ namespace Clavis::GUI {
     }
 
     void ExportGPGKeyPalette::DoGiveResponse(bool r) {
-        if (!r)
+        if (!r) {
             DualChoicePalette::DoGiveResponse(false);
+            return;
+        }
 
         std::string path;
         if (!Workflows::OpenFileDialog(FileOpenDialogAction::SAVE_FILE, path, this))

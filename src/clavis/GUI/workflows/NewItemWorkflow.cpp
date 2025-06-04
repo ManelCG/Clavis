@@ -16,7 +16,6 @@
 #include <GUI/palettes/first_run/ChoosePasswordStoreLocationPalette.h>
 #include <GUI/palettes/first_run/GPGKeyConfigurationPalette.h>
 #include <GUI/palettes/first_run/ExportGPGKeyPalette.h>
-#include <GUI/palettes/first_run/ImportGPGKeyPalette.h>
 #include <GUI/palettes/first_run/CreateNewGPGKeyPalette.h>
 
 namespace Clavis::GUI {
