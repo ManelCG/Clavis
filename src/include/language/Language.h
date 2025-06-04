@@ -509,6 +509,17 @@ _(MISC_BROWSE_BUTTON,
     __(ESP, "Buscar"),
     __(VAL, "Buscar")
 )
+
+_(MISC_EXPORT_BUTTON,
+    __(ENG, "Export"),
+    __(ESP, "Exportar"),
+    __(VAL, "Exportar")
+)
+_(MISC_IMPORT_BUTTON,
+    __(ENG, "Import"),
+    __(ESP, "Importar"),
+    __(VAL, "Importar")
+)
 #pragma endregion
 
 #pragma region Errors
@@ -933,6 +944,21 @@ _(GPG_KEY_PALETTE_EXPORT_KEY_BUTTON,
     __(ESP, "Exportar clave"),
     __(VAL, "Exportar clau")
 )
+_(IMPORT_GPG_KEY_TITLE,
+    __(ENG, "Import GPG key"),
+    __(ESP, "Importar clave GPG"),
+    __(VAL, "Importar clau GPG")
+)
+_(EXPORT_GPG_KEY_TITLE,
+    __(ENG, "Export GPG key"),
+    __(ESP, "Exportar clave GPG"),
+    __(VAL, "Exportar clau GPG")
+)
+_(DO_EXPORT_PRIVATE_KEY_CHECKBUTTON,
+    __(ENG, "Include private key"),
+    __(ESP, "Incluir clave privada"),
+    __(VAL, "Incluïr clau privada")
+)
 _(GPG_KEY_PALETTE_CREATE_NEW_KEY_BUTTON,
     __(ENG, "Create new key"),
     __(ESP, "Crear nueva clave"),
@@ -971,6 +997,40 @@ _(ERROR_FAILED_CREATING_KEY,
     __(ENG, "Could not create key:\n{0}"),
     __(ESP, "No se pudo crear la clave:\n{0}"),
     __(VAL, "No s'ha pogut crear la clau: \n{0}")
+)
+
+_(ERROR_UNABLE_TO_EXPORT_KEY,
+    __(ENG, "Could not export the key"),
+    __(ESP, "No se pudo exportar la clave"),
+    __(VAL, "No s'ha pogut exportar la clau")
+)
+
+_(ERROR_UNABLE_TO_IMPORT_KEY,
+    __(ENG, "Could not import the key"),
+    __(ESP, "No se pudo importar la clave"),
+    __(VAL, "No s'ha pogut importar la clau")
+)
+
+_(ERROR_INVALID_TRUST_LEVEL,
+    __(ENG, "Invalid trust level: {0}. Must be between 1 and 5"),
+    __(ESP, "Nivel de confianza inválido: {0}. Debe estar entre 1 y 5"),
+    __(VAL, "Nivell de confiança invàlid: {0}. Deu estar entre 1 i 5")
+)
+
+#pragma endregion
+
+#pragma region Misc Errors
+
+_(ERROR_COULD_NOT_WRITE_FILE,
+    __(ENG, "Could not write file: {0}"),
+    __(ESP, "No se ha podido escribir el archivo: {0}"),
+    __(VAL, "No s'ha pogut escriure el fitxer: {0}")
+)
+
+_(ERROR_COULD_NOT_READ_FILE,
+    __(ENG, "Could not read file: {0}"),
+    __(ESP, "No se ha podido leer el archivo: {0}"),
+    __(VAL, "No s'ha pogut escriure el fitxer: {0}")
 )
 
 #pragma endregion

@@ -39,6 +39,8 @@ namespace Clavis {
         static bool TryExportKey(const std::string& gpgid, bool exportPrivate, std::vector<uint8_t>& out);
         static bool TryImportKey(const std::vector<uint8_t>& data);
 
+        static bool TryChangeKeyTrust(const std::string& fingerprint, int trustlevel);
+
         static std::vector<Key> GetAllKeys();
         static std::string KeyToString(const Key& key, bool escapeChars = false);
 

@@ -22,7 +22,7 @@ namespace Clavis::GUI {
 
         static void ConfigGPGKeyWorkflow(PasswordStoreManager* passwordStoreManager);
 
-        static bool ExportGPGWorkflow(Gtk::Window* parent);
+        static bool ExportGPGWorkflow(const std::string& gpgid, Gtk::Window* parent = nullptr);
         static bool ImportGPGWorkflow(Gtk::Window* parent);
         static bool CreateGPGWorkflow(Gtk::Window* parent);
 

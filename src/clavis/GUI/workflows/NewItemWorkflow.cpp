@@ -265,21 +265,20 @@ namespace Clavis::GUI {
         RaiseClavisError("Selected GPGID: ", gpgid);
     }
 
-    bool Workflows::ExportGPGWorkflow(Gtk::Window *parent) {
+    bool Workflows::ExportGPGWorkflow(const std::string& gpgid, Gtk::Window *parent) {
         auto exportKeyPalette = ExportGPGKeyPalette::Create(parent);
 
-        auto response = exportKeyPalette->Run([](ExportGPGKeyPalette *p, bool r) {
+        auto response = exportKeyPalette->Run([gpgid](ExportGPGKeyPalette *p, bool r) {
             if (r) {
-                RaiseClavisError(_(ERROR_NOT_IMPLEMENTED));
-                auto id = "?";
-                std::vector<uint8_t> data;
-                if (!GPG::TryExportKey(id, false, data)) {
-                    std::cerr << "Failed to export key: " << id << std::endl;
-                    return;
-                }
+                auto path = p->GetExportPath();
+                auto doExportPrivate = p->GetDoExportPrivate();
 
-                std::string str(data.begin(), data.end());
-                std::cout << str << std::endl;
+                std::vector<uint8_t> data;
+                if (!GPG::TryExportKey(gpgid, doExportPrivate, data))
+                    RaiseClavisError(_(ERROR_UNABLE_TO_EXPORT_KEY))
+
+                if (!System::TryWriteFile(path, data))
+                    RaiseClavisError(_(ERROR_COULD_NOT_WRITE_FILE, path.string()));
             }
         });
 
@@ -288,14 +287,18 @@ namespace Clavis::GUI {
     }
 
     bool Workflows::ImportGPGWorkflow(Gtk::Window *parent) {
-        auto importKeyPalette = ImportGPGKeyPalette::Create(parent);
+        std::string path;
+        if (!OpenFileDialog(FileOpenDialogAction::OPEN_FILE, path, parent))
+            return false;
 
-        auto response = importKeyPalette->Run([](ImportGPGKeyPalette *p, bool r) {
-            RaiseClavisError(_(ERROR_NOT_IMPLEMENTED));
-        });
+        std::vector<uint8_t> data;
+        if (!System::TryReadFile(path, data))
+            RaiseClavisError(_(ERROR_COULD_NOT_READ_FILE, path));
 
-        return response;
+        if (!GPG::TryImportKey(data))
+            RaiseClavisError(_(ERROR_UNABLE_TO_IMPORT_KEY))
 
+        return true;
     }
 
 

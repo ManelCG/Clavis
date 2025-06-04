@@ -47,7 +47,7 @@ namespace Clavis::GUI {
                 PopulateKeysComboBox();
         });
         exportKeyButton.signal_clicked().connect([this]() {
-            if (Workflows::ExportGPGWorkflow(this))
+            if (Workflows::ExportGPGWorkflow(GetGPGID()))
                 PopulateKeysComboBox();
         });
         createKeyButton.signal_clicked().connect([this]() {

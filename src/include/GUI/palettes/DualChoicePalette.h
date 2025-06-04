@@ -9,6 +9,7 @@
 #include <image/icons.h>
 
 #include <extensions/GUIExtensions.h>
+#include <GUI/lib/MainLoopHalter.h>
 
 namespace Clavis::GUI {
 
@@ -46,13 +47,13 @@ namespace Clavis::GUI {
             set_resizable(false);
 
             yesButton.signal_clicked().connect([this]() {
-                DoGiveResponse(true);
+                __DoGiveResponseImpl(true);
             });
             noButton.signal_clicked().connect([this]() {
-                DoGiveResponse(false);
+                __DoGiveResponseImpl(false);
             });
             signal_hide().connect([this]() {
-                DoGiveResponse(false);
+                __DoGiveResponseImpl(false);
             }, true);
         }
 
@@ -89,7 +90,7 @@ namespace Clavis::GUI {
         }
 
         bool Run(std::function<void(Derived*, bool)> callback = [](Derived*, bool){}) {
-            WaitForHide();
+            halter.Halt();
             bool result = response;
 
             auto palette = (Derived*)this;
@@ -114,24 +115,25 @@ namespace Clavis::GUI {
 
     protected:
         virtual void DoGiveResponse(bool r) {
-            if (isResponseGiven)
-                return;
-
             response = r;
             isResponseGiven = true;
 
             close();
 
-            if (nestedLoop != nullptr) {
-                nestedLoop->quit();
-                nestedLoop = nullptr;
-            }
+            halter.Resume();
         }
 
         bool isResponseGiven = false;
         bool response = false;
 
     private:
+        void __DoGiveResponseImpl(bool r) {
+            if (isResponseGiven)
+                return;
+
+            DoGiveResponse(r);
+        }
+
         Gtk::Box mainVBox;
         Gtk::Box buttonsHBox;
         Gtk::Box contentBox;
@@ -139,13 +141,8 @@ namespace Clavis::GUI {
         LabeledIconButton yesButton;
         LabeledIconButton noButton;
 
-        std::shared_ptr<Glib::MainLoop> nestedLoop = nullptr;
+        MainLoopHalter halter;
 
-        void WaitForHide() {
-            nestedLoop = Glib::MainLoop::create();
-
-            nestedLoop->run();
-        }
     };
 
 }

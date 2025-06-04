@@ -216,6 +216,7 @@ namespace Clavis {
         return success;
     }
 
+
     bool GPG::TryImportKey(const std::vector<uint8_t>& data) {
         gpgme_error_t err;
         gpgme_ctx_t ctx = nullptr;
@@ -238,19 +239,80 @@ namespace Clavis {
             return false;
         }
 
+        std::vector<std::string> importedFingerprints;
+
         // Perform the import
         err = gpgme_op_import(ctx, keydata);
         if (err != GPG_ERR_NO_ERROR) {
             std::cerr << std::string("error gpgme_op_import: ") + std::string(gpgme_strerror(err)) << "\n";
         } else {
             success = true;
+            // Extract fingerprints from the import result
+            gpgme_import_result_t result = gpgme_op_import_result(ctx);
+            for (gpgme_import_status_t status = result->imports; status != nullptr; status = status->next)
+                if (status->fpr)
+                    importedFingerprints.push_back(status->fpr);
         }
 
         // Cleanup
         gpgme_data_release(keydata);
         gpgme_release(ctx);
 
+        for (const auto& f : importedFingerprints)
+            if (!TryChangeKeyTrust(f, 5))
+                success = false;
+
         return success;
+    }
+
+
+    bool GPG::TryChangeKeyTrust(const std::string& fingerprint, int trustlevel) {
+        std::string trustLevelString;
+        switch (trustlevel) {
+            case 1: trustLevelString = "undefined"; break;
+            case 2: trustLevelString = "never"; break;
+            case 3: trustLevelString = "marginal"; break;
+            case 4: trustLevelString = "full"; break;
+            case 5: trustLevelString = "ultimate"; break;
+            default:
+                RaiseClavisError(_(ERROR_INVALID_TRUST_LEVEL, std::to_string(trustlevel)));
+        }
+
+        gpgme_error_t err;
+        gpgme_ctx_t ctx;
+
+        // Initialize the GPGME library (required before any GPGME operation)
+        gpgme_check_version(nullptr);
+        err = gpgme_new(&ctx);
+        if (err != GPG_ERR_NO_ERROR) {
+            std::cerr << "Failed to create GPGME context: " << gpgme_strerror(err) << std::endl;
+            return false;
+        }
+
+        // Retrieve the key by its fingerprint
+        gpgme_key_t key;
+        err = gpgme_get_key(ctx, fingerprint.c_str(), &key, 0); // 0 = public keyring only
+        if (err != GPG_ERR_NO_ERROR) {
+            std::cerr << "Failed to retrieve key with fingerprint " << fingerprint << ": "
+                      << gpgme_strerror(err) << std::endl;
+            gpgme_release(ctx);
+            return false;
+        }
+
+        // Start the owner trust operation
+        err = gpgme_op_setownertrust(ctx, key, trustLevelString.c_str());
+        if (err != GPG_ERR_NO_ERROR) {
+            std::cerr << "Failed to set owner trust for key: "
+                      << gpgme_strerror(err) << std::endl;
+            gpgme_key_unref(key); // Unreference the key to avoid memory leaks
+            gpgme_release(ctx);
+            return false;
+        }
+
+        // Clean up
+        gpgme_key_unref(key); // Unreference the key
+        gpgme_release(ctx);   // Release the GPGME context
+        return true;
     }
 
 
