@@ -5,6 +5,12 @@
 #include <GUI/password_store_manager/PasswordStoreManager.h>
 
 namespace Clavis::GUI {
+    enum class FileOpenDialogAction {
+        OPEN_FILE,
+        SAVE_FILE,
+        OPEN_FOLDER,
+    };
+
     class Workflows {
     public:
         static void NewPasswordWorkflow(PasswordStoreManager* passwordStoreManager);
@@ -19,6 +25,8 @@ namespace Clavis::GUI {
         static bool ExportGPGWorkflow(Gtk::Window* parent);
         static bool ImportGPGWorkflow(Gtk::Window* parent);
         static bool CreateGPGWorkflow(Gtk::Window* parent);
+
+        static bool OpenFileDialog(FileOpenDialogAction action, std::string& outSelectedPath, Gtk::Widget* parent = nullptr);
 
         static void FirstRunWorkflow(const Glib::RefPtr<Gtk::Application> &app);
 

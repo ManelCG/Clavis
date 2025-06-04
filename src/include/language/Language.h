@@ -504,6 +504,11 @@ _(MISC_CONFIRM_SELECTION_BUTTON,
     __(VAL, "Confirmar selecció")
 )
 
+_(MISC_BROWSE_BUTTON,
+    __(ENG, "Browse"),
+    __(ESP, "Buscar"),
+    __(VAL, "Buscar")
+)
 #pragma endregion
 
 #pragma region Errors

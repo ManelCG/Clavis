@@ -1,9 +1,11 @@
+#include <gtkmm/filechooser.h>
 #include <GUI/palettes/first_run/ChoosePasswordStoreLocationPalette.h>
 
 #include <language/Language.h>
 
 #include <settings/Settings.h>
 #include <system/Extensions.h>
+#include <GUI/workflows/NewItemWorkflow.h>
 
 namespace Clavis::GUI {
     ChoosePasswordStoreLocationPalette::ChoosePasswordStoreLocationPalette() :
@@ -19,6 +21,12 @@ namespace Clavis::GUI {
         choosePathLabel.set_margin_bottom(5);
 
         choosePathEntry.set_text(Settings::PASSWORD_STORE_PATH.GetValue());
+        browseButton.SetLabel(_(MISC_BROWSE_BUTTON));
+        pathHBox.append(choosePathEntry);
+        pathHBox.append(browseButton);
+        pathHBox.set_hexpand(true);
+        choosePathEntry.set_hexpand(true);
+        browseButton.set_margin_start(5);
 
         okIcon.SetIcon(Icons::Check);
         alertIcon.SetIcon(Icons::Actions::Cancel);
@@ -31,7 +39,7 @@ namespace Clavis::GUI {
         infoLabelHBox.set_margin_top(10);
 
         append(choosePathLabel);
-        append(choosePathEntry);
+        append(pathHBox);
         append(infoLabelHBox);
 
         choosePathEntry.signal_changed().connect([this]() {
@@ -39,6 +47,11 @@ namespace Clavis::GUI {
         });
         timeoutDispatcher.SetAction([this]() {
             choosePathEntry.remove_css_class("error");
+        });
+        browseButton.signal_clicked().connect([this]() {
+            std::string out = choosePathEntry.get_text();
+            if (Workflows::OpenFileDialog(FileOpenDialogAction::OPEN_FOLDER, out, this))
+                choosePathEntry.set_text(out);
         });
         ProvidePathFeedback();
     }

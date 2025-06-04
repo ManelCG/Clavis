@@ -33,4 +33,18 @@ namespace Clavis::GUI::Extensions {
 
         return ret;
     }
+
+    Gtk::Window *GetParentWindow(Gtk::Widget *widget) {
+        if (widget == nullptr)
+            return nullptr;
+
+        Gtk::Window* window = nullptr;
+        window = dynamic_cast<Gtk::Window*>(widget);
+
+        if (window == nullptr)
+            window = dynamic_cast<Gtk::Window*>(widget->get_ancestor(Gtk::Window::get_type()));
+
+        return window;
+    }
+
 }

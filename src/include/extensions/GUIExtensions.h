@@ -9,6 +9,7 @@
 
 namespace Clavis::GUI::Extensions {
     std::vector<Gtk::Widget*> GetAllChildren(Gtk::Widget* w, bool recursive = false);
+    Gtk::Window* GetParentWindow(Gtk::Widget* widget);
 
     template<typename T>
     std::vector<T*> FilterWidgets(std::vector<Gtk::Widget*> widgets);
@@ -35,13 +36,8 @@ namespace Clavis::GUI::Extensions {
     T* __SpawnWindow_IMPL(std::function<T*()> constructor, Gtk::Widget* parent, bool doSafeDelete) {
         auto palette = constructor();
 
-        Gtk::Window* window = nullptr;
-        if (parent != nullptr) {
-            window = dynamic_cast<Gtk::Window*>(parent);
-
-            if (window == nullptr)
-                window = dynamic_cast<Gtk::Window*>(parent->get_ancestor(Gtk::Window::get_type()));
-
+        Gtk::Window* window = GetParentWindow(parent);
+        if (window != nullptr) {
             palette->set_transient_for(*window);
             window->set_sensitive(false);
         }

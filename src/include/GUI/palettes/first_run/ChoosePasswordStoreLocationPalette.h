@@ -23,7 +23,11 @@ namespace Clavis::GUI {
         };
 
         Gtk::Label choosePathLabel;
+
+        Gtk::Box pathHBox;
         Gtk::Entry choosePathEntry;
+        LabeledIconButton browseButton;
+
 
         Gtk::Box infoLabelHBox;
         PictureInsert okIcon;

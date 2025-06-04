@@ -5,6 +5,8 @@
 #include <extensions/GitWrapper.h>
 #include <system/Extensions.h>
 
+#include <GUI/lib/MainLoopHalter.h>
+
 #include <GUI/palettes/SimpleEntryPalette.h>
 #include <GUI/palettes/NewPasswordPalette.h>
 #include <GUI/palettes/SimpleYesNoQuestionPalette.h>
@@ -178,6 +180,77 @@ namespace Clavis::GUI {
         passwordStoreManager->Refresh();
     }
 
+    bool Workflows::OpenFileDialog(FileOpenDialogAction action, std::string &outSelectedPath, Gtk::Widget *parent) {
+        auto window = Extensions::GetParentWindow(parent);
+        auto dialog = Gtk::FileDialog::create();
+
+        if (window != nullptr) {
+            dialog->set_modal(true);
+            window->set_sensitive(false);
+        }
+
+        if (! outSelectedPath.empty())
+            dialog->set_initial_name(outSelectedPath);
+
+        MainLoopHalter halter;
+        bool response;
+
+        auto slot = [dialog, &halter, &outSelectedPath, &response, &action](const Glib::RefPtr<Gio::AsyncResult>& result) {
+            try {
+                Glib::RefPtr<Gio::File> file;
+                switch (action) {
+                    case FileOpenDialogAction::OPEN_FILE:
+                        file = dialog->open_finish(result);
+                        break;
+                    case FileOpenDialogAction::SAVE_FILE:
+                        file = dialog->save_finish(result);
+                        break;
+                    case FileOpenDialogAction::OPEN_FOLDER:
+                        file = dialog->select_folder_finish(result);
+                        break;
+                }
+
+                if (file) {
+                    outSelectedPath = file->get_path();
+                    response = true;
+                }
+                else
+                    response = false;
+
+            } catch (...) {
+                response = false;
+            }
+
+            halter.Resume();
+        };
+
+        switch (action) {
+            case FileOpenDialogAction::OPEN_FILE:
+                if (window != nullptr)
+                    dialog->open(*window, slot);
+                else
+                    dialog->open(slot);
+                break;
+            case FileOpenDialogAction::SAVE_FILE:
+                if (window != nullptr)
+                    dialog->save(*window, slot);
+                else
+                    dialog->save(slot);
+                break;
+            case FileOpenDialogAction::OPEN_FOLDER:
+                if (window != nullptr)
+                    dialog->select_folder(*window, slot);
+                else
+                    dialog->select_folder(slot);
+                break;
+        }
+
+        halter.Halt();
+        if (window != nullptr)
+            window->set_sensitive(true);
+        return response;
+    }
+
     void Workflows::ConfigGPGKeyWorkflow(PasswordStoreManager *passwordStoreManager) {
         auto palette = GPGKeyConfigurationPalette::Create(passwordStoreManager);
         std::string gpgid;
@@ -196,7 +269,18 @@ namespace Clavis::GUI {
         auto exportKeyPalette = ExportGPGKeyPalette::Create(parent);
 
         auto response = exportKeyPalette->Run([](ExportGPGKeyPalette *p, bool r) {
+            if (r) {
+                RaiseClavisError(_(ERROR_NOT_IMPLEMENTED));
+                auto id = "?";
+                std::vector<uint8_t> data;
+                if (!GPG::TryExportKey(id, false, data)) {
+                    std::cerr << "Failed to export key: " << id << std::endl;
+                    return;
+                }
 
+                std::string str(data.begin(), data.end());
+                std::cout << str << std::endl;
+            }
         });
 
         return response;
@@ -207,7 +291,7 @@ namespace Clavis::GUI {
         auto importKeyPalette = ImportGPGKeyPalette::Create(parent);
 
         auto response = importKeyPalette->Run([](ImportGPGKeyPalette *p, bool r) {
-
+            RaiseClavisError(_(ERROR_NOT_IMPLEMENTED));
         });
 
         return response;
@@ -222,7 +306,7 @@ namespace Clavis::GUI {
             if (r) {
                 auto key = p->GetKey();
                 if (!GPG::TryCreateKey(key))
-                    RaiseClavisError(_(ERROR_FAILED_CREATING_KEY, GPG::KeyToString(key)));
+                    RaiseClavisError(_(ERROR_FAILED_CREATING_KEY, GPG::KeyToString(key, true)));
             }
         });
 

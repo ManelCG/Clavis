@@ -155,6 +155,105 @@ namespace Clavis {
         return success;
     }
 
+    bool GPG::TryExportKey(const std::string& gpgid, bool exportPrivate, std::vector<uint8_t>& out) {
+        gpgme_error_t err;
+        gpgme_ctx_t ctx = nullptr;
+        gpgme_data_t keydata = nullptr;
+        gpgme_key_t key = nullptr;
+        bool success = false;
+
+        gpgme_check_version(nullptr);
+        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+
+        err = gpgme_new(&ctx);
+        if (err != GPG_ERR_NO_ERROR)
+            return false;
+
+        // Set ASCII armor to get BEGIN PGP KEY BLOCK
+        gpgme_set_armor(ctx, 1);
+
+        // Get key (only need once, whether public or secret)
+        err = gpgme_get_key(ctx, gpgid.c_str(), &key, exportPrivate ? 1 : 0);
+        if (err != GPG_ERR_NO_ERROR) {
+            std::cerr << std::string("error gpgme_get_key: ") + std::string(gpgme_strerror(err)) << "\n";
+            gpgme_release(ctx);
+            return false;
+        }
+
+        err = gpgme_data_new(&keydata);
+        if (err != GPG_ERR_NO_ERROR) {
+            std::cerr << std::string("error gpgme_data_new: ") + std::string(gpgme_strerror(err)) << "\n";
+            gpgme_key_unref(key);
+            gpgme_release(ctx);
+            return false;
+        }
+
+        auto mode = exportPrivate? GPGME_EXPORT_MODE_SECRET : 0;
+
+        // Always export public key
+        gpgme_key_t keys[] = {key, nullptr};
+        err = gpgme_op_export_keys(ctx, keys, mode, keydata);
+        if (err != GPG_ERR_NO_ERROR) {
+            std::cerr << std::string("error gpgme_op_export_keys (public): ") + std::string(gpgme_strerror(err)) << "\n";
+        } else {
+            // Just public key export
+            off_t size = gpgme_data_seek(keydata, 0, SEEK_END);
+            gpgme_data_seek(keydata, 0, SEEK_SET);
+
+            out.resize(size);
+            ssize_t read_bytes = gpgme_data_read(keydata, out.data(), out.size());
+            if (read_bytes >= 0) {
+                out.resize(read_bytes);
+                success = true;
+            }
+        }
+
+        // Cleanup
+        gpgme_data_release(keydata);
+        gpgme_key_unref(key);
+        gpgme_release(ctx);
+
+        return success;
+    }
+
+    bool GPG::TryImportKey(const std::vector<uint8_t>& data) {
+        gpgme_error_t err;
+        gpgme_ctx_t ctx = nullptr;
+        gpgme_data_t keydata = nullptr;
+        bool success = false;
+
+        // Initialize GPGME
+        gpgme_check_version(nullptr);
+        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+
+        err = gpgme_new(&ctx);
+        if (err != GPG_ERR_NO_ERROR)
+            return false;
+
+        // Create GPGME data object from memory
+        err = gpgme_data_new_from_mem(&keydata, reinterpret_cast<const char*>(data.data()), data.size(), 0);
+        if (err != GPG_ERR_NO_ERROR) {
+            std::cerr << std::string("error gpgme_data_new_from_mem: ") + std::string(gpgme_strerror(err)) << "\n";
+            gpgme_release(ctx);
+            return false;
+        }
+
+        // Perform the import
+        err = gpgme_op_import(ctx, keydata);
+        if (err != GPG_ERR_NO_ERROR) {
+            std::cerr << std::string("error gpgme_op_import: ") + std::string(gpgme_strerror(err)) << "\n";
+        } else {
+            success = true;
+        }
+
+        // Cleanup
+        gpgme_data_release(keydata);
+        gpgme_release(ctx);
+
+        return success;
+    }
+
+
 
     std::string GPG::GetGPGID() {
         auto p = System::GetGPGIDPath();
@@ -221,7 +320,7 @@ namespace Clavis {
 
     }
 
-    std::string GPG::KeyToString(const Key &key) {
+    std::string GPG::KeyToString(const Key &key, bool escapeChars) {
         std::string ret;
 
         ret += key.username;
@@ -229,7 +328,11 @@ namespace Clavis {
         if (! key.comment.empty())
             ret += " (" + key.comment + ")";
 
-        ret += " <" + key.keyname + ">";
+        std::string openBracket = escapeChars? " &lt;" : " <";
+        std::string closeBracket = escapeChars? "&gt;" : ">";
+
+
+        ret += openBracket + key.keyname + closeBracket;
 
         return ret;
     }
