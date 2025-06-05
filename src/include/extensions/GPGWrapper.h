@@ -37,9 +37,9 @@ namespace Clavis {
 
         static bool TryEncrypt(const std::string& data, std::vector<uint8_t>& out);
 
-        static bool TryCreateKey(const Key& data);
+        static bool TryCreateKey(const Key& data, std::string& outFingerprint);
+        static bool TryImportKey(const std::vector<uint8_t>& data, std::string& outFingerprint);
         static bool TryExportKey(const std::string& gpgid, bool exportPrivate, std::vector<uint8_t>& out);
-        static bool TryImportKey(const std::vector<uint8_t>& data);
 
 #ifdef __LINUX__
         static bool TryChangeKeyTrust(const std::string& fingerprint, int trustlevel);
@@ -47,6 +47,7 @@ namespace Clavis {
 
         static std::vector<Key> GetAllKeys();
         static std::string KeyToString(const Key& key, bool escapeChars = false);
+        static std::string KeyToStringFull(const Key& key);
 
         static std::string KeyTypeToStringCode(KeyType type);
         static std::string KeyTypeToString(KeyType type);

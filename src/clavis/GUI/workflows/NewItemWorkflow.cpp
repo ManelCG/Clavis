@@ -370,7 +370,7 @@ namespace Clavis::GUI {
 
     }
 
-    bool Workflows::ImportGPGWorkflow(Gtk::Window *parent) {
+    bool Workflows::ImportGPGWorkflow(Gtk::Window *parent, std::string& outFingerprint) {
         std::string path;
         if (!OpenFileDialog(FileOpenDialogAction::OPEN_FILE, path, parent))
             return false;
@@ -379,20 +379,20 @@ namespace Clavis::GUI {
         if (!System::TryReadFile(path, data))
             RaiseClavisError(_(ERROR_COULD_NOT_READ_FILE, path));
 
-        if (!GPG::TryImportKey(data))
+        if (!GPG::TryImportKey(data, outFingerprint))
             RaiseClavisError(_(ERROR_UNABLE_TO_IMPORT_KEY))
 
         return true;
     }
 
 
-    bool Workflows::CreateGPGWorkflow(Gtk::Window* parent) {
+    bool Workflows::CreateGPGWorkflow(Gtk::Window* parent, std::string& outFingerprint) {
         auto newKeyPalette = CreateNewGPGKeyPalette::Create(parent);
 
-        auto response = newKeyPalette->Run([](CreateNewGPGKeyPalette *p, bool r) {
+        auto response = newKeyPalette->Run([&outFingerprint](CreateNewGPGKeyPalette *p, bool r) {
             if (r) {
                 auto key = p->GetKey();
-                if (!GPG::TryCreateKey(key))
+                if (!GPG::TryCreateKey(key, outFingerprint))
                     RaiseClavisError(_(ERROR_FAILED_CREATING_KEY, GPG::KeyToString(key, true)));
             }
         });

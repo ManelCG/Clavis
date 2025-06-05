@@ -32,6 +32,6 @@ namespace Clavis::GUI {
 
         std::vector<GPG::Key> gpgKeys;
 
-        void PopulateKeysComboBox();
+        void PopulateKeysComboBox(const std::string& selectedKey = "");
     };
 }

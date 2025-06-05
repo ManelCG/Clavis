@@ -22,7 +22,7 @@ namespace Clavis::GUI {
 
         refreshKeysButton.SetIcon(Icons::Actions::Refresh);
         refreshKeysButton.signal_clicked().connect([this]() {
-            PopulateKeysComboBox();
+            PopulateKeysComboBox(gpgKeysComboBox.get_active_id());
         });
 
         keysHBox.set_orientation(Gtk::Orientation::HORIZONTAL);
@@ -43,16 +43,18 @@ namespace Clavis::GUI {
         createKeyButton.SetLabel(_(GPG_KEY_PALETTE_CREATE_NEW_KEY_BUTTON));
 
         importKeyButton.signal_clicked().connect([this]() {
-            if (Workflows::ImportGPGWorkflow(this))
-                PopulateKeysComboBox();
+            std::string fingerprint;
+            if (Workflows::ImportGPGWorkflow(this, fingerprint))
+                PopulateKeysComboBox(fingerprint);
         });
         exportKeyButton.signal_clicked().connect([this]() {
             if (Workflows::ExportGPGWorkflow(GetGPGID()))
-                PopulateKeysComboBox();
+                PopulateKeysComboBox(gpgKeysComboBox.get_active_id());
         });
         createKeyButton.signal_clicked().connect([this]() {
-            if (Workflows::CreateGPGWorkflow(this))
-                PopulateKeysComboBox();
+            std::string fingerprint;
+            if (Workflows::CreateGPGWorkflow(this, fingerprint))
+                PopulateKeysComboBox(fingerprint);
         });
 
         importExportCreateHBox.set_orientation(Gtk::Orientation::HORIZONTAL);
@@ -79,21 +81,39 @@ namespace Clavis::GUI {
         return gpgKeysComboBox.get_active_text();
     }
 
-    void GPGKeyConfigurationPalette::PopulateKeysComboBox() {
+    void GPGKeyConfigurationPalette::PopulateKeysComboBox(const std::string& fingerprint) {
         gpgKeysComboBox.remove_all();
 
         gpgKeys = GPG::GetAllKeys();
 
+        bool fingerprintIsValid = false;
+        std::string selectedFingerprint = fingerprint;
+        std::string firstFingerprint = "";
+
         for (int i = 0; i < gpgKeys.size(); i++) {
-            auto id = std::to_string(i);
             auto key = gpgKeys[i];
             auto str = GPG::KeyToString(key);
+            auto id = key.fingerprint;
+
+            // Prioritize the fingerprint we were told to show
+            if (selectedFingerprint == "")
+                selectedFingerprint = id;
+            // But it might be that it got deleted or something, and we are 100% sure that this fingerprint is valid
+            if (firstFingerprint == "")
+                firstFingerprint = id;
+            if (id == selectedFingerprint)
+                fingerprintIsValid = true;
 
             gpgKeysComboBox.append(id, str);
         }
 
-        if (gpgKeys.size() > 0)
-            gpgKeysComboBox.set_active_id(std::to_string(0));
+        if (gpgKeys.size() > 0) {
+            if (selectedFingerprint != "" && fingerprintIsValid)
+                gpgKeysComboBox.set_active_id(selectedFingerprint);
+            else
+                gpgKeysComboBox.set_active_id(firstFingerprint);
+        }
+
     }
 
 

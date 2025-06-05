@@ -217,7 +217,7 @@ namespace Clavis {
     }
 
 
-    bool GPG::TryImportKey(const std::vector<uint8_t>& data) {
+    bool GPG::TryImportKey(const std::vector<uint8_t>& data, std::string& outFingerprint) {
         gpgme_error_t err;
         gpgme_ctx_t ctx = nullptr;
         gpgme_data_t keydata = nullptr;
@@ -258,11 +258,18 @@ namespace Clavis {
         gpgme_data_release(keydata);
         gpgme_release(ctx);
 
-#ifdef __LINUX__
-        for (const auto& f : importedFingerprints)
+        bool didGetFingerprint = false;
+        for (const auto& f : importedFingerprints) {
+            if (!didGetFingerprint)
+                outFingerprint = f;
+            didGetFingerprint = true;
+
+            #ifdef __LINUX__
             if (!TryChangeKeyTrust(f, 5))
                 success = false;
-#endif
+            #endif
+        }
+
 
         return success;
     }
@@ -368,8 +375,8 @@ namespace Clavis {
                     k.keyname = uid->email;
                 if (uid->comment)
                     k.comment = uid->comment;
-                if (uid->fpr)
-                    k.fingerprint = uid->fpr;
+                if (key->fpr)
+                    k.fingerprint = key->fpr;
 
                 result.push_back(k);
             }
@@ -404,6 +411,14 @@ namespace Clavis {
 
         return ret;
     }
+
+    std::string GPG::KeyToStringFull(const Key &key) {
+        std::string ret = KeyToString(key, false);
+        ret += "\nFingerpring: " + key.fingerprint + "\n";
+
+        return ret;
+    }
+
 
     std::string GPG::KeyTypeToString(KeyType type) {
         switch (type) {
@@ -542,7 +557,7 @@ namespace Clavis {
     }
 
 
-    bool GPG::TryCreateKey(const Key& data) {
+    bool GPG::TryCreateKey(const Key& data, std::string& outFingerprint) {
         gpgme_check_version(nullptr);
         gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
 
@@ -595,6 +610,7 @@ namespace Clavis {
         gpgme_genkey_result_t result = gpgme_op_genkey_result(ctx);
         if (result && result->fpr) {
             std::cout << "Key generated with fingerprint: " << result->fpr << "\n";
+            outFingerprint = result->fpr;
         }
 
         gpgme_release(ctx);
