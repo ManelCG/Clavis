@@ -18,6 +18,14 @@
 #include <GUI/palettes/first_run/ExportGPGKeyPalette.h>
 #include <GUI/palettes/first_run/CreateNewGPGKeyPalette.h>
 
+#ifdef __WINDOWS__
+#include <windows.h>
+#include <shobjidl.h>    // for IFileDialog
+#include <shlobj.h>      // for SHBrowseForFolder
+#include <commdlg.h>     // for GetOpenFileName, GetSaveFileName
+#include <string>
+#endif
+
 namespace Clavis::GUI {
     void Workflows::NewFolderWorkflow(PasswordStoreManager *passwordStoreManager) {
         auto palette = SimpleEntryPalette::Create(passwordStoreManager);
@@ -180,6 +188,7 @@ namespace Clavis::GUI {
     }
 
     bool Workflows::OpenFileDialog(FileOpenDialogAction action, std::string &outSelectedPath, Gtk::Widget *parent) {
+	#ifdef __LINUX__
         auto window = Extensions::GetParentWindow(parent);
         auto dialog = Gtk::FileDialog::create();
 
@@ -248,7 +257,83 @@ namespace Clavis::GUI {
         if (window != nullptr)
             window->set_sensitive(true);
         return response;
+    #elif defined __WINDOWS__
+        wchar_t filePath[MAX_PATH] = { 0 };
+
+        switch (action) {
+        case FileOpenDialogAction::OPEN_FILE: {
+            OPENFILENAMEW ofn = { 0 };
+            ofn.lStructSize = sizeof(ofn);
+            ofn.hwndOwner = nullptr;
+            ofn.lpstrFile = filePath;
+            ofn.nMaxFile = MAX_PATH;
+            ofn.lpstrFilter = L"All Files\0*.*\0";
+            ofn.nFilterIndex = 1;
+            ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+            if (GetOpenFileNameW(&ofn)) {
+                outSelectedPath = System::UnicodeToUTF8(filePath);
+                return true;
+            }
+            return false;
+        }
+
+        case FileOpenDialogAction::SAVE_FILE: {
+            OPENFILENAMEW ofn = { 0 };
+            ofn.lStructSize = sizeof(ofn);
+            ofn.hwndOwner = nullptr;
+            ofn.lpstrFile = filePath;
+            ofn.nMaxFile = MAX_PATH;
+            ofn.lpstrFilter = L"All Files\0*.*\0";
+            ofn.nFilterIndex = 1;
+            ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
+
+            if (GetSaveFileNameW(&ofn)) {
+                outSelectedPath = System::UnicodeToUTF8(filePath);
+                return true;
+            }
+            return false;
+        }
+
+        case FileOpenDialogAction::OPEN_FOLDER: {
+            IFileDialog* pfd = nullptr;
+            HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+            if (SUCCEEDED(hr)) {
+                hr = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER,
+                    IID_PPV_ARGS(&pfd));
+
+                if (SUCCEEDED(hr)) {
+                    DWORD options;
+                    pfd->GetOptions(&options);
+                    pfd->SetOptions(options | FOS_PICKFOLDERS | FOS_FORCEFILESYSTEM);
+
+                    if (SUCCEEDED(pfd->Show(nullptr))) {
+                        IShellItem* pItem = nullptr;
+                        if (SUCCEEDED(pfd->GetResult(&pItem))) {
+                            PWSTR pszFilePath = nullptr;
+                            if (SUCCEEDED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath))) {
+                                outSelectedPath = System::UnicodeToUTF8(pszFilePath);
+                                CoTaskMemFree(pszFilePath);
+                                pItem->Release();
+                                pfd->Release();
+                                CoUninitialize();
+                                return true;
+                            }
+                            pItem->Release();
+                        }
+                    }
+                    pfd->Release();
+                }
+                CoUninitialize();
+            }
+            return false;
+        }
+        }
+
+        return false;
+    #endif
     }
+
 
     void Workflows::ConfigGPGKeyWorkflow(PasswordStoreManager *passwordStoreManager) {
         auto palette = GPGKeyConfigurationPalette::Create(passwordStoreManager);

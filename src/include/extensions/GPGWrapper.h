@@ -25,6 +25,8 @@ namespace Clavis {
             std::string keyname;
             std::string comment;
 
+            std::string fingerprint;
+
             std::string password;
             KeyType type;
             int length;
@@ -39,7 +41,9 @@ namespace Clavis {
         static bool TryExportKey(const std::string& gpgid, bool exportPrivate, std::vector<uint8_t>& out);
         static bool TryImportKey(const std::vector<uint8_t>& data);
 
+#ifdef __LINUX__
         static bool TryChangeKeyTrust(const std::string& fingerprint, int trustlevel);
+#endif
 
         static std::vector<Key> GetAllKeys();
         static std::string KeyToString(const Key& key, bool escapeChars = false);

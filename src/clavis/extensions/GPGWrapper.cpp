@@ -258,14 +258,17 @@ namespace Clavis {
         gpgme_data_release(keydata);
         gpgme_release(ctx);
 
+#ifdef __LINUX__
         for (const auto& f : importedFingerprints)
             if (!TryChangeKeyTrust(f, 5))
                 success = false;
+#endif
 
         return success;
     }
 
 
+#ifdef __LINUX__
     bool GPG::TryChangeKeyTrust(const std::string& fingerprint, int trustlevel) {
         std::string trustLevelString;
         switch (trustlevel) {
@@ -314,6 +317,7 @@ namespace Clavis {
         gpgme_release(ctx);   // Release the GPGME context
         return true;
     }
+#endif
 
 
 
@@ -364,6 +368,8 @@ namespace Clavis {
                     k.keyname = uid->email;
                 if (uid->comment)
                     k.comment = uid->comment;
+                if (uid->fpr)
+                    k.fingerprint = uid->fpr;
 
                 result.push_back(k);
             }
