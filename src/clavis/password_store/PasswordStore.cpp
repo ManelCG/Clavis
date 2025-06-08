@@ -91,6 +91,18 @@ namespace Clavis {
         return std::filesystem::relative(store_path, root_path);
     }
 
+    bool PasswordStore::IsValidPasswordStore(const std::filesystem::path &p) {
+        if (!System::DirectoryExists(p))
+            return false;
+
+        for (const auto& c : System::ListContents(p, false))
+            if (System::FileExists(c) && c.filename() == ".gpg-id")
+                return true;
+
+        return false;
+    }
+
+
 
     bool PasswordStore::IsAtRoot() const {
         return store_path ==  root_path;
@@ -134,6 +146,29 @@ namespace Clavis {
         return System::GetNumberOfFiles(GetRoot(), ".gpg", {".git"});
     }
 
+    std::string PasswordStore::GetGPGID() {
+        std::string ret;
+        auto p = System::GetGPGIDPath();
+        if (!TryGetGPGID(p, ret))
+            RaiseClavisError(_(ERROR_GPG_ID_FILE_NOT_FOUND, p.string()));
+
+        return ret;
+    }
+
+    bool PasswordStore::TryGetGPGID(const std::filesystem::path &directory, std::string &outgpgid) {
+        auto p = directory / ".gpg-id";
+        if (!System::FileExists(p))
+            return false;
+
+        std::string id;
+        if (!System::TryReadFile(p, id))
+            RaiseClavisError(_(ERROR_CANNOT_READ_GPGID_FILE, p.string()));
+
+        id.erase(id.find_last_not_of(" \r\n\t") + 1);
+        outgpgid = id;
+
+        return true;
+    }
 
 
 

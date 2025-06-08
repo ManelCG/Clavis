@@ -17,6 +17,7 @@
 #include <GUI/palettes/first_run/GPGKeyConfigurationPalette.h>
 #include <GUI/palettes/first_run/ExportGPGKeyPalette.h>
 #include <GUI/palettes/first_run/CreateNewGPGKeyPalette.h>
+#include <GUI/palettes/first_run/GitServerConfigPalette.h>
 
 #ifdef __WINDOWS__
 #include <windows.h>
@@ -402,15 +403,15 @@ namespace Clavis::GUI {
 
 
 
-    void Workflows::FirstRunWorkflow(const Glib::RefPtr<Gtk::Application> &app) {
+    bool Workflows::FirstRunWorkflow(const Glib::RefPtr<Gtk::Application> &app) {
         Glib::add_exception_handler([]() {
             auto data = Error::ClavisException::GetLastException();
 
-            auto p = Gtk::make_managed<ExceptionPalette>(data);
+            const auto p = Gtk::make_managed<ExceptionPalette>(data);
             p->show();
         });
 
-        {
+        /* Initialize Clavis? */ {
             auto initializeClavisQuestion = WelcomePalette::Create();
 
             app->add_window(*initializeClavisQuestion);
@@ -421,13 +422,13 @@ namespace Clavis::GUI {
             });
 
             if (!response)
-                return;
+                return false;
         }
 
 
         std::filesystem::path passwordStoreLocation;
 
-        {
+        /* Choose Password Store location */ {
             auto passwordStoreLocationQuestion = ChoosePasswordStoreLocationPalette::Create();
 
             app->add_window(*passwordStoreLocationQuestion);
@@ -438,27 +439,61 @@ namespace Clavis::GUI {
             });
 
             if (!response)
-                return;
+                return false;
         }
-
+        const bool passwordStoreAlreadyExists = System::DirectoryExists(passwordStoreLocation) && PasswordStore::IsValidPasswordStore(passwordStoreLocation);
         std::string gpgid;
 
-        {
+        const bool gpgKeyExists =
+            passwordStoreAlreadyExists &&
+            PasswordStore::TryGetGPGID(passwordStoreLocation, gpgid) &&
+            GPG::KeyExists(gpgid);
+
+        // Choose GPG key
+        if (!gpgKeyExists) {
             auto gpgKeyPalette = GPGKeyConfigurationPalette::Create();
 
             app->add_window(*gpgKeyPalette);
 
-            auto response = gpgKeyPalette->Run([&gpgid](GPGKeyConfigurationPalette *p, bool r) {
+            const auto response = gpgKeyPalette->Run([&gpgid](GPGKeyConfigurationPalette *p, bool r) {
                 if (r)
                     gpgid = p->GetGPGID();
             });
 
             if (!response)
-                return;
+                return false;
         }
 
-        std::cerr << passwordStoreLocation.string() << std::endl;
-        std::cerr << gpgid << std::endl;
+        // Git config palette does everything by itself because it is supposed to be responsive.
+        // Also, the user might not want to use Git, so we don't really need to do anything here
+        if (!System::DirectoryExists(passwordStoreLocation) || !passwordStoreAlreadyExists) {
+            // Try to initialize git repo
+            auto gitConfigPalette = GitServerConfigPalette::Create();
+
+            app->add_window(*gitConfigPalette);
+
+             if (!gitConfigPalette->Run())
+                 return false;
+        }
+
+        // We are done!
+        // Create the password store path if necessary
+        if (! System::DirectoryExists(passwordStoreLocation))
+            if (!System::mkdir_p(passwordStoreLocation))
+                RaiseClavisError(_(ERROR_UNABLE_TO_CREATE_DIRECTORY, passwordStoreLocation));
+
+        // Set the password store path in settings to reuse now.
+        Settings::PASSWORD_STORE_PATH.SetValue(passwordStoreLocation.string());
+
+        auto gpgidPath = System::GetGPGIDPath();
+        if (!System::FileExists(gpgidPath))
+            if (!System::TryWriteFile(gpgidPath, gpgid))
+                RaiseClavisError(_(ERROR_COULD_NOT_WRITE_FILE, gpgidPath));
+
+
+        // Done!
+        Settings::IS_FIRST_RUN.SetValue(false);
+        return true;
     }
 
 

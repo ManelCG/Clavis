@@ -22,6 +22,7 @@ namespace Clavis::GUI {
 
         choosePathEntry.set_text(Settings::PASSWORD_STORE_PATH.GetValue());
         browseButton.SetLabel(_(MISC_BROWSE_BUTTON));
+        browseButton.SetIcon(Icons::Actions::Search);
         pathHBox.append(choosePathEntry);
         pathHBox.append(browseButton);
         pathHBox.set_hexpand(true);
@@ -71,6 +72,7 @@ namespace Clavis::GUI {
                 break;
             case FolderType::NONEXISTANT:
             case FolderType::EMPTY:
+            case FolderType::PASSWORDSTORE:
                 okIcon.show();
                 alertIcon.hide();
                 break;
@@ -92,6 +94,10 @@ namespace Clavis::GUI {
             case FolderType::EMPTY:
                 pathInfoLabel.set_text(_(FIRST_RUN_CHOOSE_PASSWORD_STORE_PATH_FOLDER_EMPTY_INFO_LABEL));
                 break;
+
+            case FolderType::PASSWORDSTORE:
+                pathInfoLabel.set_text(_(FIRST_RUN_CHOOSE_PASSWORD_STORE_PATH_FOLDER_IS_PASSWORDSTORE_INFO_LABEL));
+                break;
         }
     }
 
@@ -107,6 +113,9 @@ namespace Clavis::GUI {
 
         if (System::ListContents(p).empty())
             return FolderType::EMPTY;
+
+        if (PasswordStore::IsValidPasswordStore(p))
+            return FolderType::PASSWORDSTORE;
 
         return FolderType::NONEMPTY;
     }
@@ -128,6 +137,7 @@ namespace Clavis::GUI {
 
             case FolderType::EMPTY:
             case FolderType::NONEXISTANT:
+            case FolderType::PASSWORDSTORE:
                 DualChoicePalette::DoGiveResponse(true);
                 return;
 

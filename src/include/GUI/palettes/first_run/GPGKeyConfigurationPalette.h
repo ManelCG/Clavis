@@ -16,6 +16,8 @@ namespace Clavis::GUI {
 
         std::string GetGPGID();
 
+        bool TryPreselectGPGKey(const std::string& fingerprint);
+
     protected:
 
     private:

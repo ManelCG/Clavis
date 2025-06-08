@@ -81,6 +81,17 @@ namespace Clavis::GUI {
         return gpgKeysComboBox.get_active_text();
     }
 
+    bool GPGKeyConfigurationPalette::TryPreselectGPGKey(const std::string &fingerprint) {
+        auto currentID = gpgKeysComboBox.get_active_id();
+        if (gpgKeysComboBox.set_active_id(fingerprint))
+            return true;
+
+        // Couldn't set the selected ID so we select the one we know works.
+        gpgKeysComboBox.set_active_id(currentID);
+        return false;
+    }
+
+
     void GPGKeyConfigurationPalette::PopulateKeysComboBox(const std::string& fingerprint) {
         gpgKeysComboBox.remove_all();
 
@@ -88,7 +99,7 @@ namespace Clavis::GUI {
 
         bool fingerprintIsValid = false;
         std::string selectedFingerprint = fingerprint;
-        std::string firstFingerprint = "";
+        std::string firstFingerprint;
 
         for (int i = 0; i < gpgKeys.size(); i++) {
             auto key = gpgKeys[i];
@@ -96,10 +107,10 @@ namespace Clavis::GUI {
             auto id = key.fingerprint;
 
             // Prioritize the fingerprint we were told to show
-            if (selectedFingerprint == "")
+            if (selectedFingerprint.empty())
                 selectedFingerprint = id;
             // But it might be that it got deleted or something, and we are 100% sure that this fingerprint is valid
-            if (firstFingerprint == "")
+            if (firstFingerprint.empty())
                 firstFingerprint = id;
             if (id == selectedFingerprint)
                 fingerprintIsValid = true;
@@ -107,8 +118,8 @@ namespace Clavis::GUI {
             gpgKeysComboBox.append(id, str);
         }
 
-        if (gpgKeys.size() > 0) {
-            if (selectedFingerprint != "" && fingerprintIsValid)
+        if (!gpgKeys.empty()) {
+            if (!selectedFingerprint.empty() && fingerprintIsValid)
                 gpgKeysComboBox.set_active_id(selectedFingerprint);
             else
                 gpgKeysComboBox.set_active_id(firstFingerprint);

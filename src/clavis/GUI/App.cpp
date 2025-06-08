@@ -14,25 +14,27 @@ namespace Clavis::GUI {
 
     void App::Run(int argc, char* argv[])
     {
-        if (Settings::IS_FIRST_RUN.GetValue()) {
-            FirstRun(argc, argv);
-            return;
-        }
-
+        if (Settings::IS_FIRST_RUN.GetValue())
+            if (!FirstRun(argc, argv))
+                return;
 
         auto app = InstantiateApp();
 
         app->make_window_and_run<MainWindow>(0, nullptr);
     }
 
-    void App::FirstRun(int argc, char *argv[]) {
+    bool App::FirstRun(int argc, char *argv[]) {
         auto app = InstantiateApp(); // This returns a Glib::RefPtr<App> or your App subclass
 
-        app->signal_startup().connect([app]() {
-            Workflows::FirstRunWorkflow(app);
+        bool success = false;
+
+        app->signal_startup().connect([app, &success]() {
+            success = Workflows::FirstRunWorkflow(app);
         });
 
         app->run(argc, argv); // launch main loop
+
+        return success;
     }
 
     Glib::RefPtr<Gtk::Application> App::InstantiateApp() {

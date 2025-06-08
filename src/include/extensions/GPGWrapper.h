@@ -37,6 +37,9 @@ namespace Clavis {
 
         static bool TryEncrypt(const std::string& data, std::vector<uint8_t>& out);
 
+        static bool TryGetKeyFingerprint(const std::string& gpgid, std::string& outFingerprint);
+        static bool KeyExists(const std::string& gpgid);
+
         static bool TryCreateKey(const Key& data, std::string& outFingerprint);
         static bool TryImportKey(const std::vector<uint8_t>& data, std::string& outFingerprint);
         static bool TryExportKey(const std::string& gpgid, bool exportPrivate, std::vector<uint8_t>& out);
@@ -58,7 +61,6 @@ namespace Clavis {
     protected:
 
     private:
-        static std::string GetGPGID();
         static std::string GetKeyParams(Key data);
     };
 }

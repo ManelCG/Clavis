@@ -19,6 +19,7 @@ namespace Clavis::GUI {
             NONEXISTANT,
             EMPTY,
             NONEMPTY,
+            PASSWORDSTORE,
             FILE
         };
 

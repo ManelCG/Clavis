@@ -685,6 +685,12 @@ _(ERROR_UNKNOWN_ENUM_VALUE,
     __(ESP, "Valor desconocido: {0}"),
     __(VAL, "Valor desconegut: {0}")
 )
+
+_(ERROR_FILE_NOT_FOUND,
+    __(ENG, "File not found: {0}"),
+    __(ESP, "Archivo no encontrado: {0}"),
+    __(VAL, "Arxiu no trobat: {0}")
+)
 #pragma endregion
 
 #pragma region Git
@@ -922,6 +928,11 @@ _(FIRST_RUN_CHOOSE_PASSWORD_STORE_PATH_FOLDER_NOT_EMPTY_INFO_LABEL,
     __(ESP, "La carpeta ya existe y no está vacía"),
     __(VAL, "La carpeta ja existeix i no està buida")
 )
+_(FIRST_RUN_CHOOSE_PASSWORD_STORE_PATH_FOLDER_IS_PASSWORDSTORE_INFO_LABEL,
+    __(ENG, "Folder already exists and contains a Password Store"),
+    __(ESP, "La carpeta ya existe y contiene un Repositorio de Contraseñas"),
+    __(VAL, "La carpeta ja existeix i conté un Repositori de Contrasenyes")
+)
 
 // THIRD WINDOW (GPG KEY)
 _(FIRST_RUN_GPG_KEY_PALETTE_TITLE,
@@ -963,6 +974,13 @@ _(GPG_KEY_PALETTE_CREATE_NEW_KEY_BUTTON,
     __(ENG, "Create new key"),
     __(ESP, "Crear nueva clave"),
     __(VAL, "Crear nova clau")
+)
+
+// FOURTH WINDOW (GIT SERVER CONFIG)
+_(GIT_SERVER_CONFIG_TITLE,
+    __(ENG, "Configure Git server"),
+    __(ESP, "Configurar servidor de Git"),
+    __(VAL, "Configurar servidor de Git")
 )
 
 #pragma endregion

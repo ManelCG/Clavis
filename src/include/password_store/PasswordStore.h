@@ -13,6 +13,7 @@ namespace Clavis {
     public:
         PasswordStore() = default;
         static PasswordStore Initialize();
+        static bool IsValidPasswordStore(const std::filesystem::path& p);
 
         bool IsAtRoot() const;
 
@@ -21,6 +22,9 @@ namespace Clavis {
 
         bool DoesPasswordExist(const std::string& passwordName) const;
         bool TrySaveEncrypted(const std::string& passwordName, const std::vector<uint8_t>& encryptedPassword);
+
+        static std::string GetGPGID();
+        static bool TryGetGPGID(const std::filesystem::path& directory, std::string& outgpgid);
 
         int GetNumberOfPasswords() const;
         int GetNumberOfFolders() const;

@@ -9,6 +9,7 @@ namespace Clavis::GUI {
 		MainHBox.append(ButtonLabel);
 
 		ButtonLabel.set_margin_start(5);
+		ButtonLabel.set_margin_end(7);
 
 		Icon.set_valign(Gtk::Align::CENTER);
 		Icon.set_halign(Gtk::Align::CENTER);

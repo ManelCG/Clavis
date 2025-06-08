@@ -3,6 +3,7 @@
 #include <exception>
 #include <string>
 #include <vector>
+#include <iostream>
 
 namespace Clavis::Error {
     class ClavisException : public std::exception {
@@ -55,5 +56,6 @@ namespace Clavis::Error {
 		""\
 	}); \
     Clavis::Error::ClavisException::LogException(exc.Data); \
+    std::cerr << exc.what() << std::endl; \
 	throw exc; \
 }

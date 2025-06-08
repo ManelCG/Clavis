@@ -146,7 +146,7 @@ namespace Clavis::System {
 
 
 	std::filesystem::path GetPasswordStoreFolder() {
-		return Settings::GetAsValue<std::string>(Settings::PASSWORD_STORE_PATH);
+		return Settings::PASSWORD_STORE_PATH.GetValue();
 	}
 
 

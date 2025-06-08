@@ -7,7 +7,7 @@ namespace Clavis::GUI {
         public:
             App();
             void Run(int argc, char* argv[]);
-            void FirstRun(int argc, char* argv[]);
+            bool FirstRun(int argc, char* argv[]);
 
         protected:
         private:

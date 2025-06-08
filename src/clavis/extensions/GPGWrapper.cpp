@@ -8,6 +8,8 @@
 
 #include <language/Language.h>
 
+#include <password_store/PasswordStore.h>
+
 namespace Clavis {
     bool GPG::TryDecrypt(const std::filesystem::path &path, std::string &out) {
         if (!System::FileExists(path))
@@ -80,6 +82,61 @@ namespace Clavis {
         return success;
     }
 
+    bool GPG::TryGetKeyFingerprint(const std::string& gpgid, std::string& outFingerprint) {
+        gpgme_error_t err;
+        gpgme_ctx_t ctx = nullptr;
+        gpgme_key_t key = nullptr;
+        bool success = false;
+
+        gpgme_check_version(nullptr);
+        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+
+        err = gpgme_new(&ctx);
+        if (err != GPG_ERR_NO_ERROR)
+            return false;
+
+        // Lookup the key by ID (can be full fingerprint, email, etc.)
+        err = gpgme_get_key(ctx, gpgid.c_str(), &key, 0);
+        if (err != GPG_ERR_NO_ERROR) {
+            std::cerr << std::string("error gpgme_get_key: ") + std::string(gpgme_strerror(err)) << "\n";
+        } else if (key && key->subkeys && key->subkeys->fpr) {
+            outFingerprint = key->subkeys->fpr;
+            success = true;
+        }
+
+        // Cleanup
+        gpgme_key_unref(key);
+        gpgme_release(ctx);
+
+        return success;
+    }
+
+    bool GPG::KeyExists(const std::string &gpgid) {
+        gpgme_error_t err;
+        gpgme_ctx_t ctx = nullptr;
+        gpgme_key_t key = nullptr;
+        bool exists = false;
+
+        gpgme_check_version(nullptr);
+        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+
+        err = gpgme_new(&ctx);
+        if (err != GPG_ERR_NO_ERROR)
+            return false;
+
+        err = gpgme_get_key(ctx, gpgid.c_str(), &key, 0);
+        if (err == GPG_ERR_NO_ERROR && key != nullptr)
+            exists = true;
+
+        // Cleanup
+        if (key)
+            gpgme_key_unref(key);
+        gpgme_release(ctx);
+
+        return exists;
+    }
+
+
 
     bool GPG::TryEncrypt(const std::string &data, std::vector<uint8_t> &out) {
         gpgme_error_t err;
@@ -89,7 +146,7 @@ namespace Clavis {
         gpgme_key_t key[2] = {nullptr, nullptr};
         bool success = false;
 
-        std::string id = GetGPGID();  // your recipient's GPG ID
+        std::string id = PasswordStore::GetGPGID();  // your recipient's GPG ID
 
         gpgme_check_version(nullptr);
         gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
@@ -327,20 +384,6 @@ namespace Clavis {
 #endif
 
 
-
-    std::string GPG::GetGPGID() {
-        auto p = System::GetGPGIDPath();
-        if (!System::FileExists(p))
-            RaiseClavisError(_(ERROR_GPG_ID_FILE_NOT_FOUND, p.string()));
-
-        std::string id;
-        if (!System::TryReadFile(p, id))
-            RaiseClavisError(_(ERROR_CANNOT_READ_GPGID_FILE, p.string()));
-
-        id.erase(id.find_last_not_of(" \r\n\t") + 1);
-
-        return id;
-    }
 
     std::vector<GPG::Key> GPG::GetAllKeys() {
         std::vector<GPG::Key> result;

@@ -1,8 +1,11 @@
 #include <GUI/components/PictureInsert.h>
 
+#include <error/ClavisError.h>
+
 #include <settings/Settings.h>
 
 #include <image/stb_image.h>
+#include <system/Extensions.h>
 
 
 namespace Clavis {
@@ -32,6 +35,9 @@ namespace Clavis {
 		void PictureInsert::SetIcon(Icons::IconDefinition def) {
 			auto name = std::string(def.Name);
 			std::string path = "assets/icons/" + name;
+
+			if (!System::FileExists(path))
+				RaiseClavisError(_(ERROR_FILE_NOT_FOUND, path));
 
 			Im = std::shared_ptr<Image>(Image::FromPath(path));
 

@@ -37,6 +37,8 @@ namespace Clavis::Icons {
 		constexpr IconDefinition Folder = IconDefinition("Actions/Folder.png");
 		constexpr IconDefinition NewFolder = IconDefinition("Actions/NewFolder.png");
 
+		constexpr IconDefinition Search = IconDefinition("Actions/Search.png");
+
 		constexpr IconDefinition Password = IconDefinition("Actions/Password.png");
 
 		constexpr IconDefinition SettingsCog = IconDefinition("Actions/SettingsCog.png");

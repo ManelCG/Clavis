@@ -28,7 +28,7 @@ namespace Clavis::GUI {
 
         static bool OpenFileDialog(FileOpenDialogAction action, std::string& outSelectedPath, Gtk::Widget* parent = nullptr);
 
-        static void FirstRunWorkflow(const Glib::RefPtr<Gtk::Application> &app);
+        static bool FirstRunWorkflow(const Glib::RefPtr<Gtk::Application> &app);
 
     private:
         static void NewPasswordWorkflow_IMPL(PasswordStoreManager* passwordStoreManager, const std::string& name = "");
