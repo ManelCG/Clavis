@@ -142,7 +142,11 @@ install(FILES ${CLAVIS_ICON_FILE_16} DESTINATION /usr/share/icons/hicolor/16x16/
 
 # === ARCHLINUX SETUP ===
 
-set(PACKAGE_DIR "${CMAKE_BINARY_DIR}/package")
+if(DEFINED ENV{BDIR})
+    set(PACKAGE_DIR "$ENV{BDIR}")
+else()
+    set(PACKAGE_DIR "${CMAKE_BINARY_DIR}/package")
+endif()
 
 add_custom_target(archlinux ALL
     COMMENT "Prepare Arch Linux package layout"
