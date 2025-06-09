@@ -8,7 +8,7 @@ namespace Clavis::GUI {
         });
 
         isTextValid = [this]() {
-            if (get_text().empty())
+            if (IsEmpty())
                 return false;
 
             return true;
@@ -23,9 +23,14 @@ namespace Clavis::GUI {
         isTextValid = lambda;
     }
 
-    bool RequiredEntry::IsValid() {
+    bool RequiredEntry::IsValid() const {
         return isTextValid();
     }
+
+    bool RequiredEntry::IsEmpty() const {
+        return get_text().empty();
+    }
+
 
 
 

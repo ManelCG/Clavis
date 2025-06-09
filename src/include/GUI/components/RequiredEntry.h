@@ -9,7 +9,8 @@ namespace Clavis::GUI {
         RequiredEntry();
         void DisplayError();
 
-        bool IsValid();
+        bool IsValid() const;
+        bool IsEmpty() const;
         void SetCorrectnessCheck(std::function<bool()> lambda);
 
     protected:

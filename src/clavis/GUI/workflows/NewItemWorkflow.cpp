@@ -441,7 +441,25 @@ namespace Clavis::GUI {
             if (!response)
                 return false;
         }
-        const bool passwordStoreAlreadyExists = System::DirectoryExists(passwordStoreLocation) && PasswordStore::IsValidPasswordStore(passwordStoreLocation);
+        bool passwordStoreAlreadyExists = System::DirectoryExists(passwordStoreLocation) && PasswordStore::IsValidPasswordStore(passwordStoreLocation);
+
+        // Git config palette does everything by itself because it is supposed to be responsive.
+        // Also, the user might not want to use Git, so we don't really need to do anything here
+        if (!System::DirectoryExists(passwordStoreLocation) || !passwordStoreAlreadyExists) {
+            // Try to initialize git repo
+            auto gitConfigPalette = GitServerConfigPalette::Create(nullptr, [&passwordStoreLocation]() {
+                return new GitServerConfigPalette(passwordStoreLocation);
+            });
+
+            app->add_window(*gitConfigPalette);
+
+            if (!gitConfigPalette->Run())
+                return false;
+        }
+
+        // Update this since the git manager can clone the password store
+        passwordStoreAlreadyExists = System::DirectoryExists(passwordStoreLocation) && PasswordStore::IsValidPasswordStore(passwordStoreLocation);
+
         std::string gpgid;
 
         const bool gpgKeyExists =
@@ -462,18 +480,6 @@ namespace Clavis::GUI {
 
             if (!response)
                 return false;
-        }
-
-        // Git config palette does everything by itself because it is supposed to be responsive.
-        // Also, the user might not want to use Git, so we don't really need to do anything here
-        if (!System::DirectoryExists(passwordStoreLocation) || !passwordStoreAlreadyExists) {
-            // Try to initialize git repo
-            auto gitConfigPalette = GitServerConfigPalette::Create();
-
-            app->add_window(*gitConfigPalette);
-
-             if (!gitConfigPalette->Run())
-                 return false;
         }
 
         // We are done!

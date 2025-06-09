@@ -520,6 +520,12 @@ _(MISC_IMPORT_BUTTON,
     __(ESP, "Importar"),
     __(VAL, "Importar")
 )
+
+_(MISC_DONE_BUTTON,
+    __(ENG, "Done"),
+    __(ESP, "Hecho"),
+    __(VAL, "Fet")
+)
 #pragma endregion
 
 #pragma region Errors
@@ -981,6 +987,60 @@ _(GIT_SERVER_CONFIG_TITLE,
     __(ENG, "Configure Git server"),
     __(ESP, "Configurar servidor de Git"),
     __(VAL, "Configurar servidor de Git")
+)
+
+_(GIT_SERVER_CONFIG_CHOOSE_METHOD_LABEL,
+    __(ENG, "Choose how to use Git:"),
+    __(ESP, "Elige cómo usar Git"),
+    __(VAL, "Tria com usar git")
+)
+
+_(GIT_SERVER_CONFIG_DO_NOT_USE_CHECKBUTTON,
+    __(ENG, "Do not setup Git"),
+    __(ESP, "No configurar Git"),
+    __(VAL, "No configurar Git"),
+)
+
+_(GIT_SERVER_CONFIG_CREATE_A_NEW_REPO_LABEL,
+    __(ENG, "Create a new Git Repository"),
+    __(ESP, "Crear un nuevo Repositorio de Git"),
+    __(VAL, "Crear un nou Repositori de Git")
+)
+
+_(GIT_SERVER_CONFIG_CLONE_AN_EXISTING_REPO_LABEL,
+    __(ENG, "Clone an existing Git Repository"),
+    __(ESP, "Clonar un Repositorio de Git existente"),
+    __(VAL, "Clonar un Repositori de Git existent")
+)
+
+_(GIT_SERVER_CONFIG_USER_SETTINGS_LABEL,
+    __(ENG, "Git user settings:"),
+    __(ESP, "Configuración del usuario de Git:"),
+    __(VAL, "Configuració de l'usuari de Git:")
+)
+
+_(GIT_SERVER_CONFIG_LOCATION_LABEL,
+    __(ENG, "Location:"),
+    __(ESP, "Ubicación:"),
+    __(VAL, "Ubicació")
+)
+
+_(GIT_SERVER_CONFIG_GIT_UPSTREAM_LABEL,
+    __(ENG, "Upstream:"),
+    __(ESP, "Upstream:"),
+    __(VAL, "Upstream:")
+)
+
+_(GIT_SERVER_CONFIG_GIT_USERNAME_LABEL,
+    __(ENG, "Git user:"),
+    __(ESP, "Usuario de Git:"),
+    __(VAL, "Usuari de Git:")
+)
+
+_(GIT_SERVER_CONFIG_GIT_EMAIL_LABEL,
+    __(ENG, "Email:"),
+    __(ESP, "Email:"),
+    __(VAL, "Email:")
 )
 
 #pragma endregion

@@ -82,6 +82,7 @@ namespace Clavis::Icons {
 		constexpr IconDefinition Push = IconDefinition("Git/Push.png");
 		constexpr IconDefinition Pull = IconDefinition("Git/Pull.png");
 		constexpr IconDefinition Sync = IconDefinition("Git/Sync.png");
+		constexpr IconDefinition Init = IconDefinition("Git/Init.png");
 	}
 
 	namespace MediaControls {

@@ -11,6 +11,7 @@
 #include <GUI/palettes/PasswordStoreDataPalette.h>
 
 #include <GUI/workflows/NewItemWorkflow.h>
+#include <GUI/palettes/first_run/GitServerConfigPalette.h>
 
 namespace Clavis::GUI {
     MainWindow::MainWindow() :
@@ -112,7 +113,7 @@ namespace Clavis::GUI {
         def->AddAction("pull", [this](){TryPullPasswords();});
         def->AddAction("sync", [this](){TrySyncPasswords();});
 
-        def->AddAction("git_server_settings", [this](){GitServerSettings();});
+        def->AddAction("git_server_config", [this](){GitServerSettings();});
         def->AddAction("gpg_key_settings", [this](){GPGKeySettings();});
 
         // HELP
@@ -135,7 +136,11 @@ namespace Clavis::GUI {
     }
 
     void MainWindow::GitServerSettings() {
-        RaiseClavisError(_(ERROR_NOT_IMPLEMENTED));
+        GitServerConfigPalette::Spawn(
+           this,
+           []() {
+               return new GitServerConfigPalette(Settings::PASSWORD_STORE_PATH.GetValue());
+           });
     }
 
     void MainWindow::GPGKeySettings() {
