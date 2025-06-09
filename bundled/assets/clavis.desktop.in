@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=@CLAVIS_VERSION@
+Type=Application
+Name=Clavis
+Comment=An easy to use Password Manager
+Exec=clavis
+Icon=clavis
+Terminal=false
+StartupNotify=false
+Categories=Security;

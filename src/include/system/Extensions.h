@@ -14,6 +14,7 @@ namespace Clavis::System {
     std::filesystem::path GetClavisConfigFolder();
     std::filesystem::path GetPasswordStoreDefaultFolder();
     std::filesystem::path GetPasswordStoreFolder();
+    std::filesystem::path GetAssetsFolder();
 
 #ifdef __WINDOWS__
     std::filesystem::path GetAppDataFolder();

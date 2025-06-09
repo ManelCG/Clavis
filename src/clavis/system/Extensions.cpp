@@ -6,6 +6,7 @@
 #include <language/Language.h>
 
 #include <fstream>
+#include <image/icons.h>
 
 #ifdef _WIN32
 // Windows does not define the S_ISREG and S_ISDIR macros in stat.h, so we do.
@@ -149,6 +150,38 @@ namespace Clavis::System {
 		return Settings::PASSWORD_STORE_PATH.GetValue();
 	}
 
+	std::filesystem::path GetAssetsFolder() {
+		static std::filesystem::path assetsRoot = "";
+		static bool isAssetsRootSet = false;
+
+		if (isAssetsRootSet)
+			return assetsRoot;
+
+		auto icon = Icons::Logos::Logo32px;
+		std::filesystem::path rel = "assets/icons/";
+
+		auto pathTrail = rel / icon.Name;
+
+		std::vector<std::filesystem::path> roots = {
+#ifdef __WINDOWS__
+			"./",
+#elif defined __LINUX__
+			"./",
+			"/usr/lib/clavis/"
+#endif
+		};
+
+		for (const auto& r : roots) {
+			auto path = r/pathTrail;
+			if (FileExists(path)) {
+				assetsRoot = r;
+				isAssetsRootSet = true;
+				return assetsRoot;
+			}
+		}
+
+		RaiseClavisError(_(ERROR_UNABLE_TO_FIND_ASSETS_FOLDER));
+	}
 
 	json JSONParseFile(const std::filesystem::path& path) {
 		std::ifstream file;

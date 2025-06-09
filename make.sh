@@ -20,6 +20,19 @@ if [ "$1" == "deploymingw" ]; then
   exit
 fi
 
+if [ "$1" == "uninstall" ]; then
+  sudo rm /usr/bin/clavis
+  sudo rm /usr/share/applications/clavis.desktop
+  sudo rm /usr/share/pixmaps/clavis.png
+  sudo rm /usr/share/icons/hicolor/256x256/apps/clavis.png
+  sudo rm /usr/share/icons/hicolor/128x128/apps/clavis.png
+  sudo rm /usr/share/icons/hicolor/64x64/apps/clavis.png
+  sudo rm /usr/share/icons/hicolor/32x32/apps/clavis.png
+  sudo rm /usr/share/icons/hicolor/16x16/apps/clavis.png
+  sudo rm -rf /usr/lib/clavis
+  exit
+fi
+
 clear
 
 cmake -B out -G "Unix Makefiles"
@@ -39,5 +52,9 @@ fi
 
 if [ "$1" == run ]; then
   ./Clavis
+elif [ "$1" == "install" ]; then
+  sudo make install
+elif [ "$2" == "archlinux" ]; then
+  make archlinux
 fi
 

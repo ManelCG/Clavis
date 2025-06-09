@@ -697,6 +697,12 @@ _(ERROR_FILE_NOT_FOUND,
     __(ESP, "Archivo no encontrado: {0}"),
     __(VAL, "Arxiu no trobat: {0}")
 )
+
+_(ERROR_UNABLE_TO_FIND_ASSETS_FOLDER,
+    __(ENG, "Unable to find assets folder. Did you install Clavis properly?"),
+    __(ESP, "No se pudo encontrar la carpeta de assets. ¿Has instalado Clavis correctamente?"),
+    __(VAL, "No s'ha pogut trobar la carpeta d'assets. Has instal·lat Clavis correctament?")
+)
 #pragma endregion
 
 #pragma region Git

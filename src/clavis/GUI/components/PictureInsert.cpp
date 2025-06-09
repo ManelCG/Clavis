@@ -34,7 +34,9 @@ namespace Clavis {
 
 		void PictureInsert::SetIcon(Icons::IconDefinition def) {
 			auto name = std::string(def.Name);
-			std::string path = "assets/icons/" + name;
+			std::filesystem::path rel = "assets/icons/";
+
+			std::string path = System::GetAssetsFolder() / rel / name;
 
 			if (!System::FileExists(path))
 				RaiseClavisError(_(ERROR_FILE_NOT_FOUND, path));

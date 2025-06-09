@@ -29,6 +29,7 @@ namespace Clavis::GUI {
         Height = 650;
 
         set_title("Clavis");
+        set_icon_name("clavis");
         set_default_size(Width, Height);
 
         if (Settings::WINDOW_DECORATIONS.GetValue() == Settings::WINDOW_DECORATIONS.CLAVIS_CSD)
