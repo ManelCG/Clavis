@@ -23,6 +23,18 @@ configure_file(
         @ONLY
 )
 
+configure_file(
+        bundled/assets/PKGBUILD-base.in
+        ${CMAKE_CURRENT_SOURCE_DIR}/aur-clavis/PKGBUILD
+        @ONLY
+)
+
+configure_file(
+        bundled/assets/PKGBUILD-git.in
+        ${CMAKE_CURRENT_SOURCE_DIR}/aur-clavis-git/PKGBUILD
+        @ONLY
+)
+
 project (${PROJECTNAME})
 
 # Find source files
