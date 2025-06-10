@@ -148,27 +148,35 @@ namespace Clavis {
 
     std::string PasswordStore::GetGPGID() {
         std::string ret;
-        auto p = System::GetGPGIDPath();
-        if (!TryGetGPGID(p, ret))
-            RaiseClavisError(_(ERROR_GPG_ID_FILE_NOT_FOUND, p.string()));
+        if (!TryGetGPGID(ret))
+            RaiseClavisError(_(ERROR_GPG_ID_FILE_NOT_FOUND, System::GetGPGIDPath()));
 
         return ret;
     }
 
     bool PasswordStore::TryGetGPGID(const std::filesystem::path &directory, std::string &outgpgid) {
-        auto p = directory / ".gpg-id";
-        if (!System::FileExists(p))
+        return __TryGetGPGID(directory / ".gpg-id", outgpgid);
+    }
+
+
+    bool PasswordStore::TryGetGPGID(std::string &outgpgid) {
+        return __TryGetGPGID(System::GetGPGIDPath(), outgpgid);
+    }
+
+    bool PasswordStore::__TryGetGPGID(const std::filesystem::path &file, std::string &out) {
+        if (!System::FileExists(file))
             return false;
 
         std::string id;
-        if (!System::TryReadFile(p, id))
-            RaiseClavisError(_(ERROR_CANNOT_READ_GPGID_FILE, p.string()));
+        if (!System::TryReadFile(file, id))
+            RaiseClavisError(_(ERROR_CANNOT_READ_GPGID_FILE, file.string()));
 
         id.erase(id.find_last_not_of(" \r\n\t") + 1);
-        outgpgid = id;
+        out = id;
 
         return true;
     }
+
 
 
 

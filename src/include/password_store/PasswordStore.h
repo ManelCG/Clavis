@@ -24,6 +24,7 @@ namespace Clavis {
         bool TrySaveEncrypted(const std::string& passwordName, const std::vector<uint8_t>& encryptedPassword);
 
         static std::string GetGPGID();
+        static bool TryGetGPGID(std::string& outgpgid);
         static bool TryGetGPGID(const std::filesystem::path& directory, std::string& outgpgid);
 
         int GetNumberOfPasswords() const;
@@ -41,6 +42,8 @@ namespace Clavis {
 
     private:
         explicit PasswordStore(std::filesystem::path path);
+
+        static bool __TryGetGPGID(const std::filesystem::path& file, std::string& out);
 
         static std::vector<PasswordStoreElements::PasswordStoreElement> SortElements(const std::vector<PasswordStoreElements::PasswordStoreElement>& elements);
 

@@ -3,9 +3,12 @@
 CLAVIS_VERSION=$(cat CMakeLists.txt | grep "set(CLAVIS_VERSION" | sed -n 's/^set(CLAVIS_VERSION "\([0-9.]*\)").*/\1/p')
 CLAVIS_VERSION_NAME="v${CLAVIS_VERSION}"
 
+git checkout main
+git merge develop
 git tag ${CLAVIS_VERSION_NAME}
 git push
 git push origin ${CLAVIS_VERSION_NAME}
+git checkout develop
 
 cd aur-clavis
 makepkg --printsrcinfo > .SRCINFO

@@ -15,7 +15,7 @@ endif()
 # Define project
 set(PROJECTNAME "Clavis")
 set(PROJECTNAME_BIN "clavis")
-set(CLAVIS_VERSION "2.0.0")
+set(CLAVIS_VERSION "2.0.2")
 
 configure_file(
         bundled/assets/clavis.desktop.in
