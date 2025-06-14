@@ -38,8 +38,8 @@ clear
 cmake -B out -G "Unix Makefiles"
 
 if [ "$?" != "0" ]; then
-  echo ERROR!
-  exit
+    echo ERROR ${ERROR}!
+    exit ${ERROR}
 fi
 
 cd out
