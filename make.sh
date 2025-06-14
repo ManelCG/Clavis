@@ -36,17 +36,17 @@ fi
 clear
 
 cmake -B out -G "Unix Makefiles"
-
-if [ "$?" != "0" ]; then
-    echo ERROR ${ERROR}!
-    exit ${ERROR}
+ERROR=$?
+if [ "$ERROR" != "0" ]; then
+  echo ERROR ${ERROR}!
+  exit ${ERROR}
 fi
 
 cd out
 
 make -j$(nproc)
 ERROR=$?
-if [ "$?" != "0" ]; then
+if [ "$ERROR" != "0" ]; then
   echo ERROR ${ERROR}!
   exit ${ERROR}
 fi
