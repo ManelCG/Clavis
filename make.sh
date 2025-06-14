@@ -45,9 +45,10 @@ fi
 cd out
 
 make -j$(nproc)
+ERROR=$?
 if [ "$?" != "0" ]; then
-  echo ERROR!
-  exit
+  echo ERROR ${ERROR}!
+  exit ${ERROR}
 fi
 
 if [ "$1" == run ]; then
