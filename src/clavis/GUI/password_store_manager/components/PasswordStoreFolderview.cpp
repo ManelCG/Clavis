@@ -27,9 +27,9 @@ namespace Clavis::GUI {
             const auto& element = elements[i];
 
             if (startedDrawing && currentType != element.GetType()) {
-                auto sep = Gtk::Separator(Gtk::Orientation::VERTICAL);
-                sep.set_margin(5);
-                mainVBox.append(sep);
+                typesSeparator = Gtk::make_managed<Gtk::Separator>(Gtk::Orientation::VERTICAL);
+                typesSeparator->set_margin(5);
+                mainVBox.append(*typesSeparator);
             }
 
             currentType = element.GetType();
@@ -96,7 +96,7 @@ namespace Clavis::GUI {
     }
 
     void Folderview::ActivateFocusedItem() {
-        if (folderviewElements.size() == 0)
+        if (folderviewElements.empty())
             return;
 
         onElementClicked(folderviewElements[focusedItem]->GetElement());
@@ -113,6 +113,11 @@ namespace Clavis::GUI {
 
         for (auto& elem : folderviewElements)
             mainVBox.remove(*elem);
+
+        if (typesSeparator != nullptr) {
+            mainVBox.remove(*typesSeparator);
+            typesSeparator = nullptr;
+        }
 
         folderviewElements.clear();
     }

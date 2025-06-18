@@ -33,6 +33,8 @@ namespace Clavis::GUI {
 
         int focusedItem;
 
+        Gtk::Separator* typesSeparator = nullptr;
+
         Gtk::Box mainVBox;
 
         std::vector<FolderviewElement*> folderviewElements;

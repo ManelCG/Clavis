@@ -45,7 +45,7 @@ namespace Clavis::Error {
 		std::vector<std::string>{__VA_ARGS__},\
 		false,\
 		\
-		CLAVIS_VERSION,\
+		CLAVIS_VERSION_NAME,\
 		__RUNNING_PLATFORM__,\
 		__BUILD_MODE__,\
 		__DATE__,\

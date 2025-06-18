@@ -1,7 +1,8 @@
 ./make.sh
 
 CLAVIS_VERSION=$(cat CMakeLists.txt | grep "set(CLAVIS_VERSION" | sed -n 's/^set(CLAVIS_VERSION "\([0-9.]*\)").*/\1/p')
-CLAVIS_VERSION_NAME="v${CLAVIS_VERSION}"
+VERSION_PATCH=$(cat CMakeLists.txt | grep "set(VERSION_PATCH" | sed -n 's/^set(VERSION_PATCH "\([0-9.]*\)").*/\1/p')
+CLAVIS_VERSION_NAME="v${CLAVIS_VERSION}-${VERSION_PATCH}"
 
 git tag ${CLAVIS_VERSION_NAME}
 git checkout main

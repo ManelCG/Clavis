@@ -15,7 +15,8 @@ endif()
 # Define project
 set(PROJECTNAME "Clavis")
 set(PROJECTNAME_BIN "clavis")
-set(CLAVIS_VERSION "2.0.2")
+set(CLAVIS_VERSION "2.0.3")
+set(VERSION_PATCH "2")
 
 configure_file(
         bundled/assets/clavis.desktop.in
@@ -52,6 +53,8 @@ target_compile_definitions(
     ${PROJECTNAME}
     PUBLIC
     CLAVIS_VERSION=\"${CLAVIS_VERSION}\"
+    VERSION_PATCH=\"${VERSION_PATCH}\"
+    CLAVIS_VERSION_NAME=\"${CLAVIS_VERSION}-${VERSION_PATCH}\"
 	$<$<CONFIG:Debug>:__DEBUG__>
     $<$<CONFIG:RelWithDebInfo>:__RELEASE__>
     $<$<CONFIG:Release>:__RELEASE__>

@@ -28,7 +28,7 @@ namespace Clavis::GUI {
         clavisLabel.set_margin_bottom(5);
         mainVBox.append(clavisLabel);
 
-        versionLabel.set_text(CLAVIS_VERSION);
+        versionLabel.set_text(CLAVIS_VERSION_NAME);
         versionLabel.set_margin_bottom(5);
         mainVBox.append(versionLabel);
 
