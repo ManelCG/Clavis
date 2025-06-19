@@ -321,7 +321,7 @@ namespace Clavis {
                 outFingerprint = f;
             didGetFingerprint = true;
 
-            #ifdef __LINUX__
+            #ifdef HAVE_GPGME_OP_SETOWNERTRUST
             if (!TryChangeKeyTrust(f, 5))
                 success = false;
             #endif
@@ -332,7 +332,7 @@ namespace Clavis {
     }
 
 
-#ifdef __LINUX__
+#ifdef HAVE_GPGME_OP_SETOWNERTRUST
     bool GPG::TryChangeKeyTrust(const std::string& fingerprint, int trustlevel) {
         std::string trustLevelString;
         switch (trustlevel) {

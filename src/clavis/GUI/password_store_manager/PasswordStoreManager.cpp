@@ -98,7 +98,7 @@ namespace Clavis::GUI {
     }
 
     bool PasswordStoreManager::on_key_pressed(const guint keyval, guint keycode, Gdk::ModifierType state) {
-        if (state == Gdk::ModifierType::NO_MODIFIER_MASK) {
+        if (state == static_cast<Gdk::ModifierType>(0)) {
             switch (keyval) {
                 case GDK_KEY_Escape:
                     if (searchEntry.get_text().empty())

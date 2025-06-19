@@ -16,38 +16,47 @@ endif()
 set(PROJECTNAME "Clavis")
 set(PROJECTNAME_BIN "clavis")
 set(CLAVIS_VERSION "2.0.3")
-set(VERSION_PATCH "2")
+set(VERSION_PATCH "3")
 
-configure_file(
-        bundled/assets/clavis.desktop.in
-        ${CMAKE_CURRENT_BINARY_DIR}/clavis.desktop
-        @ONLY
-)
-
-configure_file(
-        bundled/assets/PKGBUILD-base.in
-        ${CMAKE_CURRENT_SOURCE_DIR}/aur-clavis/PKGBUILD
-        @ONLY
-)
-
-configure_file(
-        bundled/assets/PKGBUILD-git.in
-        ${CMAKE_CURRENT_SOURCE_DIR}/aur-clavis-git/PKGBUILD
-        @ONLY
-)
+# Version depending files
+configure_file(bundled/assets/clavis.desktop.in     ${CMAKE_CURRENT_BINARY_DIR}/clavis.desktop              @ONLY)
+configure_file(bundled/assets/PKGBUILD-base.in      ${CMAKE_CURRENT_SOURCE_DIR}/aur-clavis/PKGBUILD         @ONLY)
+configure_file(bundled/assets/PKGBUILD-git.in       ${CMAKE_CURRENT_SOURCE_DIR}/aur-clavis-git/PKGBUILD     @ONLY)
 
 project (${PROJECTNAME})
 
 # Find source files
 file (GLOB_RECURSE SOURCE_CXX CONFIGURE_DEPENDS
-	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c
 )
 
 add_executable (${PROJECTNAME} WIN32 ${SOURCE_CXX})
 set_target_properties(${PROJECTNAME} PROPERTIES OUTPUT_NAME ${PROJECTNAME_BIN})
-
 target_include_directories(${PROJECTNAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/include/")
+
+set(HEADER_MACROS "${CMAKE_CURRENT_SOURCE_DIR}/src/macros.h")
+if(MSVC)
+    add_definitions(/FI"${HEADER_MACROS}" /std:c++17)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+else()  # GCC or Clang
+    add_definitions(-include "${HEADER_MACROS}")
+endif()
+
+# GTK
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
+target_link_libraries(${PROJECTNAME} PRIVATE PkgConfig::GTKMM)
+
+# GPGME
+pkg_check_modules(GPGME REQUIRED IMPORTED_TARGET gpgme)
+target_link_libraries(${PROJECTNAME} PRIVATE PkgConfig::GPGME)
+
+include(CheckFunctionExists)
+set(CMAKE_REQUIRED_INCLUDES ${GPGME_INCLUDE_DIRS})
+set(CMAKE_REQUIRED_LIBRARIES ${GPGME_LIBRARIES})
+check_function_exists(gpgme_op_setownertrust HAVE_GPGME_OP_SETOWNERTRUST)
+
 
 target_compile_definitions(
     ${PROJECTNAME}
@@ -59,32 +68,26 @@ target_compile_definitions(
     $<$<CONFIG:RelWithDebInfo>:__RELEASE__>
     $<$<CONFIG:Release>:__RELEASE__>
     $<$<CONFIG:MinSizeRel>:__RELEASE__>
+    $<$<BOOL:${HAVE_GPGME_OP_SETOWNERTRUST}>:HAVE_GPGME_OP_SETOWNERTRUST>
 )
 
-set(HEADER_MACROS "${CMAKE_CURRENT_SOURCE_DIR}/src/macros.h")
-if(MSVC)
-    add_definitions(/FI"${HEADER_MACROS}" /std:c++17)
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-else()
-    # GCC or Clang
-    add_definitions(-include "${HEADER_MACROS}")
+# Compiler defines for Iffing
+if (WIN32)
+    add_definitions("-D__WINDOWS__")
+elseif(UNIX)
+    add_definitions("-D__LINUX__")
+elseif(APPLE)
+    add_definitions("-D__APPLE__")
 endif()
 
 
-# GTK
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
-target_link_libraries(${PROJECTNAME} PRIVATE PkgConfig::GTKMM)
-
-pkg_check_modules(GPGME REQUIRED IMPORTED_TARGET gpgme)
-target_link_libraries(${PROJECTNAME} PRIVATE PkgConfig::GPGME)
 
 if(WIN32 AND MINGW)
     # Your output dir for the built executable
-    set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/$<CONFIG>")  # Adjust if needed
+    set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/$<CONFIG>")
 
     # Directory where GTK and all DLLs live
-    set(GTK_DLL_DIR "C:/msys64/mingw64/bin")  # Change to your actual path!
+    set(GTK_DLL_DIR "C:/msys64/mingw64/bin")
 
     # Get all DLL files in that directory
     file(GLOB GTK_DLLS "${GTK_DLL_DIR}/*.dll")
@@ -106,15 +109,6 @@ if (WIN32)
 endif()
 
 
-
-# Compiler defines for Iffing
-if (WIN32)
-    add_definitions("-D__WINDOWS__")
-elseif(UNIX)
-    add_definitions("-D__LINUX__")
-elseif(APPLE)
-    add_definitions("-D__APPLE__")
-endif()
 
 # === INSTALL STEP ===
 
@@ -163,7 +157,7 @@ else()
     set(PACKAGE_DIR "${CMAKE_BINARY_DIR}/package")
 endif()
 
-add_custom_target(archlinux ALL
+add_custom_target(archlinux
     COMMENT "Prepare Arch Linux package layout"
 )
 

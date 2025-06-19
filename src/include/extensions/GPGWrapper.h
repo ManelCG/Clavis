@@ -44,7 +44,7 @@ namespace Clavis {
         static bool TryImportKey(const std::vector<uint8_t>& data, std::string& outFingerprint);
         static bool TryExportKey(const std::string& gpgid, bool exportPrivate, std::vector<uint8_t>& out);
 
-#ifdef __LINUX__
+#ifdef HAVE_GPGME_OP_SETOWNERTRUST
         static bool TryChangeKeyTrust(const std::string& fingerprint, int trustlevel);
 #endif
 
