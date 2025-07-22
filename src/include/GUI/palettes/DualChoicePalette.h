@@ -156,7 +156,8 @@ namespace Clavis::GUI {
                         __DoGiveResponseImpl(false);
                         return true;
 
-                    default: return false;
+                    default:
+                        return false;
                 }
             }
 
