@@ -214,6 +214,29 @@ namespace Clavis::GUI {
 
     }
 
+    void NewPasswordPalette::DoGiveResponse(bool r) {
+        if (!r) {
+            DualChoicePalette::DoGiveResponse(false);
+            return;
+        }
+
+        auto success = true;
+
+        if (! newPasswordWidget.nameEntry.IsValid()) {
+            success = false;
+            newPasswordWidget.nameEntry.DisplayError();
+        }
+
+        if (!newPasswordWidget.passwordEntry.IsValid()) {
+            success = false;
+            newPasswordWidget.passwordEntry.DisplayError();
+        }
+
+        if (success)
+            DualChoicePalette::DoGiveResponse(true);
+    }
+
+
     Password NewPasswordPalette::GetPassword() const {
         auto password = Password::FromPassword(newPasswordWidget.GetPassword());
 

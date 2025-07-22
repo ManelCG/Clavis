@@ -33,6 +33,7 @@ namespace Clavis::GUI {
         palette->SetTitle(_(NEW_FOLDER_PALETTE_TITLE));
         palette->SetLabelText(_(NEW_FOLDER_PALETTE_LABEL_TITLE));
         palette->SetYesSuggested();
+        palette->SetIsEntryRequiredForYes(true);
 
         std::string folderName = "";
         if (!palette->Run([&folderName](SimpleEntryPalette *p, bool r) {

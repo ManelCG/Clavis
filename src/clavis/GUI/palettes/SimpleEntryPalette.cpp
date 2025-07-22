@@ -34,6 +34,32 @@ namespace Clavis::GUI {
         titleLabel.set_text(text);
     }
 
+    void SimpleEntryPalette::SetIsEntryRequiredForYes(bool isRequired) {
+        isEntryRequiredForYes = isRequired;
+    }
+    void SimpleEntryPalette::SetIsEntryRequiredForNo(bool isRequired) {
+        isEntryRequiredForNo = isRequired;
+    }
+    void SimpleEntryPalette::SetIsEntryRequired(bool isRequired) {
+        SetIsEntryRequiredForYes(isRequired);
+        SetIsEntryRequiredForNo(isRequired);
+    }
+
+    void SimpleEntryPalette::DoGiveResponse(bool r) {
+        bool isValid = true;
+
+        if (r && isEntryRequiredForYes)
+            isValid = entry.IsValid();
+        else if (!r && isEntryRequiredForNo)
+            isValid = entry.IsValid();
+
+        if (!isValid) {
+            entry.DisplayError();
+            return;
+        }
+
+        DualChoicePalette::DoGiveResponse(r);
+    }
 
 
 }

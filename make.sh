@@ -5,6 +5,8 @@ Usage() {
   echo -e "$0 [arg]"
   echo -e "    help           -> Show this menu"
   echo -e "    clean          -> Clean all output to prepare for a clean build"
+  echo -e "    install        -> Build and install Clavis on Linux"
+  echo -e "    archlinux      -> Build and setup an AUR package structure. Only to be used in an AUR PKGBUILD"
   echo -e "    deps [depname] -> Install the required dependencies for [depname]"
   echo -e "     -> mingw      -> Install dependencies for MinGW inside MSys2 in Windows"
   echo -e "     -> ubuntu     -> Install dependencies for Ubuntu"

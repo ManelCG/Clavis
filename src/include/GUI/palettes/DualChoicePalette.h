@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glibmm/main.h>
+#include <gtkmm.h>
 
 #include <GUI/palettes/Palette.h>
 #include <GUI/components/LabeledIconButton.h>
@@ -10,6 +11,8 @@
 
 #include <extensions/GUIExtensions.h>
 #include <GUI/lib/MainLoopHalter.h>
+
+#include "error/ClavisError.h"
 
 namespace Clavis::GUI {
 
@@ -45,6 +48,14 @@ namespace Clavis::GUI {
             set_child(mainVBox);
 
             set_resizable(false);
+
+            const auto key_controller = Gtk::EventControllerKey::create();
+            key_controller->set_propagation_phase(Gtk::PropagationPhase::CAPTURE);
+            key_controller->signal_key_pressed().connect(
+                sigc::mem_fun(*this, &DualChoicePalette::on_key_pressed), false);
+
+            add_controller(key_controller);  // Attach to the entry
+
 
             yesButton.signal_clicked().connect([this]() {
                 __DoGiveResponseImpl(true);
@@ -133,6 +144,32 @@ namespace Clavis::GUI {
 
             DoGiveResponse(r);
         }
+
+        bool on_key_pressed(guint keyval, guint keycode, Gdk::ModifierType state) {
+            if (state == static_cast<Gdk::ModifierType>(0)) {
+                switch (keyval) {
+                    case GDK_KEY_Return:
+                        __DoGiveResponseImpl(true);
+                        return true;
+
+                    case GDK_KEY_Escape:
+                        __DoGiveResponseImpl(false);
+                        return true;
+
+                    default: return false;
+                }
+            }
+
+            if (state == Gdk::ModifierType::CONTROL_MASK) {
+                switch (keyval) {
+                    default:
+                        return false;
+                }
+            }
+
+            return false;
+        }
+
 
         Gtk::Box mainVBox;
         Gtk::Box buttonsHBox;

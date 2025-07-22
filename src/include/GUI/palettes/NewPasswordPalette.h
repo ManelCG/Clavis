@@ -9,6 +9,8 @@
 #include <GUI/components/IconButton.h>
 #include <GUI/components/ToggleIconButton.h>
 
+#include <GUI/components/RequiredEntry.h>
+
 #include <gtkmm.h>
 
 namespace Clavis::GUI {
@@ -23,14 +25,14 @@ namespace Clavis::GUI {
 
             void SetFixedName(const std::string& name);
 
+            RequiredEntry nameEntry;
+            RequiredEntry passwordEntry;
+
         private:
             std::function<PasswordGenerator::GeneratorSettings()> settingsProvider = [](){return PasswordGenerator::GeneratorSettings();};
 
             Gtk::Label setPasswordNameLabel;
             Gtk::Label newPasswordLabel;
-
-            Gtk::Entry nameEntry;
-            Gtk::Entry passwordEntry;
 
             Gtk::Box passwordEntryHBox;
 
@@ -75,6 +77,8 @@ namespace Clavis::GUI {
     protected:
 
     private:
+        void DoGiveResponse(bool r) override;
+
         Gtk::Box mainVBox;
         Gtk::Box mainHBox;
 

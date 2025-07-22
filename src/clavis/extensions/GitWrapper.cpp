@@ -67,10 +67,10 @@ namespace Clavis::Git {
     }
 
     bool TryPull() {
-        return PerformGitCommand({"pull"});
+        return PerformGitCommand({"pull", "--rebase", "--strategy=recursive", "-X", "theirs"});
     }
     bool TryPush() {
-        return PerformGitCommand({"push"});
+        return PerformGitCommand({"push", "--force-with-lease"});
     }
     bool TrySync() {
         return TryPull() && TryPush();
