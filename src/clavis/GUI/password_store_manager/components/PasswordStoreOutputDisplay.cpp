@@ -57,11 +57,6 @@ namespace Clavis::GUI {
             RaiseClavisError(_(ERROR_NOT_IMPLEMENTED));
         });
 
-        styleSignalTimeout.SetMilliseconds(3000);
-        styleSignalTimeout.SetAction([this]() {
-            outputTextBox.remove_css_class("error");
-        });
-
         append(outputHbox);
     }
 
@@ -75,16 +70,14 @@ namespace Clavis::GUI {
 
         if (displayedPassword.IsDecrypted()) {
             outputTextBox.set_text(displayedPassword.GetPassword());
-            outputTextBox.remove_css_class("error");
+            outputTextBox.DisplaySuccess();
         }
     }
 
     void PasswordStoreOutputDisplay::DisplayError() {
         displayedPassword = Password(); // Clear the previously displayed password from memory for safety
         outputTextBox.set_text("");
-        outputTextBox.add_css_class("error");
-
-        styleSignalTimeout.StartTimeout();
+        outputTextBox.DisplayError();
     }
 
 
