@@ -1,0 +1,6 @@
+[submodule "aur-clavis"]
+	path = aur-clavis
+	url = ssh://aur@aur.archlinux.org/clavis.git
+[submodule "aur-clavis-git"]
+	path = aur-clavis-git
+	url = ssh://aur@aur.archlinux.org/clavis-git.git
