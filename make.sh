@@ -91,7 +91,7 @@ if [ "$1" == run ]; then
   ./clavis
 elif [ "$1" == "install" ]; then
   sudo make install
-elif [ "$2" == "archlinux" ]; then
-  make --build build --target archlinux
+elif [ "$1" == "archlinux" ]; then
+  make archlinux
 fi
 
