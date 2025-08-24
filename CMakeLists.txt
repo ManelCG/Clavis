@@ -196,5 +196,3 @@ add_custom_target(archlinux
     COMMAND ${CMAKE_COMMAND} -E copy ${CLAVIS_ICON_FILE_16} ${PACKAGE_DIR}/usr/share/icons/hicolor/16x16/apps/clavis.png
 
 )
-
-add_dependencies(archlinux ${PROJECTNAME})
