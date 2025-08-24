@@ -92,6 +92,6 @@ if [ "$1" == run ]; then
 elif [ "$1" == "install" ]; then
   sudo make install
 elif [ "$2" == "archlinux" ]; then
-  make archlinux
+  make --build build --target archlinux
 fi
 
