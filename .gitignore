@@ -12,3 +12,4 @@ cmake-build-release
 aur-clavis/src/clavis/.git/
 aur-clavis-git/src/clavis/.git/
 
+**/.DS_Store
