@@ -7,8 +7,10 @@ if (POLICY CMP0141)
 endif()
 
 # CMake Standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if (CMAKE_VERSION VERSION_GREATER 3.12)
-set_property(TARGET ${PROJECTNAME} PROPERTY CXX_STANDARD 17)
+  set_property(TARGET ${PROJECTNAME} PROPERTY CXX_STANDARD 17)
 endif()
 
 
@@ -40,6 +42,7 @@ if(MSVC)
     add_definitions(/FI"${HEADER_MACROS}" /std:c++17)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 else()  # GCC or Clang
+    add_compile_options(-std=c++17)
     add_definitions(-include "${HEADER_MACROS}")
 endif()
 
