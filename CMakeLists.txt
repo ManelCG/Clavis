@@ -159,39 +159,39 @@ endif()
 
 add_custom_target(archlinux
     COMMENT "Prepare Arch Linux package layout"
-)
 
-add_custom_command(TARGET archlinux
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/lib/clavis
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/bin
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/share/applications
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/share/pixmaps
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/share/icons/hicolor/256x256/apps
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/share/icons/hicolor/128x128/apps
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/share/icons/hicolor/64x64/apps
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/share/icons/hicolor/32x32/apps
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/share/icons/hicolor/16x16/apps
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/lib/clavis
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/bin
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/share/applications
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/share/pixmaps
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/share/icons/hicolor/256x256/apps
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/share/icons/hicolor/128x128/apps
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/share/icons/hicolor/64x64/apps
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/share/icons/hicolor/32x32/apps
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}/usr/share/icons/hicolor/16x16/apps
 
-        # Copy executable
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECTNAME}> ${PACKAGE_DIR}/usr/bin/clavis
+    # Copy executable
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECTNAME}> ${PACKAGE_DIR}/usr/bin/clavis
 
-        # Copy assets and locale recursively
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/bundled/assets ${PACKAGE_DIR}/usr/lib/clavis/assets
+    # Copy assets and locale recursively
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/bundled/assets ${PACKAGE_DIR}/usr/lib/clavis/assets
 
-        # Copy license
-        COMMAND ${CMAKE_COMMAND} -E copy ${CLAVIS_LICENSE_FILE} ${PACKAGE_DIR}/usr/lib/clavis/
+    # Copy license
+    COMMAND ${CMAKE_COMMAND} -E copy ${CLAVIS_LICENSE_FILE} ${PACKAGE_DIR}/usr/lib/clavis/
 
-        # Copy desktop file
-        COMMAND ${CMAKE_COMMAND} -E copy ${CLAVIS_DESKTOP_FILE} ${PACKAGE_DIR}/usr/share/applications/
+    # Copy desktop file
+    COMMAND ${CMAKE_COMMAND} -E copy ${CLAVIS_DESKTOP_FILE} ${PACKAGE_DIR}/usr/share/applications/
 
-        # Copy pixmaps icon
-        COMMAND ${CMAKE_COMMAND} -E copy ${CLAVIS_ICON_FILE_256} ${PACKAGE_DIR}/usr/share/pixmaps/clavis.png
+    # Copy pixmaps icon
+    COMMAND ${CMAKE_COMMAND} -E copy ${CLAVIS_ICON_FILE_256} ${PACKAGE_DIR}/usr/share/pixmaps/clavis.png
 
-        # Copy icon to hicolor
-        COMMAND ${CMAKE_COMMAND} -E copy ${CLAVIS_ICON_FILE_256} ${PACKAGE_DIR}/usr/share/icons/hicolor/256x256/apps/clavis.png
-        COMMAND ${CMAKE_COMMAND} -E copy ${CLAVIS_ICON_FILE_128} ${PACKAGE_DIR}/usr/share/icons/hicolor/128x128/apps/clavis.png
-        COMMAND ${CMAKE_COMMAND} -E copy ${CLAVIS_ICON_FILE_64} ${PACKAGE_DIR}/usr/share/icons/hicolor/64x64/apps/clavis.png
-        COMMAND ${CMAKE_COMMAND} -E copy ${CLAVIS_ICON_FILE_32} ${PACKAGE_DIR}/usr/share/icons/hicolor/32x32/apps/clavis.png
-        COMMAND ${CMAKE_COMMAND} -E copy ${CLAVIS_ICON_FILE_16} ${PACKAGE_DIR}/usr/share/icons/hicolor/16x16/apps/clavis.png
+    # Copy icon to hicolor
+    COMMAND ${CMAKE_COMMAND} -E copy ${CLAVIS_ICON_FILE_256} ${PACKAGE_DIR}/usr/share/icons/hicolor/256x256/apps/clavis.png
+    COMMAND ${CMAKE_COMMAND} -E copy ${CLAVIS_ICON_FILE_128} ${PACKAGE_DIR}/usr/share/icons/hicolor/128x128/apps/clavis.png
+    COMMAND ${CMAKE_COMMAND} -E copy ${CLAVIS_ICON_FILE_64} ${PACKAGE_DIR}/usr/share/icons/hicolor/64x64/apps/clavis.png
+    COMMAND ${CMAKE_COMMAND} -E copy ${CLAVIS_ICON_FILE_32} ${PACKAGE_DIR}/usr/share/icons/hicolor/32x32/apps/clavis.png
+    COMMAND ${CMAKE_COMMAND} -E copy ${CLAVIS_ICON_FILE_16} ${PACKAGE_DIR}/usr/share/icons/hicolor/16x16/apps/clavis.png
 
 )
+
+add_dependencies(archlinux ${PROJECTNAME})
