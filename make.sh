@@ -80,7 +80,14 @@ fi
 
 cd out
 
-make -j$(nproc)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    NTHREADS=$(sysctl -n hw.ncpu)
+else
+    NTHREADS=$(nproc)
+fi
+
+make -j${NTHREADS}
+
 ERROR=$?
 if [ "$ERROR" != "0" ]; then
   echo ERROR ${ERROR}!
