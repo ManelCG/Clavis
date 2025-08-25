@@ -61,6 +61,18 @@ Uninstall() {
   exit
 }
 
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  CURRENT_OS="MACOS"
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  CURRENT_OS="LINUX"
+elif [[ "$OSTYPE" == "msys"* ]] || [[ "$OSTYPE" == "cygwin"* ]]; then
+  CURRENT_OS="WINDOWS"
+else
+  echo "Unknown OS!"
+  exit 1
+fi
+
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
 
@@ -78,15 +90,15 @@ if [ "$ERROR" != "0" ]; then
   exit ${ERROR}
 fi
 
-cd out
+cd out || exit 1
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
+if [ ${CURRENT_OS} == "MACOS" ]; then
     NTHREADS=$(sysctl -n hw.ncpu)
 else
     NTHREADS=$(nproc)
 fi
 
-make -j${NTHREADS}
+make -j"${NTHREADS}"
 
 ERROR=$?
 if [ "$ERROR" != "0" ]; then
@@ -102,3 +114,26 @@ elif [ "$1" == "archlinux" ]; then
   make archlinux
 fi
 
+if [ "${CURRENT_OS}" == "MACOS" ]; then
+  OUT_FOLDER="${SCRIPT_DIR}/out"
+
+  #if [ ! -d "${DMG_FOLDER}" ]; then
+    #mkdir -p "${DMG_FOLDER}"
+  #fi
+
+  #cp -R ${APP_FOLDER} ${DMG_FOLDER}
+  #ln -s /Applications ${DMG_FOLDER}/Applications
+
+  #hdiutil create -volname "Clavis" -srcfolder ${DMG_FOLDER} -ov -format UDZO "Clavis.dmg"
+
+  create-dmg \
+    --volname "Clavis" \
+    --window-pos 200 120 \
+    --window-size 500 300 \
+    --icon-size 100 \
+    --icon "clavis.app" 125 150 \
+    --app-drop-link 375 150 \
+    "${OUT_FOLDER}/Clavis.dmg" "${OUT_FOLDER}/clavis.app"
+    #--background "background.png" \
+
+fi
