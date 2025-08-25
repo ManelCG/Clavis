@@ -50,7 +50,13 @@ namespace Clavis::GUI {
                 return;
             }
 
-            System::CopyToClipboard(displayedPassword.GetPassword());
+            auto success = System::CopyToClipboard(displayedPassword.GetPassword());
+
+            if (success)
+                DisplaySuccess();
+            else
+                DisplayError();
+
         });
 
         writeButton.signal_clicked().connect([this]() {
@@ -70,7 +76,7 @@ namespace Clavis::GUI {
 
         if (displayedPassword.IsDecrypted()) {
             outputTextBox.set_text(displayedPassword.GetPassword());
-            outputTextBox.DisplaySuccess();
+            DisplaySuccess();
         }
     }
 
@@ -79,6 +85,11 @@ namespace Clavis::GUI {
         outputTextBox.set_text("");
         outputTextBox.DisplayError();
     }
+
+    void PasswordStoreOutputDisplay::DisplaySuccess() {
+        outputTextBox.DisplaySuccess();
+    }
+
 
 
 

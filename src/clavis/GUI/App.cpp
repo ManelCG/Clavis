@@ -20,8 +20,32 @@ namespace Clavis::GUI {
 
         auto app = InstantiateApp();
 
+        SetupCssProvider();
+
         app->make_window_and_run<MainWindow>(0, nullptr);
     }
+
+    void App::SetupCssProvider() {
+        auto css_provider = Gtk::CssProvider::create();
+        css_provider->load_from_data(R"(
+            .success {
+                color: inherit;
+                background-color: #427d4a;
+            }
+
+            .error {
+                color: inherit;
+                background-color: #ad4040;
+            }
+        )");
+
+        auto display = Gdk::Display::get_default();
+        Gtk::StyleContext::add_provider_for_display(
+            display, css_provider,
+            GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
+        );
+    }
+
 
     bool App::FirstRun(int argc, char *argv[]) {
         auto app = InstantiateApp(); // This returns a Glib::RefPtr<App> or your App subclass
