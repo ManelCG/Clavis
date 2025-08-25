@@ -77,10 +77,10 @@ target_compile_definitions(
 # Compiler defines for Iffing
 if (WIN32)
     add_definitions("-D__WINDOWS__")
+elseif(APPLE)
+    add_definitions("-D__MACOS__")
 elseif(UNIX)
     add_definitions("-D__LINUX__")
-elseif(APPLE)
-    add_definitions("-D__APPLE__")
 endif()
 
 

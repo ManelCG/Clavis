@@ -269,7 +269,7 @@ namespace Clavis::Settings {
 			BoolSetting::Kvp(PASSWORD_GENERATOR_USE_SYMBOLS, false),
 			BoolSetting::Kvp(PASSWORD_GENERATOR_PRONOUNCEABLE, false),
 
-			#ifdef __LINUX__
+			#ifdef __UNIX__
 			StringSetting::Kvp(WINDOW_DECORATIONS, WINDOW_DECORATIONS.GTK_CSD),
 			BoolSetting::Kvp(FORCE_CLAVIS_STYLE, false),
 			#elif defined __WINDOWS__

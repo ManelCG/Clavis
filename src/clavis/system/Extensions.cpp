@@ -28,11 +28,19 @@
 #include <shlobj.h>
 #include <Windows.h>
 
-#elif defined __LINUX__
+#elif defined __UNIX__
 #include <sys/stat.h>
 #include <gdkmm/clipboard.h>
 #include <gdkmm/display.h>
 #endif
+
+#if defined(__LINUX__)
+	#include <unistd.h>
+	#include <limits.h>
+#elif defined(__MACOS__)
+	#include <mach-o/dyld.h>
+#endif
+
 
 
 namespace fs = std::filesystem;
@@ -64,7 +72,7 @@ namespace Clavis::System {
 		GlobalFree(hg);
 
 		return true;
-#elif defined __LINUX__
+#elif defined __UNIX__
 		const auto display = Gdk::Display::get_default();
 		if (!display) {
 			return false;
@@ -103,7 +111,7 @@ namespace Clavis::System {
 		std::wstring ws(my_documents);
 		auto s = UnicodeToUTF8(ws);
 		return std::filesystem::path(s);
-#elif defined __LINUX__
+#elif defined __UNIX__
 		return std::string(getenv("HOME"));
 #endif
 	}
@@ -124,7 +132,7 @@ namespace Clavis::System {
 	std::filesystem::path GetConfigFolder() {
 #ifdef __WINDOWS__
 		return GetAppDataFolder();
-#elif defined __LINUX__
+#elif defined __UNIX__
 		return GetHomeFolder() / ".config";
 #endif
 	}
@@ -134,7 +142,7 @@ namespace Clavis::System {
 	}
 
 	std::filesystem::path GetPasswordStoreDefaultFolder() {
-#ifdef __LINUX__
+#ifdef __UNIX__
 		return GetHomeFolder() / ".password-store";
 #elif defined __WINDOWS__
 		return GetHomeFolder() / "ClavisPasswords";
@@ -168,6 +176,9 @@ namespace Clavis::System {
 #elif defined __LINUX__
 			"./",
 			"/usr/lib/clavis/"
+#elif defined __MACOS__
+			"./",
+			"/Applications/Clavis.app/"
 #endif
 		};
 
@@ -217,7 +228,7 @@ namespace Clavis::System {
 #ifdef _WIN32
 		if (!CreateDirectory(s.c_str(), nullptr)) {
 			if (GetLastError() != ERROR_ALREADY_EXISTS) {
-#elif defined __LINUX__
+#elif defined __UNIX__
 		if (mkdir(s.c_str(), 0755) != 0) {
 			if (errno != EEXIST) {
 #endif
@@ -388,9 +399,44 @@ namespace Clavis::System {
 #ifdef __WINDOWS__
 		auto w = UTF8ToUnicode(s);
 		_wchdir(w.c_str());
-#elif defined __LINUX__
+#elif defined __UNIX__
 		chdir(s.c_str());
 #endif
 	}
+
+	std::filesystem::path GetExecutableLocation() {
+		std::filesystem::path exePath;
+
+#if defined(_WIN32)
+		char buffer[MAX_PATH];
+		DWORD size = GetModuleFileNameA(NULL, buffer, MAX_PATH);
+		if (size == 0 || size == MAX_PATH) {
+			throw std::runtime_error("Failed to get executable path (Windows)");
+		}
+		exePath = std::filesystem::path(buffer);
+
+#elif defined(__LINUX__)
+		char buffer[PATH_MAX];
+		ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX);
+		if (count == -1) {
+			throw std::runtime_error("Failed to get executable path (Linux)");
+		}
+		exePath = std::filesystem::path(std::string(buffer, count));
+
+#elif defined(__APPLE__)
+		char buffer[PATH_MAX];
+		uint32_t size = sizeof(buffer);
+		if (_NSGetExecutablePath(buffer, &size) != 0) {
+			throw std::runtime_error("Buffer too small for executable path (macOS)");
+		}
+		exePath = std::filesystem::canonical(buffer); // resolve symlinks
+#else
+		throw std::runtime_error("Unsupported platform");
+#endif
+
+		return exePath.parent_path();  // Return the folder containing the executable
+
+	}
+
 
 }

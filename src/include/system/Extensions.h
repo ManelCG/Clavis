@@ -21,6 +21,7 @@ namespace Clavis::System {
 #endif
 
     std::filesystem::path GetGPGIDPath();
+    std::filesystem::path GetExecutableLocation();
 
     bool DirectoryExists(const std::filesystem::path& path);
     bool FileExists(const std::filesystem::path& path);

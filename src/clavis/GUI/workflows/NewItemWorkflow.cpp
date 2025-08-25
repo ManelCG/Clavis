@@ -190,7 +190,7 @@ namespace Clavis::GUI {
     }
 
     bool Workflows::OpenFileDialog(FileOpenDialogAction action, std::string &outSelectedPath, Gtk::Widget *parent) {
-	#ifdef __LINUX__
+	#ifdef __UNIX__
         auto window = Extensions::GetParentWindow(parent);
         auto dialog = Gtk::FileDialog::create();
 

@@ -61,7 +61,7 @@ namespace Clavis::Git {
     std::string FormatStringArgument(const std::string &message) {
 #ifdef __WINDOWS__
         return std::string("\"" + message + "\"");
-#elif defined __LINUX__
+#elif defined __UNIX__
         return message;
 #endif
     }
