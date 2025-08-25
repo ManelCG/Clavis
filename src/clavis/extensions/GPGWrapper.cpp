@@ -11,6 +11,23 @@
 #include <password_store/PasswordStore.h>
 
 namespace Clavis {
+    bool GPG::InitializeGPGME() {
+#ifdef __MACOS__
+        if (!System::FileExists(GetGpgAgentConfPath()))
+            System::TryWriteFile(GetGpgAgentConfPath(), "pinentry-program /opt/homebrew/bin/pinentry-mac");
+#endif
+
+        gpgme_check_version(nullptr);
+        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+
+        return true;
+    }
+
+    std::filesystem::path GPG::GetGpgAgentConfPath() {
+        return System::GetHomeFolder() / ".gnupg/gpg-agent.conf";
+    }
+
+
     bool GPG::TryDecrypt(const std::filesystem::path &path, std::string &out) {
         if (!System::FileExists(path))
             RaiseClavisError(_(ERROR_NOT_A_FILE, path.string()));
@@ -29,7 +46,7 @@ namespace Clavis {
         bool success = false;
 
         // Initialize GPGME
-        gpgme_check_version(nullptr);
+        InitializeGPGME();
 
         // Create a new context
         gpgme_error_t err = gpgme_new(&ctx);
@@ -39,6 +56,7 @@ namespace Clavis {
 
         // Set the context to use ASCII armor if needed
         gpgme_set_armor(ctx, 0); // 0 for binary output, 1 for ASCII armor
+        gpgme_set_pinentry_mode(ctx, GPGME_PINENTRY_MODE_ASK);
 
         // Create data objects from the input data
         err = gpgme_data_new_from_mem(&cipher, reinterpret_cast<const char*>(data.data()), data.size(), 0);
@@ -88,8 +106,7 @@ namespace Clavis {
         gpgme_key_t key = nullptr;
         bool success = false;
 
-        gpgme_check_version(nullptr);
-        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+        InitializeGPGME();
 
         err = gpgme_new(&ctx);
         if (err != GPG_ERR_NO_ERROR)
@@ -117,8 +134,7 @@ namespace Clavis {
         gpgme_key_t key = nullptr;
         bool exists = false;
 
-        gpgme_check_version(nullptr);
-        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+        InitializeGPGME();
 
         err = gpgme_new(&ctx);
         if (err != GPG_ERR_NO_ERROR)
@@ -148,14 +164,14 @@ namespace Clavis {
 
         std::string id = PasswordStore::GetGPGID();  // your recipient's GPG ID
 
-        gpgme_check_version(nullptr);
-        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+        InitializeGPGME();
 
         err = gpgme_new(&ctx);
         if (err != GPG_ERR_NO_ERROR)
             return false;
 
         gpgme_set_armor(ctx, 0); // set to 1 for ASCII output if needed
+        gpgme_set_pinentry_mode(ctx, GPGME_PINENTRY_MODE_ASK);
 
 
         // Look up the recipient's public key
@@ -219,8 +235,7 @@ namespace Clavis {
         gpgme_key_t key = nullptr;
         bool success = false;
 
-        gpgme_check_version(nullptr);
-        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+        InitializeGPGME();
 
         err = gpgme_new(&ctx);
         if (err != GPG_ERR_NO_ERROR)
@@ -228,6 +243,7 @@ namespace Clavis {
 
         // Set ASCII armor to get BEGIN PGP KEY BLOCK
         gpgme_set_armor(ctx, 1);
+        gpgme_set_pinentry_mode(ctx, GPGME_PINENTRY_MODE_ASK);
 
         // Get key (only need once, whether public or secret)
         err = gpgme_get_key(ctx, gpgid.c_str(), &key, exportPrivate ? 1 : 0);
@@ -281,8 +297,7 @@ namespace Clavis {
         bool success = false;
 
         // Initialize GPGME
-        gpgme_check_version(nullptr);
-        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+        InitializeGPGME();
 
         err = gpgme_new(&ctx);
         if (err != GPG_ERR_NO_ERROR)
@@ -349,7 +364,8 @@ namespace Clavis {
         gpgme_ctx_t ctx;
 
         // Initialize the GPGME library (required before any GPGME operation)
-        gpgme_check_version(nullptr);
+        InitializeGPGME();
+
         err = gpgme_new(&ctx);
         if (err != GPG_ERR_NO_ERROR) {
             std::cerr << "Failed to create GPGME context: " << gpgme_strerror(err) << std::endl;
@@ -389,8 +405,7 @@ namespace Clavis {
         std::vector<GPG::Key> result;
 
         // Initialize GPGME
-        gpgme_check_version(nullptr);
-        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+        InitializeGPGME();
 
         gpgme_ctx_t ctx;
         gpgme_error_t err = gpgme_new(&ctx);
@@ -601,8 +616,7 @@ namespace Clavis {
 
 
     bool GPG::TryCreateKey(const Key& data, std::string& outFingerprint) {
-        gpgme_check_version(nullptr);
-        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+        InitializeGPGME();
 
         gpgme_ctx_t ctx = nullptr;
         gpgme_error_t err = gpgme_new(&ctx);
@@ -610,6 +624,7 @@ namespace Clavis {
             return false;
 
         gpgme_set_armor(ctx, 1); // Make output ASCII armored
+        gpgme_set_pinentry_mode(ctx, GPGME_PINENTRY_MODE_ASK);
 
         // Create parameter string
         std::ostringstream params;

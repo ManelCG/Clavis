@@ -32,6 +32,8 @@ namespace Clavis {
             int length;
         };
 
+        static bool InitializeGPGME();
+
         static bool TryDecrypt(const std::filesystem::path& path, std::string& out);
         static bool TryDecrypt(const std::vector<uint8_t>& data, std::string& out);
 
@@ -47,6 +49,8 @@ namespace Clavis {
 #ifdef HAVE_GPGME_OP_SETOWNERTRUST
         static bool TryChangeKeyTrust(const std::string& fingerprint, int trustlevel);
 #endif
+
+        static std::filesystem::path GetGpgAgentConfPath();
 
         static std::vector<Key> GetAllKeys();
         static std::string KeyToString(const Key& key, bool escapeChars = false);
