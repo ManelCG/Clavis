@@ -5,6 +5,11 @@
 namespace Clavis::GUI {
     UniqueSignalTimeout::UniqueSignalTimeout() {
         lastCallerID = 0;
+        alive = true;
+    }
+
+    UniqueSignalTimeout::~UniqueSignalTimeout() {
+        alive = false;
     }
 
     SignalCallerID UniqueSignalTimeout::ConnectOnce(std::function<void()> callback, int ms, int priority) {
@@ -14,6 +19,8 @@ namespace Clavis::GUI {
 
         int callbackCallerID = lastCallerID;
         Glib::signal_timeout().connect_once([this, callback, callbackCallerID]() {
+            if (!alive) return;
+
             std::lock_guard lock(mutex);
 
             if (lastCallerID != callbackCallerID)
@@ -33,7 +40,7 @@ namespace Clavis::GUI {
         std::lock_guard lock(mutex);
 
         lastCallerID = Extensions::RNG::GetUInt32();
-        int callbackCallerID = lastCallerID;
+        unsigned int callbackCallerID = lastCallerID;
 
         Glib::signal_timeout().connect([this, callback, callbackCallerID]() {
             std::lock_guard lock(mutex);
@@ -50,9 +57,6 @@ namespace Clavis::GUI {
     SignalCallerID UniqueSignalTimeout::ConnectSeconds(std::function<bool()> callback, int seconds, int priority) {
         return Connect(callback, seconds*1000, priority);
     }
-
-
-
 
     void UniqueSignalTimeout::Disconnect(const SignalCallerID id) {
         std::lock_guard lock(mutex);
