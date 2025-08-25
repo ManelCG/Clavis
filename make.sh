@@ -117,23 +117,12 @@ fi
 if [ "${CURRENT_OS}" == "MACOS" ]; then
   OUT_FOLDER="${SCRIPT_DIR}/out"
 
-  #if [ ! -d "${DMG_FOLDER}" ]; then
-    #mkdir -p "${DMG_FOLDER}"
-  #fi
-
-  #cp -R ${APP_FOLDER} ${DMG_FOLDER}
-  #ln -s /Applications ${DMG_FOLDER}/Applications
-
-  #hdiutil create -volname "Clavis" -srcfolder ${DMG_FOLDER} -ov -format UDZO "Clavis.dmg"
-
   create-dmg \
     --volname "Clavis" \
     --window-pos 200 120 \
     --window-size 500 300 \
-    --icon-size 100 \
+    --icon-size 60 \
     --icon "clavis.app" 125 150 \
     --app-drop-link 375 150 \
     "${OUT_FOLDER}/Clavis.dmg" "${OUT_FOLDER}/clavis.app"
-    #--background "background.png" \
-
 fi
