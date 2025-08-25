@@ -177,8 +177,8 @@ namespace Clavis::System {
 			"./",
 			"/usr/lib/clavis/"
 #elif defined __MACOS__
-			"./",
-			"/Applications/Clavis.app/"
+			"../Resources/",
+			"/Applications/Clavis.app/Contents/Resources/"
 #endif
 		};
 

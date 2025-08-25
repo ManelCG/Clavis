@@ -13,6 +13,12 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET ${PROJECTNAME} PROPERTY CXX_STANDARD 17)
 endif()
 
+if (UNIX AND NOT APPLE)
+    set(LINUX TRUE)
+else()
+    set(LINUX FALSE)
+endif()
+
 
 # Define project
 set(PROJECTNAME "Clavis")
@@ -21,9 +27,15 @@ set(CLAVIS_VERSION "2.0.3")
 set(VERSION_PATCH "3")
 
 # Version depending files
-configure_file(bundled/assets/clavis.desktop.in     ${CMAKE_CURRENT_BINARY_DIR}/clavis.desktop              @ONLY)
-configure_file(bundled/assets/PKGBUILD-base.in      ${CMAKE_CURRENT_SOURCE_DIR}/aur-clavis/PKGBUILD         @ONLY)
-configure_file(bundled/assets/PKGBUILD-git.in       ${CMAKE_CURRENT_SOURCE_DIR}/aur-clavis-git/PKGBUILD     @ONLY)
+if (LINUX)
+    configure_file(bundled/assets/clavis.desktop.in     ${CMAKE_CURRENT_BINARY_DIR}/clavis.desktop              @ONLY)
+    configure_file(bundled/assets/PKGBUILD-base.in      ${CMAKE_CURRENT_SOURCE_DIR}/aur-clavis/PKGBUILD         @ONLY)
+    configure_file(bundled/assets/PKGBUILD-git.in       ${CMAKE_CURRENT_SOURCE_DIR}/aur-clavis-git/PKGBUILD     @ONLY)
+endif()
+
+if (APPLE)
+    configure_file(bundled/assets/Info.plist.in         ${CMAKE_CURRENT_SOURCE_DIR}/macos/Info.plist            @ONLY)
+endif()
 
 project (${PROJECTNAME})
 
@@ -46,7 +58,14 @@ else()  # GCC or Clang
     add_definitions(-include "${HEADER_MACROS}")
 endif()
 
-# GTK
+if (APPLE)
+  set_target_properties(${PROJECTNAME} PROPERTIES
+    MACOSX_BUNDLE TRUE
+    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/macos/Info.plist
+  )
+endif()
+
+    # GTK
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
 target_link_libraries(${PROJECTNAME} PRIVATE PkgConfig::GTKMM)
@@ -79,7 +98,7 @@ if (WIN32)
     add_definitions("-D__WINDOWS__")
 elseif(APPLE)
     add_definitions("-D__MACOS__")
-elseif(UNIX)
+elseif(LINUX)
     add_definitions("-D__LINUX__")
 endif()
 
@@ -104,7 +123,9 @@ if(WIN32 AND MINGW)
 endif()
 
 # Copy all assets
-file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/bundled/assets" DESTINATION  "${CMAKE_CURRENT_BINARY_DIR}/")
+if (WIN32 OR LINUX)
+    file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/bundled/assets" DESTINATION  "${CMAKE_CURRENT_BINARY_DIR}/")
+endif()
 
 if (WIN32)
     file(GLOB GPG_BINARIES "${CMAKE_CURRENT_SOURCE_DIR}/bundled/gpgbin/*")
@@ -115,10 +136,6 @@ endif()
 
 # === INSTALL STEP ===
 
-# Define install paths
-set(CLAVIS_SHARE_DIR "/usr/lib/clavis")
-set(CLAVIS_ASSETS_DIR "/usr/lib/clavis/assets")
-
 set(CLAVIS_DESKTOP_FILE "${CMAKE_CURRENT_BINARY_DIR}/clavis.desktop")
 set(CLAVIS_LICENSE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 
@@ -128,29 +145,58 @@ set(CLAVIS_ICON_FILE_64 "${CMAKE_CURRENT_SOURCE_DIR}/bundled/assets/icons/Logos/
 set(CLAVIS_ICON_FILE_32 "${CMAKE_CURRENT_SOURCE_DIR}/bundled/assets/icons/Logos/32px.png")
 set(CLAVIS_ICON_FILE_16 "${CMAKE_CURRENT_SOURCE_DIR}/bundled/assets/icons/Logos/16px.png")
 
+if(LINUX)
+  # Define install paths
+  set(CLAVIS_SHARE_DIR "/usr/lib/clavis")
+  set(CLAVIS_ASSETS_DIR "/usr/lib/clavis/assets")
 
-# Install the executable to /usr/bin/clavis
-install(TARGETS ${PROJECTNAME}
-        RUNTIME DESTINATION /usr/bin
-)
+  # Install the executable to /usr/bin/clavis
+  install(TARGETS ${PROJECTNAME}
+          RUNTIME DESTINATION /usr/bin
+  )
 
-# Install assets (excluding clavis.desktop and icon)
-install(DIRECTORY bundled/assets/
-        DESTINATION ${CLAVIS_ASSETS_DIR}
-        FILES_MATCHING PATTERN "*"
-        PATTERN "clavis.desktop" EXCLUDE
-        PATTERN "app_icon/256.png" EXCLUDE
-)
+  install(FILES ${CLAVIS_DESKTOP_FILE} DESTINATION /usr/share/applications/)
 
-install(FILES ${CLAVIS_DESKTOP_FILE} DESTINATION /usr/share/applications/)
-install(FILES ${CLAVIS_LICENSE_FILE} DESTINATION ${CLAVIS_SHARE_DIR})
+  install(FILES ${CLAVIS_ICON_FILE_256} DESTINATION /usr/share/pixmaps/ RENAME clavis.png)
+  install(FILES ${CLAVIS_ICON_FILE_256} DESTINATION /usr/share/icons/hicolor/256x256/apps/ RENAME clavis.png)
+  install(FILES ${CLAVIS_ICON_FILE_128} DESTINATION /usr/share/icons/hicolor/128x128/apps/ RENAME clavis.png)
+  install(FILES ${CLAVIS_ICON_FILE_64} DESTINATION /usr/share/icons/hicolor/64x64/apps/ RENAME clavis.png)
+  install(FILES ${CLAVIS_ICON_FILE_32} DESTINATION /usr/share/icons/hicolor/32x32/apps/ RENAME clavis.png)
+  install(FILES ${CLAVIS_ICON_FILE_16} DESTINATION /usr/share/icons/hicolor/16x16/apps/ RENAME clavis.png)
 
-install(FILES ${CLAVIS_ICON_FILE_256} DESTINATION /usr/share/pixmaps/ RENAME clavis.png)
-install(FILES ${CLAVIS_ICON_FILE_256} DESTINATION /usr/share/icons/hicolor/256x256/apps/ RENAME clavis.png)
-install(FILES ${CLAVIS_ICON_FILE_128} DESTINATION /usr/share/icons/hicolor/128x128/apps/ RENAME clavis.png)
-install(FILES ${CLAVIS_ICON_FILE_64} DESTINATION /usr/share/icons/hicolor/64x64/apps/ RENAME clavis.png)
-install(FILES ${CLAVIS_ICON_FILE_32} DESTINATION /usr/share/icons/hicolor/32x32/apps/ RENAME clavis.png)
-install(FILES ${CLAVIS_ICON_FILE_16} DESTINATION /usr/share/icons/hicolor/16x16/apps/ RENAME clavis.png)
+  install(DIRECTORY bundled/assets/
+          DESTINATION ${CLAVIS_ASSETS_DIR}
+          FILES_MATCHING PATTERN "*"
+          PATTERN "clavis.desktop" EXCLUDE
+          PATTERN "app_icon/256.png" EXCLUDE
+  )
+
+  install(FILES ${CLAVIS_LICENSE_FILE} DESTINATION ${CLAVIS_SHARE_DIR})
+elseif(APPLE)
+  #Define install paths
+  set(BUNDLE_PATH "${CMAKE_BINARY_DIR}/clavis.app")
+
+  set(CLAVIS_RESOURCES_DIR "${BUNDLE_PATH}/Contents/Resources")
+  set(CLAVIS_ASSETS_DIR "${CLAVIS_RESOURCES_DIR}/assets")
+
+  set(CLAVIS_ICNS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/macos/clavis.icns")
+
+  add_custom_command(TARGET ${PROJECTNAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+      "${CMAKE_SOURCE_DIR}/bundled/assets"
+      "${CLAVIS_ASSETS_DIR}"
+
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "${CLAVIS_LICENSE_FILE}"
+      "${CLAVIS_RESOURCES_DIR}/LICENSE"
+
+      COMMAND ${CMAKE_COMMAND} -E copy
+        "${CLAVIS_ICNS_FILE}"
+        "${CLAVIS_RESOURCES_DIR}/clavis.icns"
+  )
+
+endif()
+
 
 # === ARCHLINUX SETUP ===
 
