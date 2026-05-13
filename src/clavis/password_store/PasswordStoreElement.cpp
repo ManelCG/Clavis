@@ -56,7 +56,13 @@ namespace Clavis::PasswordStoreElements {
     }
 
     std::string PasswordStoreElement::GetName() const {
+        if (!displayName.empty())
+            return displayName;
         return GetPath().filename().string();
+    }
+
+    void PasswordStoreElement::SetDisplayName(const std::string& name) {
+        displayName = name;
     }
 
     bool PasswordStoreElement::IsFolder() const {

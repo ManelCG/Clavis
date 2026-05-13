@@ -1,6 +1,7 @@
 #include <GUI/password_store_manager/PasswordStoreManager.h>
 
 #include <GUI/workflows/NewItemWorkflow.h>
+#include <extensions/GUIExtensions.h>
 
 namespace Clavis::GUI {
     PasswordStoreManager::PasswordStoreManager() :
@@ -30,6 +31,15 @@ namespace Clavis::GUI {
         append(outputDisplay);
 
         searchEntry.grab_focus();
+
+        recursiveSearchCssProvider = Gtk::CssProvider::create();
+        recursiveSearchCssProvider->load_from_data(
+            ".recursive-search { box-shadow: 0 0 0 2px orange; }"
+        );
+        searchEntry.get_style_context()->add_provider(
+            recursiveSearchCssProvider,
+            GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
+        );
 
         const auto key_controller = Gtk::EventControllerKey::create();
         key_controller->set_propagation_phase(Gtk::PropagationPhase::CAPTURE);
@@ -138,6 +148,10 @@ namespace Clavis::GUI {
                     outputDisplay.TryCopyPassword();
                     return true;
 
+                case GDK_KEY_f:
+                    SetRecursiveSearch(!recursiveSearchActive);
+                    return true;
+
                 case GDK_KEY_n:
                     Workflows::NewPasswordWorkflow(this);
                     searchEntry.grab_focus();
@@ -191,7 +205,9 @@ namespace Clavis::GUI {
     void PasswordStoreManager::Refresh() {
         auto filter = searchEntry.get_text();
 
-        if (filter.empty())
+        if (recursiveSearchActive && !filter.empty())
+            folderview.DisplayElements(passwordStore.GetElementsRecursive(std::string(filter)));
+        else if (filter.empty())
             folderview.DisplayElements(passwordStore.GetElements());
         else
             folderview.DisplayElements(passwordStore.GetElements(filter));
@@ -199,6 +215,20 @@ namespace Clavis::GUI {
         searchEntry.grab_focus();
         tools.SetGoUpButtonActive(!passwordStore.IsAtRoot());
         tools.SetPath(passwordStore.GetPath(true));
+    }
+
+    void PasswordStoreManager::SetRecursiveSearch(bool active) {
+        recursiveSearchActive = active;
+
+        if (active) {
+            searchEntry.set_placeholder_text(_(FILTER_FILES_SEARCHBAR_PLACEHOLDER_RECURSIVE));
+            searchEntry.add_css_class("recursive-search");
+        } else {
+            searchEntry.set_placeholder_text(_(FILTER_FILES_SEARCHBAR_PLACEHOLDER));
+            searchEntry.remove_css_class("recursive-search");
+        }
+
+        Refresh();
     }
 
     void PasswordStoreManager::PerformGitAction(GitManagerToolbar::Action action) {

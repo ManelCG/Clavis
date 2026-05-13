@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <set>
 
 #include <password_store/PasswordStore.h>
 #include <system/Extensions.h>
@@ -66,6 +67,78 @@ namespace Clavis {
         }
 
         return ret;
+    }
+
+    std::vector<PasswordStoreElements::PasswordStoreElement> PasswordStore::GetElementsRecursive(std::string filter) const {
+        auto contents = System::ListContents(store_path, true, {".git"});
+        auto show_hidden_files = Settings::GetAsValue<bool>(Settings::SHOW_HIDDEN_FILES);
+
+        if (!isFilterCaseSensitive)
+            filter = StringHelper::ToLower(filter);
+
+        struct MatchedItem {
+            PasswordStoreElements::PasswordStoreElement elem;
+            std::filesystem::path relPath;
+            std::string matchKey;
+        };
+
+        std::vector<MatchedItem> matches;
+
+        for (const auto& filePath : contents) {
+            auto elem = PasswordStoreElements::PasswordStoreElement(filePath);
+
+            if (!show_hidden_files && elem.IsHiddenFile())
+                continue;
+
+            auto relPath = std::filesystem::relative(filePath, store_path);
+            auto matchKey = relPath.string();
+            if (!isFilterCaseSensitive)
+                matchKey = StringHelper::ToLower(matchKey);
+
+            if (matchKey.find(filter) == std::string::npos)
+                continue;
+
+            elem.SetDisplayName(relPath.string());
+            matches.push_back({elem, relPath, matchKey});
+        }
+
+        // Build a lookup set of all matched relative-path keys for ancestor checks.
+        std::set<std::string> matchKeySet;
+        for (const auto& m : matches)
+            matchKeySet.insert(m.matchKey);
+
+        std::vector<PasswordStoreElements::PasswordStoreElement> ret;
+
+        for (const auto& m : matches) {
+            bool suppressed = false;
+
+            // Walk up the ancestor chain. If any ancestor is also in the result set,
+            // suppress this entry — unless its own filename independently matches.
+            auto ancestor = m.relPath.parent_path();
+            while (!ancestor.empty()) {
+                auto ancestorKey = ancestor.string();
+                if (!isFilterCaseSensitive)
+                    ancestorKey = StringHelper::ToLower(ancestorKey);
+
+                if (matchKeySet.count(ancestorKey) > 0) {
+                    auto ownName = m.relPath.filename().string();
+                    if (!isFilterCaseSensitive)
+                        ownName = StringHelper::ToLower(ownName);
+
+                    if (ownName.find(filter) == std::string::npos)
+                        suppressed = true;
+
+                    break;
+                }
+
+                ancestor = ancestor.parent_path();
+            }
+
+            if (!suppressed)
+                ret.push_back(m.elem);
+        }
+
+        return SortElements(ret);
     }
 
     bool PasswordStore::TryDecryptPassword(const PasswordStoreElements::PasswordStoreElement &elem, Password& password) {

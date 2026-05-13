@@ -32,11 +32,13 @@ namespace Clavis::PasswordStoreElements {
 
         std::string ToString() const;
 
+        void SetDisplayName(const std::string& name);
 
     protected:
 
     private:
         std::filesystem::path path;
         PasswordStoreElementType type;
+        std::string displayName;
     };
 }

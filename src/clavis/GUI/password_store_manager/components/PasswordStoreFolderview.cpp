@@ -27,9 +27,10 @@ namespace Clavis::GUI {
             const auto& element = elements[i];
 
             if (startedDrawing && currentType != element.GetType()) {
-                typesSeparator = Gtk::make_managed<Gtk::Separator>(Gtk::Orientation::VERTICAL);
-                typesSeparator->set_margin(5);
-                mainVBox.append(*typesSeparator);
+                auto sep = Gtk::make_managed<Gtk::Separator>(Gtk::Orientation::VERTICAL);
+                sep->set_margin(5);
+                mainVBox.append(*sep);
+                typeSeparators.push_back(sep);
             }
 
             currentType = element.GetType();
@@ -109,17 +110,14 @@ namespace Clavis::GUI {
     }
 
     void Folderview::Clear() {
-        auto children = Extensions::GetAllChildren(&mainVBox);
-
         for (auto& elem : folderviewElements)
             mainVBox.remove(*elem);
 
-        if (typesSeparator != nullptr) {
-            mainVBox.remove(*typesSeparator);
-            typesSeparator = nullptr;
-        }
+        for (auto sep : typeSeparators)
+            mainVBox.remove(*sep);
 
         folderviewElements.clear();
+        typeSeparators.clear();
     }
 
     void Folderview::SetOnDeleteItem(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {

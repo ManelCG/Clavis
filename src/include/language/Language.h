@@ -417,6 +417,12 @@ _(FILTER_FILES_SEARCHBAR_PLACEHOLDER,
     __(VAL, "Filtrar arxius")
 )
 
+_(FILTER_FILES_SEARCHBAR_PLACEHOLDER_RECURSIVE,
+    __(ENG, "Recursive search"),
+    __(ESP, "Búsqueda recursiva"),
+    __(VAL, "Cerca recursiva")
+)
+
 _(PASSWORDSTORE_DECRYPTED_PASSWORD_LABEL,
     __(ENG, "Decrypted Password:"),
     __(ESP, "Contraseña Descifrada:"),

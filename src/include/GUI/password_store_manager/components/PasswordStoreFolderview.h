@@ -33,7 +33,7 @@ namespace Clavis::GUI {
 
         int focusedItem;
 
-        Gtk::Separator* typesSeparator = nullptr;
+        std::vector<Gtk::Separator*> typeSeparators;
 
         Gtk::Box mainVBox;
 
