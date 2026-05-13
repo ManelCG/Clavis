@@ -119,6 +119,10 @@ namespace Clavis::GUI {
                     folderview.ActivateFocusedItem();
                     return true;
 
+                case GDK_KEY_F5:
+                    PerformGitAction(GitManagerToolbar::Action::Sync);
+                    return true;
+
                 // Disabled keys
                 case GDK_KEY_Tab:
                     return true;
@@ -130,8 +134,25 @@ namespace Clavis::GUI {
 
         if (state == Gdk::ModifierType::CONTROL_MASK) {
             switch (keyval) {
-                case GDK_KEY_f:
-                    RaiseClavisError("Ctrl F!");
+                case GDK_KEY_c:
+                    outputDisplay.TryCopyPassword();
+                    return true;
+
+                case GDK_KEY_n:
+                    Workflows::NewPasswordWorkflow(this);
+                    searchEntry.grab_focus();
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        if (state == (Gdk::ModifierType::CONTROL_MASK | Gdk::ModifierType::SHIFT_MASK)) {
+            switch (keyval) {
+                case GDK_KEY_N:
+                    Workflows::NewFolderWorkflow(this);
+                    searchEntry.grab_focus();
                     return true;
 
                 default:

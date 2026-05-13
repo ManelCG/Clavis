@@ -24,6 +24,7 @@ namespace Clavis::GUI {
             std::string GetPasswordName() const;
 
             void SetFixedName(const std::string& name);
+            void SetGeneratable(bool generatable);
 
             RequiredEntry nameEntry;
             RequiredEntry passwordEntry;
@@ -46,11 +47,14 @@ namespace Clavis::GUI {
 
             void PopulateWithValues(const PasswordGenerator::GeneratorSettings& settings);
             PasswordGenerator::GeneratorSettings GetSettings();
+            void SetOnSettingsChanged(std::function<void()> callback);
 
         protected:
 
         private:
             void SaveCurrentSettings();
+
+            std::function<void()> onSettingsChanged = [](){};
 
             Gtk::Label passwordGeneratorLabel;
 

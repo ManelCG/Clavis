@@ -45,18 +45,7 @@ namespace Clavis::GUI {
         });
 
         copyButton.signal_clicked().connect([this]() {
-            if (!displayedPassword.IsDecrypted()) {
-                DisplayError();
-                return;
-            }
-
-            auto success = System::CopyToClipboard(displayedPassword.GetPassword());
-
-            if (success)
-                DisplaySuccess();
-            else
-                DisplayError();
-
+            TryCopyPassword();
         });
 
         writeButton.signal_clicked().connect([this]() {
@@ -90,7 +79,19 @@ namespace Clavis::GUI {
         outputTextBox.DisplaySuccess();
     }
 
+    void PasswordStoreOutputDisplay::TryCopyPassword() {
+        if (!displayedPassword.IsDecrypted()) {
+            outputTextBox.DisplayError();
+            return;
+        }
 
+        auto success = System::CopyToClipboard(displayedPassword.GetPassword());
+
+        if (success)
+            DisplaySuccess();
+        else
+            DisplayError();
+    }
 
 
 }

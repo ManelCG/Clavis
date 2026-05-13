@@ -5,6 +5,8 @@
 #include <limits>
 #include <cstdint>
 
+#include <error/ClavisError.h>
+
 #include <settings/Settings.h>
 
 #if defined(_WIN32)
@@ -93,8 +95,14 @@ namespace Clavis {
 
 
     std::string PasswordGenerator::GeneratePassword(const GeneratorSettings &settings) {
-        if (settings.pronounceable)
+        if (settings.pronounceable) {
+            if (!settings.lowercase && !settings.uppercase)
+                RaiseClavisError("Cannot generate a pronounceable password: no character sets enabled. Enable lowercase or uppercase letters.");
             return GeneratePronounceable(settings);
+        }
+
+        if (!settings.lowercase && !settings.uppercase && !settings.numerals && !settings.symbols)
+            RaiseClavisError("Cannot generate a password: no character sets enabled. Enable at least one character set.");
 
         return GenerateNormal(settings);
     }

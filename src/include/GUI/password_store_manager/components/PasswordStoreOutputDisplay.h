@@ -18,6 +18,7 @@ namespace Clavis::GUI {
         void DisplayPassword(const Password& password);
         void DisplayError();
         void DisplaySuccess();
+        void TryCopyPassword();
 
     protected:
 
