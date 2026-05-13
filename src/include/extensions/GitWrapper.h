@@ -21,7 +21,7 @@ namespace Clavis::Git {
     bool TrySetEmail(const std::string& email);
 
     void CommitNewFile(const std::filesystem::path& path, const std::string& name);
-    void RemoveFile(const std::filesystem::path& path, const std::string& name);
-    void RemoveFolder(const std::filesystem::path& path, const std::string& name);
+    bool RemoveFile(const std::filesystem::path& path, const std::string& name);
+    bool RemoveFolder(const std::filesystem::path& path, const std::string& name);
     void Move(const std::filesystem::path& from, const std::filesystem::path& to);
 }

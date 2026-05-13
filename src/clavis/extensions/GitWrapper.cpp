@@ -125,11 +125,15 @@ namespace Clavis::Git {
     void CommitNewFile(const std::filesystem::path& path, const std::string& name) {
         PerformGitCommand({"add", path.string()}) && PerformGitCommand({"commit", "-m", FormatStringArgument(_(GIT_ADDED_PASSWORD_COMMIT_MESSAGE, name))});
     }
-    void RemoveFile(const std::filesystem::path& path, const std::string& name) {
-        PerformGitCommand({"rm", path.string()}) && PerformGitCommand({"commit", "-m", FormatStringArgument(_(GIT_REMOVED_PASSWORD_COMMIT_MESSAGE, name))});
+    bool RemoveFile(const std::filesystem::path& path, const std::string& name) {
+        if (!PerformGitCommand({"rm", path.string()})) return false;
+        PerformGitCommand({"commit", "-m", FormatStringArgument(_(GIT_REMOVED_PASSWORD_COMMIT_MESSAGE, name))});
+        return true;
     }
-    void RemoveFolder(const std::filesystem::path &path, const std::string &name) {
-        PerformGitCommand({"rm", "-r", path.string()}) && PerformGitCommand({"commit", "-m", FormatStringArgument(_(GIT_REMOVED_DIRECTORY_COMMIT_MESSAGE, name))});
+    bool RemoveFolder(const std::filesystem::path &path, const std::string &name) {
+        if (!PerformGitCommand({"rm", "-r", path.string()})) return false;
+        PerformGitCommand({"commit", "-m", FormatStringArgument(_(GIT_REMOVED_DIRECTORY_COMMIT_MESSAGE, name))});
+        return true;
     }
     void Move(const std::filesystem::path &from, const std::filesystem::path &to) {
         PerformGitCommand({"mv", from.string(), to.string()}) && PerformGitCommand({"commit", "-m", FormatStringArgument(_(GIT_MOVED_ELEMENT_COMMIT_MESSAGE, from.string(), to.string()))});

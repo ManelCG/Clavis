@@ -1195,6 +1195,76 @@ _(ERROR_EXPORT_FAILED,
 
 #pragma endregion
 
+#pragma region Import Password Store Palette
+
+_(IMPORT_PASSWORD_STORE_PALETTE_TITLE,
+    __(ENG, "Import Password Store"),
+    __(ESP, "Importar Repositorio de Contraseñas"),
+    __(VAL, "Importar Repositori de Contrasenyes")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_PATH_PLACEHOLDER,
+    __(ENG, "Path to .clav file..."),
+    __(ESP, "Ruta del archivo .clav..."),
+    __(VAL, "Ruta del fitxer .clav...")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_PASSWORD_PLACEHOLDER,
+    __(ENG, "Decryption password..."),
+    __(ESP, "Contraseña de descifrado..."),
+    __(VAL, "Contrasenya de desxifratge...")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_STATUS_NOT_A_CLAV,
+    __(ENG, "Not a valid .clav file"),
+    __(ESP, "No es un archivo .clav válido"),
+    __(VAL, "No és un fitxer .clav vàlid")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_STATUS_UNSUPPORTED_VERSION,
+    __(ENG, "Unsupported .clav file version"),
+    __(ESP, "Versión de archivo .clav no soportada"),
+    __(VAL, "Versió de fitxer .clav no suportada")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_STATUS_KEY_MISMATCH,
+    __(ENG, "The passwords in this file are encrypted for a different GPG key"),
+    __(ESP, "Las contraseñas de este archivo están cifradas para una clave GPG diferente"),
+    __(VAL, "Les contrasenyes d'aquest fitxer estan xifrades per a una clau GPG diferent")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_STATUS_CANNOT_DECRYPT,
+    __(ENG, "Cannot decrypt: the required GPG key is not available"),
+    __(ESP, "No se puede descifrar: la clave GPG necesaria no está disponible"),
+    __(VAL, "No es pot desxifrar: la clau GPG necessària no està disponible")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_STATUS_VALID_NO_ENCRYPTION,
+    __(ENG, "Valid .clav file (not encrypted)"),
+    __(ESP, "Archivo .clav válido (sin cifrado)"),
+    __(VAL, "Fitxer .clav vàlid (sense xifratge)")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_STATUS_VALID_GPG,
+    __(ENG, "Valid .clav file, encrypted with your GPG key"),
+    __(ESP, "Archivo .clav válido, cifrado con tu clave GPG"),
+    __(VAL, "Fitxer .clav vàlid, xifrat amb la teua clau GPG")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_STATUS_PASSWORD_ENCRYPTED,
+    __(ENG, "Password-encrypted. Enter the password to import."),
+    __(ESP, "Cifrado con contraseña. Introduce la contraseña para importar."),
+    __(VAL, "Xifrat amb contrasenya. Introduïx la contrasenya per a importar.")
+)
+_(ERROR_IMPORT_FAILED,
+    __(ENG, "Failed to import .clav file."),
+    __(ESP, "Error al importar el archivo .clav."),
+    __(VAL, "Error en importar el fitxer .clav.")
+)
+_(ERROR_IMPORT_WRONG_PASSWORD,
+    __(ENG, "Wrong password."),
+    __(ESP, "Contraseña incorrecta."),
+    __(VAL, "Contrasenya incorrecta.")
+)
+_(ERROR_IMPORT_GPG_KEY_MISMATCH,
+    __(ENG, "These passwords were encrypted for a different GPG key."),
+    __(ESP, "Estas contraseñas están cifradas para una clave GPG diferente."),
+    __(VAL, "Aquestes contrasenyes estan xifrades per a una clau GPG diferent.")
+)
+
+#pragma endregion
+
 #pragma region Macros and Cleanup
 #ifdef _
 #undef _

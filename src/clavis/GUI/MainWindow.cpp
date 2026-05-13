@@ -107,6 +107,7 @@ namespace Clavis::GUI {
         def->AddAction("password_store_data", [this]() {Extensions::SpawnWindow<PasswordStoreDataPalette>([this](){return new PasswordStoreDataPalette(passwordStoreManager.GetPasswordStore());}, this);});
         def->AddAction("new_folder", [this]() {Workflows::NewFolderWorkflow(&passwordStoreManager);});
         def->AddAction("new_password", [this]() {Workflows::NewPasswordWorkflow(&passwordStoreManager);});
+        def->AddAction("import_password_store", [this]() {Workflows::ImportPasswordStoreWorkflow(&passwordStoreManager, this);});
         def->AddAction("export_password_store", [this]() {Workflows::ExportPasswordStoreWorkflow(&passwordStoreManager, this);});
         def->AddAction("quit", [this](){close();});
 

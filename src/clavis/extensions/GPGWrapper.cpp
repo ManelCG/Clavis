@@ -229,6 +229,57 @@ namespace Clavis {
         return success;
     }
 
+    bool GPG::TryDecryptSymmetric(const std::string& passphrase, const std::vector<uint8_t>& data, std::vector<uint8_t>& out) {
+        gpgme_ctx_t ctx = nullptr;
+        gpgme_data_t cipher = nullptr;
+        gpgme_data_t plain = nullptr;
+        bool success = false;
+
+        InitializeGPGME();
+
+        gpgme_error_t err = gpgme_new(&ctx);
+        if (err != GPG_ERR_NO_ERROR)
+            return false;
+
+        gpgme_set_armor(ctx, 0);
+        gpgme_set_pinentry_mode(ctx, GPGME_PINENTRY_MODE_LOOPBACK);
+        gpgme_set_passphrase_cb(ctx, symmetric_passphrase_cb, (void*)passphrase.c_str());
+
+        err = gpgme_data_new_from_mem(&cipher, reinterpret_cast<const char*>(data.data()), data.size(), 0);
+        if (err != GPG_ERR_NO_ERROR) {
+            gpgme_release(ctx);
+            return false;
+        }
+
+        err = gpgme_data_new(&plain);
+        if (err != GPG_ERR_NO_ERROR) {
+            gpgme_data_release(cipher);
+            gpgme_release(ctx);
+            return false;
+        }
+
+        err = gpgme_op_decrypt(ctx, cipher, plain);
+        if (err == GPG_ERR_NO_ERROR) {
+            off_t size = gpgme_data_seek(plain, 0, SEEK_END);
+            gpgme_data_seek(plain, 0, SEEK_SET);
+            out.resize(size);
+            ssize_t read_bytes = gpgme_data_read(plain, out.data(), out.size());
+            if (read_bytes >= 0) {
+                out.resize(read_bytes);
+                success = true;
+            }
+        }
+
+        if (!success)
+            std::cerr << "error TryDecryptSymmetric: " << gpgme_strerror(err) << "\n";
+
+        gpgme_data_release(plain);
+        gpgme_data_release(cipher);
+        gpgme_release(ctx);
+
+        return success;
+    }
+
     bool GPG::TryEncrypt(const std::string &data, std::vector<uint8_t> &out) {
         gpgme_error_t err;
         gpgme_ctx_t ctx = nullptr;

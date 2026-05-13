@@ -15,6 +15,26 @@ namespace Clavis::Clav {
         GPGKey   = 2,
     };
 
+    struct ClavEntry {
+        std::string          relPath;
+        std::vector<uint8_t> data;
+    };
+
+    struct ParsedClavFile {
+        std::string            name;
+        std::vector<uint8_t>   publicKeyData;
+        std::vector<ClavEntry> entries;
+        EncryptionType         encryption;
+    };
+
+    enum class ClavReadResult {
+        Ok,
+        NotAClavFile,
+        UnsupportedVersion,
+        DecryptionFailed,
+        TruncatedData,
+    };
+
     class ClavFile {
     public:
         static constexpr char    MAGIC[4] = {'C', 'L', 'A', 'V'};
@@ -37,6 +57,11 @@ namespace Clavis::Clav {
             const std::string&             password = ""
         );
 
+        static ClavReadResult TryCheckFormat(const std::vector<uint8_t>& fileData, EncryptionType& outEncryption);
+        static ClavReadResult TryRead(const std::vector<uint8_t>& fileData, ParsedClavFile& out, const std::string& password = "");
+        static bool           Unpack(const ParsedClavFile& file, const std::filesystem::path& targetDir);
+        static bool           CheckPublicKeyMatchesStore(const std::vector<uint8_t>& keyData);
+
     private:
         static std::vector<uint8_t> BuildPayload(
             const PasswordStore&         store,
@@ -47,6 +72,11 @@ namespace Clavis::Clav {
         static void WriteU32   (std::vector<uint8_t>& buf, uint32_t v);
         static void WriteBlob  (std::vector<uint8_t>& buf, const std::vector<uint8_t>& data);
         static void WriteString(std::vector<uint8_t>& buf, const std::string& s);
+
+        static bool ReadU32   (const std::vector<uint8_t>& buf, size_t& offset, uint32_t& out);
+        static bool ReadBlob  (const std::vector<uint8_t>& buf, size_t& offset, std::vector<uint8_t>& out);
+        static bool ReadString(const std::vector<uint8_t>& buf, size_t& offset, std::string& out);
+        static ClavReadResult ParsePayload(const std::vector<uint8_t>& payload, ParsedClavFile& out);
     };
 
 }

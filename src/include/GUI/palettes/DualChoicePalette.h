@@ -84,6 +84,9 @@ namespace Clavis::GUI {
         void SetNoDestructive() {
             noButton.add_css_class("destructive-action");
         }
+        void SetYesEnabled(bool enabled) {
+            yesButton.set_sensitive(enabled);
+        }
         void SetYesText(const std::string& text) {
             yesButton.SetLabel(text);
         }
