@@ -68,6 +68,16 @@ namespace Clavis::GUI {
             });
         }
 
+        if (element.IsFolder()) {
+            contextMenuVBox.append(exportFolderButton);
+            exportFolderButton.SetIcon(Icons::Actions::Export);
+            exportFolderButton.SetLabel(_(PASSWORD_STORE_MANAGER_CONTEXT_MENU_EXPORT_FOLDER_BUTTON));
+            exportFolderButton.signal_clicked().connect([this]() {
+                contextMenu.hide();
+                exportFolderCallback(element);
+            });
+        }
+
         contextMenuVBox.append(renameItemButton);
         renameItemButton.SetIcon(Icons::Actions::Rename);
         renameItemButton.SetLabel(_(PASSWORD_STORE_MANAGER_CONTEXT_MENU_RENAME_ITEM_BUTTON));
@@ -95,6 +105,9 @@ namespace Clavis::GUI {
 
     void FolderviewElement::SetOnDeleteItem(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
         deleteItemCallback = lambda;
+    }
+    void FolderviewElement::SetOnExportFolder(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
+        exportFolderCallback = lambda;
     }
     void FolderviewElement::SetOnEditPassword(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
         editPasswordCallback = lambda;

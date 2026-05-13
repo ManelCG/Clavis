@@ -10,6 +10,8 @@
 #include <GUI/palettes/SimpleEntryPalette.h>
 #include <GUI/palettes/NewPasswordPalette.h>
 #include <GUI/palettes/SimpleYesNoQuestionPalette.h>
+#include <GUI/palettes/ExportPasswordStorePalette.h>
+#include <clav/ClavFile.h>
 
 #include <GUI/palettes/ExceptionPalette.h>
 #include <GUI/palettes/first_run/WelcomePalette.h>
@@ -403,6 +405,63 @@ namespace Clavis::GUI {
     }
 
 
+
+    void Workflows::ExportPasswordStoreWorkflow(PasswordStoreManager* passwordStoreManager, Gtk::Window* parent) {
+        const auto store      = passwordStoreManager->GetPasswordStore();
+        const auto exportName = store.GetRoot().filename().string();
+
+        auto palette = ExportPasswordStorePalette::Create(parent, [&exportName]() {
+            return new ExportPasswordStorePalette("", "export.clav");
+        });
+
+        std::filesystem::path   exportPath;
+        std::string             password;
+        Clav::EncryptionType    encMode = Clav::EncryptionType::None;
+
+        const bool confirmed = palette->Run([&](ExportPasswordStorePalette* p, bool r) {
+            if (!r) return;
+            exportPath = p->GetExportPath();
+            password   = p->GetPassword();
+            encMode    = p->GetEncryptionMode();
+        });
+
+        if (!confirmed)
+            return;
+
+        auto fileOut = Clav::ClavFile::Build(store, exportName, encMode, password);
+
+        if (!System::TryWriteFile(exportPath, fileOut))
+            RaiseClavisError(_(ERROR_COULD_NOT_WRITE_FILE, exportPath.string()));
+    }
+
+    void Workflows::ExportFolderWorkflow(PasswordStoreManager* passwordStoreManager, const PasswordStoreElements::PasswordStoreElement& folder) {
+        const auto store          = passwordStoreManager->GetPasswordStore();
+        const auto folderName     = folder.GetName();
+        const auto defaultFilename = folder.GetPath().filename().string() + ".clav";
+
+        auto palette = ExportPasswordStorePalette::Create(passwordStoreManager, [&folderName, &defaultFilename]() {
+            return new ExportPasswordStorePalette(folderName, defaultFilename);
+        });
+
+        std::filesystem::path   exportPath;
+        std::string             password;
+        Clav::EncryptionType    encMode = Clav::EncryptionType::None;
+
+        const bool confirmed = palette->Run([&](ExportPasswordStorePalette* p, bool r) {
+            if (!r) return;
+            exportPath = p->GetExportPath();
+            password   = p->GetPassword();
+            encMode    = p->GetEncryptionMode();
+        });
+
+        if (!confirmed)
+            return;
+
+        auto fileOut = Clav::ClavFile::Build(store, folder.GetPath(), folderName, encMode, password);
+
+        if (!System::TryWriteFile(exportPath, fileOut))
+            RaiseClavisError(_(ERROR_COULD_NOT_WRITE_FILE, exportPath.string()));
+    }
 
     bool Workflows::FirstRunWorkflow(const Glib::RefPtr<Gtk::Application> &app) {
         Glib::add_exception_handler([]() {

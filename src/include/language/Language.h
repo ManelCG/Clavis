@@ -447,6 +447,12 @@ _(PASSWORD_STORE_MANAGER_CONTEXT_MENU_RENAME_ITEM_BUTTON,
     __(VAL, "Renombrar")
 )
 
+_(PASSWORD_STORE_MANAGER_CONTEXT_MENU_EXPORT_FOLDER_BUTTON,
+    __(ENG, "Export as .clav"),
+    __(ESP, "Exportar como .clav"),
+    __(VAL, "Exportar com a .clav")
+)
+
 #pragma endregion
 
 #pragma region Buttons
@@ -988,6 +994,58 @@ _(DO_EXPORT_PRIVATE_KEY_CHECKBUTTON,
     __(ESP, "Incluir clave privada"),
     __(VAL, "Incluïr clau privada")
 )
+
+// EXPORT PASSWORD STORE PALETTE
+_(EXPORT_PASSWORD_STORE_PALETTE_TITLE,
+    __(ENG, "Export Password Store"),
+    __(ESP, "Exportar Repositorio de Contraseñas"),
+    __(VAL, "Exportar Repositori de Contrasenyes")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_FOLDER_LABEL,
+    __(ENG, "Folder:"),
+    __(ESP, "Carpeta:"),
+    __(VAL, "Carpeta:")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_PATH_PLACEHOLDER,
+    __(ENG, "Output file path..."),
+    __(ESP, "Ruta del archivo de salida..."),
+    __(VAL, "Ruta del fitxer de eixida...")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_ENCRYPTION_LABEL,
+    __(ENG, "Encryption"),
+    __(ESP, "Cifrado"),
+    __(VAL, "Xifratge")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_NO_ENCRYPTION,
+    __(ENG, "No encryption"),
+    __(ESP, "Sin cifrado"),
+    __(VAL, "Sense xifratge")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_ENCRYPT_PASSWORD,
+    __(ENG, "Encrypt with password"),
+    __(ESP, "Cifrar con contraseña"),
+    __(VAL, "Xifrar amb contrasenya")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_ENCRYPT_GPG_KEY,
+    __(ENG, "Encrypt with GPG key"),
+    __(ESP, "Cifrar con clave GPG"),
+    __(VAL, "Xifrar amb clau GPG")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_PASSWORD_PLACEHOLDER,
+    __(ENG, "Encryption password..."),
+    __(ESP, "Contraseña de cifrado..."),
+    __(VAL, "Contrasenya de xifratge...")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_SHOW_PASSWORD,
+    __(ENG, "Show"),
+    __(ESP, "Mostrar"),
+    __(VAL, "Mostrar")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_HIDE_PASSWORD,
+    __(ENG, "Hide"),
+    __(ESP, "Ocultar"),
+    __(VAL, "Ocultar")
+)
 _(GPG_KEY_PALETTE_CREATE_NEW_KEY_BUTTON,
     __(ENG, "Create new key"),
     __(ESP, "Crear nueva clave"),
@@ -1121,6 +1179,18 @@ _(ERROR_COULD_NOT_READ_FILE,
     __(ENG, "Could not read file: {0}"),
     __(ESP, "No se ha podido leer el archivo: {0}"),
     __(VAL, "No s'ha pogut escriure el fitxer: {0}")
+)
+
+_(ERROR_EXPORT_PATH_EMPTY,
+    __(ENG, "Export path cannot be empty."),
+    __(ESP, "La ruta de exportación no puede estar vacía."),
+    __(VAL, "La ruta d'exportació no pot estar buida.")
+)
+
+_(ERROR_EXPORT_FAILED,
+    __(ENG, "Failed to export password store."),
+    __(ESP, "Error al exportar el repositorio de contraseñas."),
+    __(VAL, "Error en exportar el repositori de contrasenyes.")
 )
 
 #pragma endregion

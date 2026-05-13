@@ -87,6 +87,9 @@ namespace Clavis::GUI {
         folderview.SetOnRenameItem([this](const PasswordStoreElements::PasswordStoreElement& element) {
             Workflows::RenameElementWorkflow(this, element);
         });
+        folderview.SetOnExportFolder([this](const PasswordStoreElements::PasswordStoreElement& element) {
+            Workflows::ExportFolderWorkflow(this, element);
+        });
 
         tools.SetOnNewFolderButtonClick([this]() {
             Workflows::NewFolderWorkflow(this);

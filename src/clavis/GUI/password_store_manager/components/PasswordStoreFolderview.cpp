@@ -60,6 +60,8 @@ namespace Clavis::GUI {
             button->SetOnRenameItem(renameItemCallback);
             if (element.IsGPGFile())
                 button->SetOnEditPassword(editPasswordCallback);
+            if (element.IsFolder())
+                button->SetOnExportFolder(exportFolderCallback);
 
             mainVBox.append(*button);
 
@@ -128,6 +130,9 @@ namespace Clavis::GUI {
     }
     void Folderview::SetOnRenameItem(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
         renameItemCallback = lambda;
+    }
+    void Folderview::SetOnExportFolder(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
+        exportFolderCallback = lambda;
     }
 
 

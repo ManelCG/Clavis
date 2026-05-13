@@ -38,6 +38,7 @@ namespace Clavis {
         static bool TryDecrypt(const std::vector<uint8_t>& data, std::string& out);
 
         static bool TryEncrypt(const std::string& data, std::vector<uint8_t>& out);
+        static bool TryEncryptSymmetric(const std::string& passphrase, const std::vector<uint8_t>& plainData, std::vector<uint8_t>& out);
 
         static bool TryGetKeyFingerprint(const std::string& gpgid, std::string& outFingerprint);
         static bool KeyExists(const std::string& gpgid);

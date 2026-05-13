@@ -30,6 +30,9 @@ namespace Clavis::GUI {
 
         static bool FirstRunWorkflow(const Glib::RefPtr<Gtk::Application> &app);
 
+        static void ExportPasswordStoreWorkflow(PasswordStoreManager* passwordStoreManager, Gtk::Window* parent);
+        static void ExportFolderWorkflow(PasswordStoreManager* passwordStoreManager, const PasswordStoreElements::PasswordStoreElement& folder);
+
     private:
         static void NewPasswordWorkflow_IMPL(PasswordStoreManager* passwordStoreManager, const std::string& name = "");
     };

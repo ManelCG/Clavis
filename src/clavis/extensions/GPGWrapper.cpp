@@ -3,6 +3,12 @@
 #include <iostream>
 #include <gpgme.h>
 
+#ifndef __WINDOWS__
+#include <unistd.h>
+#else
+#include <io.h>
+#endif
+
 #include <error/ClavisError.h>
 #include <system/Extensions.h>
 
@@ -153,6 +159,75 @@ namespace Clavis {
     }
 
 
+
+    static gpgme_error_t symmetric_passphrase_cb(void *opaque, const char * /*uid_hint*/, const char * /*info*/, int prev_was_bad, int fd) {
+        if (prev_was_bad)
+            return GPG_ERR_CANCELED;
+
+        const char* pw = static_cast<const char*>(opaque);
+        size_t len = strlen(pw);
+
+        #ifndef __WINDOWS__
+        if (write(fd, pw, len) < 0) return GPG_ERR_CANCELED;
+        if (write(fd, "\n", 1) < 0) return GPG_ERR_CANCELED;
+        #else
+        _write(fd, pw, (unsigned int)len);
+        _write(fd, "\n", 1);
+        #endif
+
+        return GPG_ERR_NO_ERROR;
+    }
+
+    bool GPG::TryEncryptSymmetric(const std::string& passphrase, const std::vector<uint8_t>& plainData, std::vector<uint8_t>& out) {
+        gpgme_ctx_t ctx = nullptr;
+        gpgme_data_t plain = nullptr;
+        gpgme_data_t cipher = nullptr;
+        bool success = false;
+
+        InitializeGPGME();
+
+        gpgme_error_t err = gpgme_new(&ctx);
+        if (err != GPG_ERR_NO_ERROR)
+            return false;
+
+        gpgme_set_armor(ctx, 0);
+        gpgme_set_pinentry_mode(ctx, GPGME_PINENTRY_MODE_LOOPBACK);
+        gpgme_set_passphrase_cb(ctx, symmetric_passphrase_cb, (void*)passphrase.c_str());
+
+        err = gpgme_data_new_from_mem(&plain, reinterpret_cast<const char*>(plainData.data()), plainData.size(), 0);
+        if (err != GPG_ERR_NO_ERROR) {
+            gpgme_release(ctx);
+            return false;
+        }
+
+        err = gpgme_data_new(&cipher);
+        if (err != GPG_ERR_NO_ERROR) {
+            gpgme_data_release(plain);
+            gpgme_release(ctx);
+            return false;
+        }
+
+        err = gpgme_op_encrypt(ctx, nullptr, GPGME_ENCRYPT_SYMMETRIC, plain, cipher);
+        if (err == GPG_ERR_NO_ERROR) {
+            off_t size = gpgme_data_seek(cipher, 0, SEEK_END);
+            gpgme_data_seek(cipher, 0, SEEK_SET);
+            out.resize(size);
+            ssize_t read_bytes = gpgme_data_read(cipher, out.data(), out.size());
+            if (read_bytes >= 0) {
+                out.resize(read_bytes);
+                success = true;
+            }
+        }
+
+        if (!success)
+            std::cerr << "error TryEncryptSymmetric: " << gpgme_strerror(err) << "\n";
+
+        gpgme_data_release(plain);
+        gpgme_data_release(cipher);
+        gpgme_release(ctx);
+
+        return success;
+    }
 
     bool GPG::TryEncrypt(const std::string &data, std::vector<uint8_t> &out) {
         gpgme_error_t err;
