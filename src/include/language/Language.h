@@ -813,6 +813,12 @@ _(GIT_MOVED_ELEMENT_COMMIT_MESSAGE,
     __(VAL, "Clavis: Mogut '{0}' a '{1}'")
 )
 
+_(GIT_IMPORTED_PASSWORD_STORE_COMMIT_MESSAGE,
+    __(ENG, "Clavis: Imported password store '{0}'"),
+    __(ESP, "Clavis: Importado repositorio de contraseñas '{0}'"),
+    __(VAL, "Clavis: Importat repositori de contrasenyes '{0}'")
+)
+
 _(ERROR_GIT_NOT_INITIALIZED,
     __(ENG, "Git repository not initialized"),
     __(ESP, "Repositorio Git no inicializado"),

@@ -1,5 +1,6 @@
 #pragma once
 #include <filesystem>
+#include <vector>
 
 namespace Clavis::Git {
     bool IsGitRepo();
@@ -21,6 +22,7 @@ namespace Clavis::Git {
     bool TrySetEmail(const std::string& email);
 
     void CommitNewFile(const std::filesystem::path& path, const std::string& name);
+    void CommitImport(const std::vector<std::filesystem::path>& paths, const std::string& name);
     bool RemoveFile(const std::filesystem::path& path, const std::string& name);
     bool RemoveFolder(const std::filesystem::path& path, const std::string& name);
     void Move(const std::filesystem::path& from, const std::filesystem::path& to);

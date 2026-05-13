@@ -503,6 +503,13 @@ namespace Clavis::GUI {
         if (!Clav::ClavFile::Unpack(parsed, destPath))
             RaiseClavisError(_(ERROR_IMPORT_FAILED));
 
+        if (Git::IsGitRepo()) {
+            std::vector<std::filesystem::path> importedPaths;
+            for (const auto& entry : parsed.entries)
+                importedPaths.push_back(std::filesystem::path(destPath) / entry.relPath);
+            Git::CommitImport(importedPaths, parsed.name);
+        }
+
         passwordStoreManager->Refresh();
     }
 

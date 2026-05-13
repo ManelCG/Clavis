@@ -125,6 +125,14 @@ namespace Clavis::Git {
     void CommitNewFile(const std::filesystem::path& path, const std::string& name) {
         PerformGitCommand({"add", path.string()}) && PerformGitCommand({"commit", "-m", FormatStringArgument(_(GIT_ADDED_PASSWORD_COMMIT_MESSAGE, name))});
     }
+    void CommitImport(const std::vector<std::filesystem::path>& paths, const std::string& name) {
+        if (paths.empty()) return;
+        std::vector<std::string> addArgs = {"add"};
+        for (const auto& p : paths)
+            addArgs.push_back(p.string());
+        if (PerformGitCommand(addArgs))
+            PerformGitCommand({"commit", "-m", FormatStringArgument(_(GIT_IMPORTED_PASSWORD_STORE_COMMIT_MESSAGE, name))});
+    }
     bool RemoveFile(const std::filesystem::path& path, const std::string& name) {
         if (!PerformGitCommand({"rm", path.string()})) return false;
         PerformGitCommand({"commit", "-m", FormatStringArgument(_(GIT_REMOVED_PASSWORD_COMMIT_MESSAGE, name))});
