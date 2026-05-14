@@ -262,6 +262,8 @@ namespace Clavis::Settings {
 
 			StringSetting::Kvp(PASSWORD_STORE_PATH, System::GetPasswordStoreDefaultFolder().string()),
 
+			IntSetting::Kvp(CLIPBOARD_CLEAR_SECONDS, 45),
+
 			IntSetting::Kvp(PASSWORD_GENERATOR_DEFAULT_LENGTH, 25),
 			BoolSetting::Kvp(PASSWORD_GENERATOR_USE_LOWERCASE, true),
 			BoolSetting::Kvp(PASSWORD_GENERATOR_USE_UPPERCASE, true),

@@ -93,6 +93,7 @@ namespace Clavis {
                 out.assign(buffer.data(), read_bytes);
                 success = true;
             }
+            System::SecureZero(buffer.data(), buffer.size());
         }
 
         if (!success)
@@ -770,19 +771,9 @@ namespace Clavis {
         params << "Expire-Date: 0\n"; // Never expires
         params << "</GnupgKeyParms>\n";
 
-        gpgme_data_t key_params;
-        err = gpgme_data_new_from_mem(&key_params, params.str().c_str(), params.str().size(), 0);
-        if (err != GPG_ERR_NO_ERROR) {
-            std::cerr << "error gpgme_data_new_from_mem: " << gpgme_strerror(err) << "\n";
-            gpgme_release(ctx);
-            return false;
-        }
-
         auto paramsStr = params.str();
-        auto cstr = paramsStr.c_str();
-        // Generate the key
-        err = gpgme_op_genkey(ctx,cstr, nullptr, nullptr);
-        gpgme_data_release(key_params);
+        err = gpgme_op_genkey(ctx, paramsStr.c_str(), nullptr, nullptr);
+        System::SecureZero(paramsStr.data(), paramsStr.size());
 
         if (err != GPG_ERR_NO_ERROR) {
             std::cerr << "error gpgme_op_genkey: " << gpgme_strerror(err) << "\n";
@@ -790,12 +781,9 @@ namespace Clavis {
             return false;
         }
 
-        // Optional: get generated key info
         gpgme_genkey_result_t result = gpgme_op_genkey_result(ctx);
-        if (result && result->fpr) {
-            std::cout << "Key generated with fingerprint: " << result->fpr << "\n";
+        if (result && result->fpr)
             outFingerprint = result->fpr;
-        }
 
         gpgme_release(ctx);
         return true;

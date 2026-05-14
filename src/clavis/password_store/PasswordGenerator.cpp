@@ -111,7 +111,7 @@ namespace Clavis {
         if (a > b)
             std::swap(a, b);
 
-        std::random_device rd;
+        static std::random_device rd;
         std::uniform_int_distribution<int> dist(a, b);
         return dist(rd);
     }

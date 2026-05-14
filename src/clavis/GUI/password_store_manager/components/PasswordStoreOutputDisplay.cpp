@@ -2,6 +2,7 @@
 
 #include <language/Language.h>
 #include <system/Extensions.h>
+#include <settings/Settings.h>
 
 #include "error/ClavisError.h"
 
@@ -42,6 +43,10 @@ namespace Clavis::GUI {
         SetPasswordVisibility();
         showPasswordButton.signal_clicked().connect([this]() {
             SetPasswordVisibility();
+        });
+
+        clipboardClearTimeout.SetAction([this]() {
+            Gdk::Display::get_default()->get_clipboard()->set_text("");
         });
 
         copyButton.signal_clicked().connect([this]() {
@@ -87,10 +92,16 @@ namespace Clavis::GUI {
 
         auto success = System::CopyToClipboard(displayedPassword.GetPassword());
 
-        if (success)
+        if (success) {
             DisplaySuccess();
-        else
+            const int clearSeconds = Settings::CLIPBOARD_CLEAR_SECONDS.GetValue();
+            if (clearSeconds > 0) {
+                clipboardClearTimeout.SetSeconds(clearSeconds);
+                clipboardClearTimeout.StartTimeout();
+            }
+        } else {
             DisplayError();
+        }
     }
 
 

@@ -33,5 +33,7 @@ namespace Clavis::GUI {
         IconButton copyButton;
         IconButton writeButton;
         ToggleIconButton showPasswordButton;
+
+        UniqueSignalTimeoutDispatcher clipboardClearTimeout;
     };
 }
