@@ -286,6 +286,10 @@ namespace Clavis::GUI {
         }
 
         case FileOpenDialogAction::SAVE_FILE: {
+            if (!outSelectedPath.empty()) {
+                auto wname = System::UTF8ToUnicode(outSelectedPath);
+                wcsncpy_s(filePath, MAX_PATH, wname.c_str(), _TRUNCATE);
+            }
             OPENFILENAMEW ofn = { 0 };
             ofn.lStructSize = sizeof(ofn);
             ofn.hwndOwner = nullptr;
@@ -375,6 +379,25 @@ namespace Clavis::GUI {
 
         return response;
 
+    }
+
+    bool Workflows::ExportGPGKeyDirectWorkflow(bool exportPrivate, Gtk::Window* parent) {
+        std::string gpgid;
+        if (!PasswordStore::TryGetGPGID(gpgid))
+            RaiseClavisError(_(ERROR_GPG_ID_FILE_NOT_FOUND, System::GetGPGIDPath().string()));
+
+        std::string path = exportPrivate ? "private_key.asc" : "public_key.asc";
+        if (!OpenFileDialog(FileOpenDialogAction::SAVE_FILE, path, parent))
+            return false;
+
+        std::vector<uint8_t> data;
+        if (!GPG::TryExportKey(gpgid, exportPrivate, data))
+            RaiseClavisError(_(ERROR_UNABLE_TO_EXPORT_KEY));
+
+        if (!System::TryWriteFile(std::filesystem::path(path), data))
+            RaiseClavisError(_(ERROR_COULD_NOT_WRITE_FILE, path));
+
+        return true;
     }
 
     bool Workflows::ImportGPGWorkflow(Gtk::Window *parent, std::string& outFingerprint) {

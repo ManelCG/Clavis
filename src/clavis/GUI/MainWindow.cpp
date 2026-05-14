@@ -109,6 +109,8 @@ namespace Clavis::GUI {
         def->AddAction("new_password", [this]() {Workflows::NewPasswordWorkflow(&passwordStoreManager);});
         def->AddAction("import_password_store", [this]() {Workflows::ImportPasswordStoreWorkflow(&passwordStoreManager, this);});
         def->AddAction("export_password_store", [this]() {Workflows::ExportPasswordStoreWorkflow(&passwordStoreManager, this);});
+        def->AddAction("export_public_gpg",  [this]() {Workflows::ExportGPGKeyDirectWorkflow(false, this);});
+        def->AddAction("export_private_gpg", [this]() {Workflows::ExportGPGKeyDirectWorkflow(true,  this);});
         def->AddAction("quit", [this](){close();});
 
         // EDIT
