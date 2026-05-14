@@ -24,6 +24,7 @@ namespace Clavis::GUI {
 
     private:
         void SetPasswordVisibility();
+        void ClearDisplay();
 
         Password displayedPassword;
 
@@ -35,5 +36,6 @@ namespace Clavis::GUI {
         ToggleIconButton showPasswordButton;
 
         UniqueSignalTimeoutDispatcher clipboardClearTimeout;
+        UniqueSignalTimeoutDispatcher passwordClearTimeout;
     };
 }

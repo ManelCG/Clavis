@@ -49,6 +49,10 @@ namespace Clavis::GUI {
             Gdk::Display::get_default()->get_clipboard()->set_text("");
         });
 
+        passwordClearTimeout.SetAction([this]() {
+            ClearDisplay();
+        });
+
         copyButton.signal_clicked().connect([this]() {
             TryCopyPassword();
         });
@@ -71,7 +75,18 @@ namespace Clavis::GUI {
         if (displayedPassword.IsDecrypted()) {
             outputTextBox.set_text(displayedPassword.GetPassword());
             DisplaySuccess();
+
+            const int clearSeconds = Settings::CLEAR_PASSWORD_DISPLAY_SECONDS.GetValue();
+            if (clearSeconds > 0) {
+                passwordClearTimeout.SetSeconds(clearSeconds);
+                passwordClearTimeout.StartTimeout();
+            }
         }
+    }
+
+    void PasswordStoreOutputDisplay::ClearDisplay() {
+        displayedPassword = Password();
+        outputTextBox.set_text("");
     }
 
     void PasswordStoreOutputDisplay::DisplayError() {

@@ -110,6 +110,12 @@ _(MAINMENU_EDIT_MENU_GPG_KEY_SETTINGS,
     __(VAL, "Configurar clau GPG")
 )
 
+_(MAINMENU_EDIT_MENU_SETTINGS,
+    __(ENG, "Settings"),
+    __(ESP, "Configuración"),
+    __(VAL, "Configuració")
+)
+
 #pragma endregion
 
 #pragma region Help Menu
@@ -456,6 +462,12 @@ _(PASSWORD_STORE_MANAGER_CONTEXT_MENU_EXPORT_FOLDER_BUTTON,
 #pragma endregion
 
 #pragma region Buttons
+_(MISC_SECONDS,
+    __(ENG, "Seconds:"),
+    __(ESP, "Segundos:"),
+    __(VAL, "Segons:")
+)
+
 _(MISC_SAVE_BUTTON,
     __(ENG, "Save"),
     __(ESP, "Guardar"),
@@ -1267,6 +1279,173 @@ _(ERROR_IMPORT_GPG_KEY_MISMATCH,
     __(ENG, "These passwords were encrypted for a different GPG key."),
     __(ESP, "Estas contraseñas están cifradas para una clave GPG diferente."),
     __(VAL, "Aquestes contrasenyes estan xifrades per a una clau GPG diferent.")
+)
+
+#pragma endregion
+
+#pragma region Settings Palette
+
+_(SETTINGS_PALETTE_TITLE,
+    __(ENG, "Settings"),
+    __(ESP, "Configuración"),
+    __(VAL, "Configuració")
+)
+
+_(SETTINGS_SECTION_GENERAL,
+    __(ENG, "General"),
+    __(ESP, "General"),
+    __(VAL, "General")
+)
+_(SETTINGS_SECTION_APPEARANCE,
+    __(ENG, "Appearance"),
+    __(ESP, "Apariencia"),
+    __(VAL, "Aparença")
+)
+_(SETTINGS_SECTION_PASSWORD_STORE,
+    __(ENG, "Password Store"),
+    __(ESP, "Repositorio de Contraseñas"),
+    __(VAL, "Repositori de Contrasenyes")
+)
+_(SETTINGS_SECTION_SECURITY,
+    __(ENG, "Security"),
+    __(ESP, "Seguridad"),
+    __(VAL, "Seguretat")
+)
+_(SETTINGS_SECTION_PASSWORD_BROWSER,
+    __(ENG, "Password Browser"),
+    __(ESP, "Explorador de Contraseñas"),
+    __(VAL, "Explorador de Contrasenyes")
+)
+_(SETTINGS_SECTION_PASSWORD_GENERATOR,
+    __(ENG, "Password Generator"),
+    __(ESP, "Generador de Contraseñas"),
+    __(VAL, "Generador de Contrasenyes")
+)
+_(SETTINGS_SECTION_DEVELOPER,
+    __(ENG, "Developer"),
+    __(ESP, "Desarrollador"),
+    __(VAL, "Desenvolupador")
+)
+
+_(SETTINGS_LANGUAGE_LABEL,
+    __(ENG, "Language"),
+    __(ESP, "Idioma"),
+    __(VAL, "Idioma")
+)
+_(SETTINGS_DO_USE_DARK_THEME_LABEL,
+    __(ENG, "Use dark theme"),
+    __(ESP, "Usar tema oscuro"),
+    __(VAL, "Usar tema fosc")
+)
+_(SETTINGS_WINDOW_DECORATIONS_LABEL,
+    __(ENG, "Window decorations"),
+    __(ESP, "Decoraciones de ventana"),
+    __(VAL, "Decoracions de finestra")
+)
+_(SETTINGS_WINDOW_DECORATIONS_CLAVIS_CSD,
+    __(ENG, "Clavis (custom title bar)"),
+    __(ESP, "Clavis (barra de título personalizada)"),
+    __(VAL, "Clavis (barra de títol personalitzada)")
+)
+_(SETTINGS_WINDOW_DECORATIONS_GTK_CSD,
+    __(ENG, "System (GTK default)"),
+    __(ESP, "Sistema (GTK por defecto)"),
+    __(VAL, "Sistema (GTK per defecte)")
+)
+_(SETTINGS_WINDOW_DECORATIONS_FORCE_NO_CSD,
+    __(ENG, "Server-side decorations"),
+    __(ESP, "Decoraciones del servidor"),
+    __(VAL, "Decoracions del servidor")
+)
+_(SETTINGS_FORCE_CLAVIS_STYLE_LABEL,
+    __(ENG, "Force Clavis menu style"),
+    __(ESP, "Forzar estilo de menú Clavis"),
+    __(VAL, "Forçar estil de menú Clavis")
+)
+_(SETTINGS_DISABLE_SHADOWS_LABEL,
+    __(ENG, "Disable window shadows"),
+    __(ESP, "Desactivar sombras de ventana"),
+    __(VAL, "Desactivar ombres de finestra")
+)
+_(SETTINGS_CLAVIS_FONT_LABEL,
+    __(ENG, "Font"),
+    __(ESP, "Fuente"),
+    __(VAL, "Font")
+)
+_(SETTINGS_CLAVIS_THEME_LABEL,
+    __(ENG, "Theme"),
+    __(ESP, "Tema"),
+    __(VAL, "Tema")
+)
+_(SETTINGS_PASSWORD_STORE_PATH_LABEL,
+    __(ENG, "Password store path"),
+    __(ESP, "Ruta del repositorio de contraseñas"),
+    __(VAL, "Ruta del repositori de contrasenyes")
+)
+_(SETTINGS_SHOW_HIDDEN_FILES_LABEL,
+    __(ENG, "Show hidden files"),
+    __(ESP, "Mostrar archivos ocultos"),
+    __(VAL, "Mostrar fitxers ocults")
+)
+_(SETTINGS_CLIPBOARD_CLEAR_SECONDS_LABEL,
+    __(ENG, "Clear clipboard after (seconds, 0 = never)"),
+    __(ESP, "Borrar portapapeles tras (segundos, 0 = nunca)"),
+    __(VAL, "Esborrar porta-retalls després de (segons, 0 = mai)")
+)
+_(SETTINGS_CLIPBOARD_CLEAR_ENABLED_LABEL,
+    __(ENG, "Clear clipboard after copy"),
+    __(ESP, "Borrar portapapeles al copiar"),
+    __(VAL, "Esborrar porta-retalls en copiar")
+)
+_(SETTINGS_CLEAR_PASSWORD_DISPLAY_LABEL,
+    __(ENG, "Clear decrypted password after display"),
+    __(ESP, "Borrar contraseña descifrada tras mostrarla"),
+    __(VAL, "Esborrar contrasenya desxifrada després de mostrar-la")
+)
+_(SETTINGS_CLIPBOARD_CLEAR_DELAY_LABEL,
+    __(ENG, "Delay (seconds)"),
+    __(ESP, "Retardo (segundos)"),
+    __(VAL, "Retard (segons)")
+)
+_(SETTINGS_FILTER_CASE_SENSITIVE_LABEL,
+    __(ENG, "Case-sensitive search"),
+    __(ESP, "Búsqueda sensible a mayúsculas"),
+    __(VAL, "Cerca sensible a majúscules")
+)
+_(SETTINGS_PASSWORD_GENERATOR_LENGTH_LABEL,
+    __(ENG, "Default password length"),
+    __(ESP, "Longitud de contraseña por defecto"),
+    __(VAL, "Longitud de contrasenya per defecte")
+)
+_(SETTINGS_PASSWORD_GENERATOR_LOWERCASE_LABEL,
+    __(ENG, "Use lowercase letters"),
+    __(ESP, "Usar letras minúsculas"),
+    __(VAL, "Usar lletres minúscules")
+)
+_(SETTINGS_PASSWORD_GENERATOR_UPPERCASE_LABEL,
+    __(ENG, "Use uppercase letters"),
+    __(ESP, "Usar letras mayúsculas"),
+    __(VAL, "Usar lletres majúscules")
+)
+_(SETTINGS_PASSWORD_GENERATOR_NUMERALS_LABEL,
+    __(ENG, "Use numerals"),
+    __(ESP, "Usar números"),
+    __(VAL, "Usar números")
+)
+_(SETTINGS_PASSWORD_GENERATOR_SYMBOLS_LABEL,
+    __(ENG, "Use symbols"),
+    __(ESP, "Usar símbolos"),
+    __(VAL, "Usar símbols")
+)
+_(SETTINGS_PASSWORD_GENERATOR_PRONOUNCEABLE_LABEL,
+    __(ENG, "Generate pronounceable passwords"),
+    __(ESP, "Generar contraseñas pronunciables"),
+    __(VAL, "Generar contrasenyes pronunciables")
+)
+_(SETTINGS_RUN_GTK_CSS_INSPECTOR_LABEL,
+    __(ENG, "Show GTK CSS inspector on startup"),
+    __(ESP, "Mostrar inspector CSS de GTK al inicio"),
+    __(VAL, "Mostrar inspector CSS de GTK a l'inici")
 )
 
 #pragma endregion
