@@ -142,23 +142,22 @@ namespace Clavis::System {
 		ProcessData->Pipe.Overlapped = std::shared_ptr<OVERLAPPED>((OVERLAPPED*)calloc(1, sizeof(OVERLAPPED)));	// Cast so that compiler doesn't cry.
 		ConnectNamedPipe(ProcessData->Pipe.NamedPipe, ProcessData->Pipe.Overlapped.get());
 
-		STARTUPINFO si = { sizeof(STARTUPINFO) };
+		STARTUPINFOW si = { sizeof(STARTUPINFOW) };
 		si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
 		si.wShowWindow = SW_HIDE;
 		si.hStdInput = ProcessData->Pipe.PipeEnd;
 
 		PROCESS_INFORMATION pi = { 0 };
 
+		std::wstring wcmd = System::UTF8ToUnicode(executable);
+		for (const auto& arg : args)
+			wcmd += L" " + System::UTF8ToUnicode(arg);
 
-		auto cmd = executable;
-		for (auto arg : args)
-			cmd += " " + arg;
+		auto wpath = workingDir.wstring();
 
-		auto wpath = workingDir.string();
-
-		auto success = CreateProcess(
+		auto success = CreateProcessW(
 			NULL,
-			(LPSTR)cmd.c_str(),
+			(LPWSTR)wcmd.c_str(),
 			NULL,
 			NULL,
 			TRUE,
