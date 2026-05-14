@@ -34,9 +34,10 @@ namespace Clavis::GUI {
 
         recursiveSearchCssProvider = Gtk::CssProvider::create();
         recursiveSearchCssProvider->load_from_data(
-            ".recursive-search { box-shadow: 0 0 0 2px orange; }"
+            "entry.recursive-search:focus-within { border-color: @warning_color; }"
         );
-        searchEntry.get_style_context()->add_provider(
+        Gtk::StyleContext::add_provider_for_display(
+            Gdk::Display::get_default(),
             recursiveSearchCssProvider,
             GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
         );
