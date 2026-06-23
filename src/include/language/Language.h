@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <filesystem>
 
 #include <glibmm/ustring.h>
 
@@ -15,7 +16,14 @@
 
 
 namespace Clavis::Language {
-    Glib::ustring GetResourceString(_I18N_MAP_ strings, std::vector<std::string> arguments);
+    struct StrArg {
+        std::string value;
+        StrArg(std::string s) : value(std::move(s)) {}
+        StrArg(const char* s) : value(s) {}
+        StrArg(const std::filesystem::path& p) : value(p.string()) {}
+    };
+
+    Glib::ustring GetResourceString(_I18N_MAP_ strings, std::vector<StrArg> arguments);
 
     std::pair<std::string, std::string> GetLanguageData(LanguagesEnum language);
     std::string GetLanguageCode(LanguagesEnum language);
@@ -716,7 +724,7 @@ _(ERROR_UNKNOWN_ENUM_VALUE,
     __(VAL, "Valor desconegut: {0}")
 )
 
-_(ERROR_FILE_NOT_FOUND,
+_(CLAVIS_ERROR_FILE_NOT_FOUND,
     __(ENG, "File not found: {0}"),
     __(ESP, "Archivo no encontrado: {0}"),
     __(VAL, "Arxiu no trobat: {0}")
@@ -1454,7 +1462,7 @@ _(SETTINGS_RUN_GTK_CSS_INSPECTOR_LABEL,
 #ifdef _
 #undef _
 #endif
-#define _(x, ...) Clavis::Language::GetResourceString(x, std::vector<std::string>{ __VA_ARGS__ })
+#define _(x, ...) Clavis::Language::GetResourceString(x, std::vector<Clavis::Language::StrArg>{ __VA_ARGS__ })
 
 // MACRO CLEANUP
 #ifdef TRANSLATE_CHECK

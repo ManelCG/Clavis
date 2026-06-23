@@ -149,9 +149,9 @@ namespace Clavis::System {
 
 		PROCESS_INFORMATION pi = { 0 };
 
-		std::wstring wcmd = System::UTF8ToUnicode(executable);
+		std::wstring wcmd = L"\"" + System::UTF8ToUnicode(executable) + L"\"";
 		for (const auto& arg : args)
-			wcmd += L" " + System::UTF8ToUnicode(arg);
+			wcmd += L" \"" + System::UTF8ToUnicode(arg) + L"\"";
 
 		auto wpath = workingDir.wstring();
 
@@ -161,7 +161,7 @@ namespace Clavis::System {
 			NULL,
 			NULL,
 			TRUE,
-			CREATE_NEW_CONSOLE,
+			CREATE_NO_WINDOW,
 			NULL,
 			wpath.c_str(),
 			&si,

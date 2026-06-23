@@ -33,6 +33,11 @@ namespace Clavis::GUI {
         repeatPasswordEntry.SetCorrectnessCheck([this]() {
             return passwordEntry.get_text() == repeatPasswordEntry.get_text();
         });
+        keynameEntry.SetCorrectnessCheck([this]() {
+            const auto text = keynameEntry.get_text();
+            return !text.empty() && text.find('@') != std::string::npos;
+        });
+
         keyLengthEntry.SetCorrectnessCheck([this]() {
             // keySize not available so always valid
             if (keySizeRange.first == -1 && keySizeRange.second == -1)

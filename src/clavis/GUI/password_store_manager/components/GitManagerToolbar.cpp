@@ -120,11 +120,11 @@ namespace Clavis::GUI {
 
         button->RegisterIcon(StateIconButton::State::PROGRESS, Icons::Actions::Refresh);
         button->RegisterIcon(StateIconButton::State::SUCCESS, Icons::Check);
-        button->RegisterIcon(StateIconButton::State::ERROR, Icons::Cross);
+        button->RegisterIcon(StateIconButton::State::ERROR_STATE, Icons::Cross);
 
         button->RegisterTooltip(StateIconButton::State::PROGRESS, textProgress);
         button->RegisterTooltip(StateIconButton::State::SUCCESS, textSuccess);
-        button->RegisterTooltip(StateIconButton::State::ERROR, textError);
+        button->RegisterTooltip(StateIconButton::State::ERROR_STATE, textError);
 
         button->set_margin_start(1);
 
@@ -175,7 +175,7 @@ namespace Clavis::GUI {
             if (success)
                 SetStateThreadsafe(buttonID, StateIconButton::State::SUCCESS);
             else
-                SetStateThreadsafe(buttonID, StateIconButton::State::ERROR);
+                SetStateThreadsafe(buttonID, StateIconButton::State::ERROR_STATE);
 
             SetSensitiveThreadsafe(true);
 

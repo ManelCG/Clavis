@@ -10,7 +10,7 @@ namespace Clavis::GUI {
             PROGRESS,
             SUCCESS,
             WARNING,
-            ERROR
+            ERROR_STATE
         };
 
         StateIconButton();

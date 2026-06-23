@@ -23,8 +23,8 @@ endif()
 # Define project
 set(PROJECTNAME "Clavis")
 set(PROJECTNAME_BIN "clavis")
-set(CLAVIS_VERSION "2.0.3")
-set(VERSION_PATCH "3")
+set(CLAVIS_VERSION "2.1.0")
+set(VERSION_PATCH "1")
 
 # Version depending files
 if (LINUX)
@@ -105,32 +105,55 @@ endif()
 
 
 if(WIN32 AND MINGW)
-    # Your output dir for the built executable
-    set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/$<CONFIG>")
+    set(MSYS2_BIN "C:/msys64/mingw64/bin")
 
-    # Directory where GTK and all DLLs live
-    set(GTK_DLL_DIR "C:/msys64/mingw64/bin")
-
-    # Get all DLL files in that directory
-    file(GLOB GTK_DLLS "${GTK_DLL_DIR}/*.dll")
-
-    # After build, copy all DLLs to output folder
+    # Copy all runtime DLLs (GTK, GPGME, MinGW CRT, etc.) from the active MSYS2 installation.
+    file(GLOB ALL_MSYS2_DLLS "${MSYS2_BIN}/*.dll")
     add_custom_command(TARGET ${PROJECTNAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${GTK_DLLS}
-            ${OUTPUT_DIR}
+            ${ALL_MSYS2_DLLS}
+            $<TARGET_FILE_DIR:${PROJECTNAME}>
     )
+
+    # Copy GPG executables from the SAME MSYS2 installation so they share the same DLL
+    # versions as the DLLs above. Requires mingw-w64-x86_64-gnupg to be installed.
+    set(GPG_EXE_NAMES
+        gpg.exe gpg-agent.exe gpgconf.exe gpgsm.exe gpgtar.exe gpgv.exe
+        gpg-connect-agent.exe dirmngr.exe dirmngr_ldap.exe pinentry-basic.exe
+        gpgme-w32spawn.exe gpg-card.exe gpg-check-pattern.exe gpg-preset-passphrase.exe
+        gpg-wks-client.exe keyboxd.exe scdaemon.exe
+    )
+    set(GPG_EXES_TO_COPY "")
+    foreach(exe_name ${GPG_EXE_NAMES})
+        if(EXISTS "${MSYS2_BIN}/${exe_name}")
+            list(APPEND GPG_EXES_TO_COPY "${MSYS2_BIN}/${exe_name}")
+        endif()
+    endforeach()
+    if(GPG_EXES_TO_COPY)
+        add_custom_command(TARGET ${PROJECTNAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${GPG_EXES_TO_COPY}
+                $<TARGET_FILE_DIR:${PROJECTNAME}>
+        )
+    endif()
+
+    # Copy GPG batch helper scripts
+    file(GLOB GPG_BATS "${MSYS2_BIN}/*.bat")
+    if(GPG_BATS)
+        add_custom_command(TARGET ${PROJECTNAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${GPG_BATS}
+                $<TARGET_FILE_DIR:${PROJECTNAME}>
+        )
+    endif()
 endif()
 
 # Copy all assets
 if (WIN32 OR LINUX)
     file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/bundled/assets" DESTINATION  "${CMAKE_CURRENT_BINARY_DIR}/")
 endif()
-
-if (WIN32)
-    file(GLOB GPG_BINARIES "${CMAKE_CURRENT_SOURCE_DIR}/bundled/gpgbin/*")
-    file(COPY ${GPG_BINARIES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
-endif()
+# bundled/gpgbin is intentionally NOT copied here: the executables there may be built
+# against different DLL versions than the current MSYS2 toolchain and will fail to load.
 
 
 

@@ -36,10 +36,10 @@ namespace Clavis {
 			auto name = std::string(def.Name);
 			std::filesystem::path rel = "assets/icons/";
 
-			std::string path = System::GetAssetsFolder() / rel / name;
+			std::filesystem::path path = System::GetAssetsFolder() / rel / name;
 
 			if (!System::FileExists(path))
-				RaiseClavisError(_(ERROR_FILE_NOT_FOUND, path));
+				RaiseClavisError(_(CLAVIS_ERROR_FILE_NOT_FOUND, path.string()));
 
 			Im = std::shared_ptr<Image>(Image::FromPath(path));
 
