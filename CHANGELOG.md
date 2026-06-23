@@ -1,3 +1,18 @@
+## [2.1.0-2] - 2026-06-23
+
+Clavis 2.1.0
+============
+
+* Added MacOS Support
+* WIP Windows Support
+* Settings window
+* Import / export of the full Clavis store (passwords & config)
+* Better handling of export GPG keys
+* Recursive search
+* Keyboard shortcuts and QoL
+* Password security hardening
+* Fixed some Git errors
+
 ## [2.1.0-1] - 2026-06-23
 
 - Add release tooling: deploy.sh, AUR packaging, changelog
