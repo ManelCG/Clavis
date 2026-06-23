@@ -24,7 +24,7 @@ endif()
 set(PROJECTNAME "Clavis")
 set(PROJECTNAME_BIN "clavis")
 set(CLAVIS_VERSION "2.1.0")
-set(VERSION_PATCH "1")
+set(VERSION_PATCH "2")
 
 # Version depending files
 if (LINUX)
