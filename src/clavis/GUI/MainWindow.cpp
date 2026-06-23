@@ -9,6 +9,7 @@
 #include <GUI/palettes/AboutPalette.h>
 #include <GUI/palettes/HelpPalette.h>
 #include <GUI/palettes/PasswordStoreDataPalette.h>
+#include <GUI/palettes/SettingsPalette.h>
 
 #include <GUI/workflows/NewItemWorkflow.h>
 #include <GUI/palettes/first_run/GitServerConfigPalette.h>
@@ -91,8 +92,11 @@ namespace Clavis::GUI {
                     MenuBar::MenuItem(_(GIT_SYNC_PASSWORDS), "sync"),
                 }),
                 MenuBar::MenuSection({
-                MenuBar::MenuItem(_(MAINMENU_EDIT_MENU_GIT_SERVER_SETTINGS), "git_server_config"),
-                MenuBar::MenuItem(_(MAINMENU_EDIT_MENU_GPG_KEY_SETTINGS), "gpg_key_settings"),
+                    MenuBar::MenuItem(_(MAINMENU_EDIT_MENU_GIT_SERVER_SETTINGS), "git_server_config"),
+                    MenuBar::MenuItem(_(MAINMENU_EDIT_MENU_GPG_KEY_SETTINGS), "gpg_key_settings"),
+                }),
+                MenuBar::MenuSection({
+                    MenuBar::MenuItem(_(MAINMENU_EDIT_MENU_SETTINGS), "settings"),
                 }),
             }),
             MenuBar::MenuSubmenu(_(MAINMENU_HELP_MENU), {
@@ -107,6 +111,10 @@ namespace Clavis::GUI {
         def->AddAction("password_store_data", [this]() {Extensions::SpawnWindow<PasswordStoreDataPalette>([this](){return new PasswordStoreDataPalette(passwordStoreManager.GetPasswordStore());}, this);});
         def->AddAction("new_folder", [this]() {Workflows::NewFolderWorkflow(&passwordStoreManager);});
         def->AddAction("new_password", [this]() {Workflows::NewPasswordWorkflow(&passwordStoreManager);});
+        def->AddAction("import_password_store", [this]() {Workflows::ImportPasswordStoreWorkflow(&passwordStoreManager, this);});
+        def->AddAction("export_password_store", [this]() {Workflows::ExportPasswordStoreWorkflow(&passwordStoreManager, this);});
+        def->AddAction("export_public_gpg",  [this]() {Workflows::ExportGPGKeyDirectWorkflow(false, this);});
+        def->AddAction("export_private_gpg", [this]() {Workflows::ExportGPGKeyDirectWorkflow(true,  this);});
         def->AddAction("quit", [this](){close();});
 
         // EDIT
@@ -116,6 +124,9 @@ namespace Clavis::GUI {
 
         def->AddAction("git_server_config", [this](){GitServerSettings();});
         def->AddAction("gpg_key_settings", [this](){GPGKeySettings();});
+        def->AddAction("settings", [this](){
+            SettingsPalette::Spawn(this, []() { return new SettingsPalette(); });
+        });
 
         // HELP
         def->AddAction("help", [this](){Extensions::SpawnWindow<HelpPalette>(this);});

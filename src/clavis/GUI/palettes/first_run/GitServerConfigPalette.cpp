@@ -272,7 +272,8 @@ namespace Clavis::GUI {
 
 
     bool GitServerConfigPalette::TryApplyGitUserSettings() const {
-        return Git::TrySetUsername(gitUserNameEntry.get_text()) && Git::TrySetEmail(gitUserEmailEntry.get_text());
+        return Git::TrySetUsername(passwordStoreLocation, gitUserNameEntry.get_text()) &&
+               Git::TrySetEmail(passwordStoreLocation, gitUserEmailEntry.get_text());
     }
 
 

@@ -12,5 +12,7 @@ namespace Clavis::GUI {
         protected:
         private:
         Glib::RefPtr<Gtk::Application> InstantiateApp();
+
+        void SetupCssProvider();
     };
 }

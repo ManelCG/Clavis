@@ -120,11 +120,11 @@ namespace Clavis::GUI {
 
         button->RegisterIcon(StateIconButton::State::PROGRESS, Icons::Actions::Refresh);
         button->RegisterIcon(StateIconButton::State::SUCCESS, Icons::Check);
-        button->RegisterIcon(StateIconButton::State::ERROR, Icons::Cross);
+        button->RegisterIcon(StateIconButton::State::ERROR_STATE, Icons::Cross);
 
         button->RegisterTooltip(StateIconButton::State::PROGRESS, textProgress);
         button->RegisterTooltip(StateIconButton::State::SUCCESS, textSuccess);
-        button->RegisterTooltip(StateIconButton::State::ERROR, textError);
+        button->RegisterTooltip(StateIconButton::State::ERROR_STATE, textError);
 
         button->set_margin_start(1);
 
@@ -139,39 +139,44 @@ namespace Clavis::GUI {
     }
 
 
+    GitManagerToolbar::~GitManagerToolbar() {
+        *aliveFlag = false;
+        if (gitThread.joinable())
+            gitThread.join();
+    }
+
     void GitManagerToolbar::PerformGitAction(Action buttonID) {
-        // Disallow more git actions to avoid corruption or something
         {
             std::lock_guard lock(mutex);
             if (isGitActionRunning)
                 return;
-
             isGitActionRunning = true;
         }
 
-        // This is just needed because the 3s delay to remove style can act janky
-        // So we make it remember "who is the last thread that set its style" kinda
+        // Clean up the previous (already-finished) thread handle before starting a new one
+        if (gitThread.joinable())
+            gitThread.join();
+
         auto button = buttons[buttonID];
         auto action = gitActions[buttonID];
 
-        // Disallow pressing other buttons. Also remove their style.
         SetSensitive(false);
         RemoveState();
 
-        // Our button stays sensitive because otherwise it loses its color
         button->set_sensitive(true);
         button->ApplyState(StateIconButton::State::PROGRESS);
 
-        std::thread t([this, button, action, buttonID]() {
-            // Start the git action
+        auto alive = aliveFlag;
+        gitThread = std::thread([this, button, action, buttonID, alive]() {
             const auto success = action();
+
+            if (!alive->load()) return;
 
             if (success)
                 SetStateThreadsafe(buttonID, StateIconButton::State::SUCCESS);
             else
-                SetStateThreadsafe(buttonID, StateIconButton::State::ERROR);
+                SetStateThreadsafe(buttonID, StateIconButton::State::ERROR_STATE);
 
-            // Allow other buttons to be pressed again
             SetSensitiveThreadsafe(true);
 
             {
@@ -179,15 +184,15 @@ namespace Clavis::GUI {
                 isGitActionRunning = false;
             }
 
-            // This should refresh the folderView, but they must set their own lambda for it
+            if (!alive->load()) return;
             onSync();
 
-            // Remove success/error style after 3 seconds.
-            uniqueSignalTimeout.ConnectOnce([this, buttonID]() {
-                RemoveStateThreadsafe(buttonID);
+            uniqueSignalTimeout.ConnectOnce([this, buttonID, alive]() {
+                if (alive->load())
+                    RemoveStateThreadsafe(buttonID);
             }, 3000);
         });
-        t.detach();
+        // Not detached — destructor joins the thread to prevent use-after-free
     }
 
 }

@@ -17,5 +17,7 @@ namespace Clavis::GUI {
 
         void SetCustomTitlebar();
         void DisableShadows();
+
+        bool on_key_pressed(guint keyval, guint keycode, Gdk::ModifierType state);
     };
 }

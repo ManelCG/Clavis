@@ -24,6 +24,7 @@ namespace Clavis::GUI {
         void SetOnEditPassword(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
         void SetOnRenameItem(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
         void SetOnDeleteItem(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
+        void SetOnExportFolder(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
 
     protected:
 
@@ -33,7 +34,7 @@ namespace Clavis::GUI {
 
         int focusedItem;
 
-        Gtk::Separator* typesSeparator = nullptr;
+        std::vector<Gtk::Separator*> typeSeparators;
 
         Gtk::Box mainVBox;
 
@@ -41,8 +42,9 @@ namespace Clavis::GUI {
 
         std::function<void(const PasswordStoreElements::PasswordStoreElement&)> onElementClicked;
 
-        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> editPasswordCallback = [](const PasswordStoreElements::PasswordStoreElement& elem){};
-        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> renameItemCallback = [](const PasswordStoreElements::PasswordStoreElement& elem){};
-        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> deleteItemCallback = [](const PasswordStoreElements::PasswordStoreElement& elem){};
+        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> editPasswordCallback  = [](const PasswordStoreElements::PasswordStoreElement&){};
+        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> renameItemCallback   = [](const PasswordStoreElements::PasswordStoreElement&){};
+        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> deleteItemCallback   = [](const PasswordStoreElements::PasswordStoreElement&){};
+        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> exportFolderCallback = [](const PasswordStoreElements::PasswordStoreElement&){};
     };
 }

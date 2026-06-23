@@ -3,14 +3,184 @@
 #include <iostream>
 #include <gpgme.h>
 
+#ifndef __WINDOWS__
+#include <unistd.h>
+#else
+#include <io.h>
+#endif
+
 #include <error/ClavisError.h>
 #include <system/Extensions.h>
+#include <system/ProcessWrapper.h>
 
 #include <language/Language.h>
 
 #include <password_store/PasswordStore.h>
 
 namespace Clavis {
+    bool GPG::InitializeGPGME() {
+#ifdef __MACOS__
+        if (!System::FileExists(GetGpgAgentConfPath()))
+            System::TryWriteFile(GetGpgAgentConfPath(), "pinentry-program /opt/homebrew/bin/pinentry-mac");
+#endif
+
+#ifdef __WINDOWS__
+        // GPGME reads GPGME_DEBUG only during gpgme_check_version() (first call).
+        // Set it before that call so the full internal trace goes to a log file.
+        {
+            static bool gpgmeDebugInit = false;
+            if (!gpgmeDebugInit) {
+                gpgmeDebugInit = true;
+                auto logDir = System::GetAppDataFolder() / "gnupg";
+                System::mkdir_p(logDir);
+                auto logPath = logDir / "gpgme-debug.log";
+                std::string val = "9:" + logPath.string();
+                SetEnvironmentVariableA("GPGME_DEBUG", val.c_str());
+                _putenv(("GPGME_DEBUG=" + val).c_str());
+                std::cerr << "[GPGME debug log: " << logPath.string() << "]\n";
+            }
+        }
+
+        // Locate gpg.exe: check alongside the executable first (installed / dev build
+        // after CMake copies bundled executables), then fall back to searching PATH.
+        std::filesystem::path gpgPath;
+        {
+            auto candidate = System::GetExecutableLocation() / "gpg.exe";
+            if (System::FileExists(candidate)) {
+                gpgPath = candidate;
+            } else {
+                char buf[MAX_PATH];
+                if (SearchPathA(nullptr, "gpg.exe", nullptr, MAX_PATH, buf, nullptr) != 0)
+                    gpgPath = buf;
+            }
+        }
+
+        // GnuPG's home on Windows is %APPDATA%\gnupg, not ~/gnupg.
+        auto homedirPath = System::GetAppDataFolder() / "gnupg";
+        std::string homedirStr = homedirPath.string();
+
+        // Set GNUPGHOME in both the Windows env block and the CRT's own env cache.
+        // GPGME reads this via getenv() before falling back to gpgconf, so setting
+        // it here prevents the gpgconf invocation for homedir discovery.
+        SetEnvironmentVariableA("GNUPGHOME", homedirStr.c_str());
+        _putenv(("GNUPGHOME=" + homedirStr).c_str());
+
+        if (!gpgPath.empty()) {
+            auto gpgDir = gpgPath.parent_path();
+            std::string gpgDirStr = gpgDir.string();
+            // Update PATH in both the Windows env block (inherited by child processes)
+            // and the CRT cache (read by GPGME's getenv calls within this process).
+            char* existingPath = getenv("PATH");
+            std::string newPath = gpgDirStr + ";" + (existingPath ? existingPath : "");
+            SetEnvironmentVariableA("PATH", newPath.c_str());
+            _putenv(("PATH=" + newPath).c_str());
+        }
+#endif
+
+        gpgme_check_version(nullptr);
+        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+
+#ifdef __WINDOWS__
+        // Set engine paths after gpgme_check_version (required by the GPGME API).
+        // Create the homedir if it doesn't exist yet; gpg-agent will fail to start
+        // if it can't find or write to the gnupg directory.
+        System::mkdir_p(homedirPath);
+
+        gpgme_set_engine_info(GPGME_PROTOCOL_OpenPGP,
+                              gpgPath.empty() ? nullptr : gpgPath.string().c_str(),
+                              homedirStr.c_str());
+        if (!gpgPath.empty()) {
+            auto gpgDir = gpgPath.parent_path();
+
+            auto gpgconfPath = gpgDir / "gpgconf.exe";
+            if (System::FileExists(gpgconfPath))
+                gpgme_set_engine_info(GPGME_PROTOCOL_GPGCONF,
+                                      gpgconfPath.string().c_str(), nullptr);
+
+            auto connectPath = gpgDir / "gpg-connect-agent.exe";
+
+            // gpg-agent writes its socket into <exe_dir>\gnupg\ (binary-relative on
+            // MSYS2/Windows). Create it so the agent can start even on a fresh install.
+            System::mkdir_p(gpgDir / "gnupg");
+
+            // Ensure gpg-agent.conf has allow-loopback-pinentry.
+            {
+                auto agentConfPath = homedirPath / "gpg-agent.conf";
+                std::string agentConf;
+                System::TryReadFile(agentConfPath, agentConf);
+                if (agentConf.find("allow-loopback-pinentry") == std::string::npos) {
+                    if (!agentConf.empty() && agentConf.back() != '\n')
+                        agentConf += '\n';
+                    agentConf += "allow-loopback-pinentry\n";
+                    System::TryWriteFile(agentConfPath, agentConf);
+                    std::cerr << "[gpg-agent.conf] wrote allow-loopback-pinentry\n";
+                }
+            }
+
+            // Ensure gpg.conf has pinentry-mode loopback so the agent uses loopback
+            // when gpg is invoked directly (GPGME already passes --pinentry-mode=loopback
+            // on the command line, but writing it to gpg.conf is the documented MSYS2 fix).
+            {
+                auto gpgConfPath = homedirPath / "gpg.conf";
+                std::string gpgConf;
+                System::TryReadFile(gpgConfPath, gpgConf);
+                if (gpgConf.find("pinentry-mode loopback") == std::string::npos) {
+                    if (!gpgConf.empty() && gpgConf.back() != '\n')
+                        gpgConf += '\n';
+                    gpgConf += "pinentry-mode loopback\n";
+                    System::TryWriteFile(gpgConfPath, gpgConf);
+                    std::cerr << "[gpg.conf] wrote pinentry-mode loopback\n";
+                }
+            }
+
+            // Kill the running agent once per process run so it restarts fresh
+            // and reads the updated gpg-agent.conf. The agent auto-starts on next use.
+            if (System::FileExists(connectPath)) {
+                static bool agentKilledThisRun = false;
+                if (!agentKilledThisRun) {
+                    agentKilledThisRun = true;
+                    auto pw = System::ProcessWrapper();
+                    pw.Init(connectPath.string(),
+                            {"--homedir", homedirStr, "KILLAGENT", "/bye"},
+                            gpgDir);
+                    pw.Wait();
+                    std::cerr << "[gpg-agent] killed for config reload\n";
+                }
+            }
+
+            // Warm-start the agent (starts it if not running).
+            if (System::FileExists(connectPath)) {
+                auto pw = System::ProcessWrapper();
+                pw.Init(connectPath.string(),
+                        {"--homedir", homedirStr, "/bye"},
+                        gpgDir);
+                pw.Wait();
+            }
+        }
+
+#ifdef __DEBUG__
+        std::cerr << "[GPGME init] gpg=" << gpgPath.string()
+                  << " home=" << homedirStr << "\n";
+        {
+            gpgme_engine_info_t ei = nullptr;
+            gpgme_get_engine_info(&ei);
+            for (auto e = ei; e; e = e->next)
+                std::cerr << "[GPGME engine proto=" << e->protocol
+                          << " bin=" << (e->file_name ? e->file_name : "null")
+                          << " home=" << (e->home_dir ? e->home_dir : "(default)")
+                          << " ver=" << (e->version ? e->version : "?") << "]\n";
+        }
+#endif
+#endif
+
+        return true;
+    }
+
+    std::filesystem::path GPG::GetGpgAgentConfPath() {
+        return System::GetHomeFolder() / ".gnupg/gpg-agent.conf";
+    }
+
+
     bool GPG::TryDecrypt(const std::filesystem::path &path, std::string &out) {
         if (!System::FileExists(path))
             RaiseClavisError(_(ERROR_NOT_A_FILE, path.string()));
@@ -29,7 +199,7 @@ namespace Clavis {
         bool success = false;
 
         // Initialize GPGME
-        gpgme_check_version(nullptr);
+        InitializeGPGME();
 
         // Create a new context
         gpgme_error_t err = gpgme_new(&ctx);
@@ -39,6 +209,7 @@ namespace Clavis {
 
         // Set the context to use ASCII armor if needed
         gpgme_set_armor(ctx, 0); // 0 for binary output, 1 for ASCII armor
+        gpgme_set_pinentry_mode(ctx, GPGME_PINENTRY_MODE_ASK);
 
         // Create data objects from the input data
         err = gpgme_data_new_from_mem(&cipher, reinterpret_cast<const char*>(data.data()), data.size(), 0);
@@ -69,6 +240,7 @@ namespace Clavis {
                 out.assign(buffer.data(), read_bytes);
                 success = true;
             }
+            System::SecureZero(buffer.data(), buffer.size());
         }
 
         if (!success)
@@ -88,8 +260,7 @@ namespace Clavis {
         gpgme_key_t key = nullptr;
         bool success = false;
 
-        gpgme_check_version(nullptr);
-        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+        InitializeGPGME();
 
         err = gpgme_new(&ctx);
         if (err != GPG_ERR_NO_ERROR)
@@ -117,8 +288,7 @@ namespace Clavis {
         gpgme_key_t key = nullptr;
         bool exists = false;
 
-        gpgme_check_version(nullptr);
-        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+        InitializeGPGME();
 
         err = gpgme_new(&ctx);
         if (err != GPG_ERR_NO_ERROR)
@@ -138,6 +308,126 @@ namespace Clavis {
 
 
 
+    static gpgme_error_t symmetric_passphrase_cb(void *opaque, const char * /*uid_hint*/, const char * /*info*/, int prev_was_bad, int fd) {
+        if (prev_was_bad)
+            return GPG_ERR_CANCELED;
+
+        const char* pw = static_cast<const char*>(opaque);
+        size_t len = strlen(pw);
+
+        #ifndef __WINDOWS__
+        if (write(fd, pw, len) < 0) return GPG_ERR_CANCELED;
+        if (write(fd, "\n", 1) < 0) return GPG_ERR_CANCELED;
+        #else
+        _write(fd, pw, (unsigned int)len);
+        _write(fd, "\n", 1);
+        #endif
+
+        return GPG_ERR_NO_ERROR;
+    }
+
+    bool GPG::TryEncryptSymmetric(const std::string& passphrase, const std::vector<uint8_t>& plainData, std::vector<uint8_t>& out) {
+        gpgme_ctx_t ctx = nullptr;
+        gpgme_data_t plain = nullptr;
+        gpgme_data_t cipher = nullptr;
+        bool success = false;
+
+        InitializeGPGME();
+
+        gpgme_error_t err = gpgme_new(&ctx);
+        if (err != GPG_ERR_NO_ERROR)
+            return false;
+
+        gpgme_set_armor(ctx, 0);
+        gpgme_set_pinentry_mode(ctx, GPGME_PINENTRY_MODE_LOOPBACK);
+        gpgme_set_passphrase_cb(ctx, symmetric_passphrase_cb, (void*)passphrase.c_str());
+
+        err = gpgme_data_new_from_mem(&plain, reinterpret_cast<const char*>(plainData.data()), plainData.size(), 0);
+        if (err != GPG_ERR_NO_ERROR) {
+            gpgme_release(ctx);
+            return false;
+        }
+
+        err = gpgme_data_new(&cipher);
+        if (err != GPG_ERR_NO_ERROR) {
+            gpgme_data_release(plain);
+            gpgme_release(ctx);
+            return false;
+        }
+
+        err = gpgme_op_encrypt(ctx, nullptr, GPGME_ENCRYPT_SYMMETRIC, plain, cipher);
+        if (err == GPG_ERR_NO_ERROR) {
+            off_t size = gpgme_data_seek(cipher, 0, SEEK_END);
+            gpgme_data_seek(cipher, 0, SEEK_SET);
+            out.resize(size);
+            ssize_t read_bytes = gpgme_data_read(cipher, out.data(), out.size());
+            if (read_bytes >= 0) {
+                out.resize(read_bytes);
+                success = true;
+            }
+        }
+
+        if (!success)
+            std::cerr << "error TryEncryptSymmetric: " << gpgme_strerror(err) << "\n";
+
+        gpgme_data_release(plain);
+        gpgme_data_release(cipher);
+        gpgme_release(ctx);
+
+        return success;
+    }
+
+    bool GPG::TryDecryptSymmetric(const std::string& passphrase, const std::vector<uint8_t>& data, std::vector<uint8_t>& out) {
+        gpgme_ctx_t ctx = nullptr;
+        gpgme_data_t cipher = nullptr;
+        gpgme_data_t plain = nullptr;
+        bool success = false;
+
+        InitializeGPGME();
+
+        gpgme_error_t err = gpgme_new(&ctx);
+        if (err != GPG_ERR_NO_ERROR)
+            return false;
+
+        gpgme_set_armor(ctx, 0);
+        gpgme_set_pinentry_mode(ctx, GPGME_PINENTRY_MODE_LOOPBACK);
+        gpgme_set_passphrase_cb(ctx, symmetric_passphrase_cb, (void*)passphrase.c_str());
+
+        err = gpgme_data_new_from_mem(&cipher, reinterpret_cast<const char*>(data.data()), data.size(), 0);
+        if (err != GPG_ERR_NO_ERROR) {
+            gpgme_release(ctx);
+            return false;
+        }
+
+        err = gpgme_data_new(&plain);
+        if (err != GPG_ERR_NO_ERROR) {
+            gpgme_data_release(cipher);
+            gpgme_release(ctx);
+            return false;
+        }
+
+        err = gpgme_op_decrypt(ctx, cipher, plain);
+        if (err == GPG_ERR_NO_ERROR) {
+            off_t size = gpgme_data_seek(plain, 0, SEEK_END);
+            gpgme_data_seek(plain, 0, SEEK_SET);
+            out.resize(size);
+            ssize_t read_bytes = gpgme_data_read(plain, out.data(), out.size());
+            if (read_bytes >= 0) {
+                out.resize(read_bytes);
+                success = true;
+            }
+        }
+
+        if (!success)
+            std::cerr << "error TryDecryptSymmetric: " << gpgme_strerror(err) << "\n";
+
+        gpgme_data_release(plain);
+        gpgme_data_release(cipher);
+        gpgme_release(ctx);
+
+        return success;
+    }
+
     bool GPG::TryEncrypt(const std::string &data, std::vector<uint8_t> &out) {
         gpgme_error_t err;
         gpgme_ctx_t ctx = nullptr;
@@ -148,14 +438,14 @@ namespace Clavis {
 
         std::string id = PasswordStore::GetGPGID();  // your recipient's GPG ID
 
-        gpgme_check_version(nullptr);
-        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+        InitializeGPGME();
 
         err = gpgme_new(&ctx);
         if (err != GPG_ERR_NO_ERROR)
             return false;
 
         gpgme_set_armor(ctx, 0); // set to 1 for ASCII output if needed
+        gpgme_set_pinentry_mode(ctx, GPGME_PINENTRY_MODE_ASK);
 
 
         // Look up the recipient's public key
@@ -219,8 +509,7 @@ namespace Clavis {
         gpgme_key_t key = nullptr;
         bool success = false;
 
-        gpgme_check_version(nullptr);
-        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+        InitializeGPGME();
 
         err = gpgme_new(&ctx);
         if (err != GPG_ERR_NO_ERROR)
@@ -228,6 +517,7 @@ namespace Clavis {
 
         // Set ASCII armor to get BEGIN PGP KEY BLOCK
         gpgme_set_armor(ctx, 1);
+        gpgme_set_pinentry_mode(ctx, GPGME_PINENTRY_MODE_ASK);
 
         // Get key (only need once, whether public or secret)
         err = gpgme_get_key(ctx, gpgid.c_str(), &key, exportPrivate ? 1 : 0);
@@ -281,8 +571,7 @@ namespace Clavis {
         bool success = false;
 
         // Initialize GPGME
-        gpgme_check_version(nullptr);
-        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+        InitializeGPGME();
 
         err = gpgme_new(&ctx);
         if (err != GPG_ERR_NO_ERROR)
@@ -321,7 +610,7 @@ namespace Clavis {
                 outFingerprint = f;
             didGetFingerprint = true;
 
-            #ifdef __LINUX__
+            #ifdef HAVE_GPGME_OP_SETOWNERTRUST
             if (!TryChangeKeyTrust(f, 5))
                 success = false;
             #endif
@@ -332,7 +621,7 @@ namespace Clavis {
     }
 
 
-#ifdef __LINUX__
+#ifdef HAVE_GPGME_OP_SETOWNERTRUST
     bool GPG::TryChangeKeyTrust(const std::string& fingerprint, int trustlevel) {
         std::string trustLevelString;
         switch (trustlevel) {
@@ -349,7 +638,8 @@ namespace Clavis {
         gpgme_ctx_t ctx;
 
         // Initialize the GPGME library (required before any GPGME operation)
-        gpgme_check_version(nullptr);
+        InitializeGPGME();
+
         err = gpgme_new(&ctx);
         if (err != GPG_ERR_NO_ERROR) {
             std::cerr << "Failed to create GPGME context: " << gpgme_strerror(err) << std::endl;
@@ -389,8 +679,7 @@ namespace Clavis {
         std::vector<GPG::Key> result;
 
         // Initialize GPGME
-        gpgme_check_version(nullptr);
-        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+        InitializeGPGME();
 
         gpgme_ctx_t ctx;
         gpgme_error_t err = gpgme_new(&ctx);
@@ -601,63 +890,175 @@ namespace Clavis {
 
 
     bool GPG::TryCreateKey(const Key& data, std::string& outFingerprint) {
-        gpgme_check_version(nullptr);
-        gpgme_set_locale(nullptr, LC_CTYPE, setlocale(LC_CTYPE, nullptr));
+        InitializeGPGME();
 
         gpgme_ctx_t ctx = nullptr;
         gpgme_error_t err = gpgme_new(&ctx);
         if (err != GPG_ERR_NO_ERROR)
             return false;
 
-        gpgme_set_armor(ctx, 1); // Make output ASCII armored
+        gpgme_set_armor(ctx, 1);
 
-        // Create parameter string
-        std::ostringstream params;
-        params << "<GnupgKeyParms format=\"internal\">\n";
+#ifdef __WINDOWS__
+        // gpgme_op_createkey requires the loopback pinentry path, which is unreliable
+        // with MSYS2's gpg-agent on Windows (passphrase callback is never invoked).
+        // Use gpgme_op_genkey with the passphrase embedded in the batch parameter block
+        // to bypass pinentry entirely while still protecting the key material.
+        {
+            std::ostringstream parms;
+            parms << "<GnupgKeyParms format=\"internal\">\n";
 
-        params << GetKeyParams(data);
+            switch (data.type) {
+                case KeyType::ECC_25519:
+                    parms << "Key-Type: eddsa\nKey-Curve: ed25519\n"
+                          << "Subkey-Type: ecdh\nSubkey-Curve: cv25519\n";
+                    break;
+                case KeyType::RSA_DSA:
+                    parms << "Key-Type: rsa\nKey-Length: " << data.length << "\nKey-Usage: sign\n"
+                          << "Subkey-Type: rsa\nSubkey-Length: " << data.length << "\nSubkey-Usage: encrypt\n";
+                    break;
+                case KeyType::DSA_ELGAMAL:
+                    parms << "Key-Type: dsa\nKey-Length: " << data.length << "\nKey-Usage: sign\n"
+                          << "Subkey-Type: elg\nSubkey-Length: " << data.length << "\nSubkey-Usage: encrypt\n";
+                    break;
+                case KeyType::ECC_NIST_P256:
+                    parms << "Key-Type: ecdsa\nKey-Curve: nistp256\nKey-Usage: sign\n"
+                          << "Subkey-Type: ecdh\nSubkey-Curve: nistp256\nSubkey-Usage: encrypt\n";
+                    break;
+                case KeyType::ECC_NIST_P384:
+                    parms << "Key-Type: ecdsa\nKey-Curve: nistp384\nKey-Usage: sign\n"
+                          << "Subkey-Type: ecdh\nSubkey-Curve: nistp384\nSubkey-Usage: encrypt\n";
+                    break;
+                case KeyType::ECC_NIST_P521:
+                    parms << "Key-Type: ecdsa\nKey-Curve: nistp521\nKey-Usage: sign\n"
+                          << "Subkey-Type: ecdh\nSubkey-Curve: nistp521\nSubkey-Usage: encrypt\n";
+                    break;
+                case KeyType::ECC_BRAINPOOL_P256:
+                    parms << "Key-Type: ecdsa\nKey-Curve: brainpoolP256r1\nKey-Usage: sign\n"
+                          << "Subkey-Type: ecdh\nSubkey-Curve: brainpoolP256r1\nSubkey-Usage: encrypt\n";
+                    break;
+                default:
+                    parms << "Key-Type: eddsa\nKey-Curve: ed25519\n"
+                          << "Subkey-Type: ecdh\nSubkey-Curve: cv25519\n";
+                    break;
+            }
 
-        params << "Name-Real: " << data.username << "\n";
-        params << "Name-Comment: " << data.comment << "\n";
-        params << "Name-Email: " << data.keyname << "\n";
+            parms << "Name-Real: " << data.username << "\n";
+            parms << "Name-Email: " << data.keyname << "\n";
+            if (!data.comment.empty())
+                parms << "Name-Comment: " << data.comment << "\n";
+            parms << "Expire-Date: 0\n";
 
+            if (data.password.empty())
+                parms << "%no-protection\n";
+            else
+                parms << "Passphrase: " << data.password << "\n";
+
+            parms << "</GnupgKeyParms>\n";
+            std::string parmsStr = parms.str();
+
+            std::cerr << "[TryCreateKey] using gpgme_op_genkey (Windows batch mode)\n";
+
+            err = gpgme_op_genkey(ctx, parmsStr.c_str(), nullptr, nullptr);
+            if (err != GPG_ERR_NO_ERROR) {
+                std::cerr << "error gpgme_op_genkey: " << gpgme_strerror(err)
+                          << " [src=" << gpgme_strsource(err)
+                          << " code=" << gpgme_err_code(err) << "]\n";
+                gpgme_release(ctx);
+                return false;
+            }
+
+            gpgme_genkey_result_t result = gpgme_op_genkey_result(ctx);
+            if (result && result->fpr)
+                outFingerprint = result->fpr;
+
+            gpgme_release(ctx);
+            return !outFingerprint.empty();
+        }
+#endif
+
+        gpgme_set_pinentry_mode(ctx, GPGME_PINENTRY_MODE_LOOPBACK);
         if (!data.password.empty())
-            params << "Passphrase: " << data.password << "\n";
-        else
-            params << "Passphrase: \n"; // empty password
+            gpgme_set_passphrase_cb(ctx, symmetric_passphrase_cb, (void*)data.password.c_str());
 
-        params << "Expire-Date: 0\n"; // Never expires
-        params << "</GnupgKeyParms>\n";
+        // Build user ID string: "Real Name (comment) <email>"
+        std::string userid = data.username;
+        if (!data.comment.empty())
+            userid += " (" + data.comment + ")";
+        userid += " <" + data.keyname + ">";
 
-        gpgme_data_t key_params;
-        err = gpgme_data_new_from_mem(&key_params, params.str().c_str(), params.str().size(), 0);
+        // Map KeyType to gpg --quick-gen-key algo strings.
+        // "default" creates ed25519+cv25519 (primary sign/cert + subkey encr).
+        // For other types, we create the primary key and then add an encryption subkey.
+        std::string primaryAlgo;
+        std::string subkeyAlgo;
+        switch (data.type) {
+            case KeyType::ECC_25519:
+                primaryAlgo = "default";
+                break;
+            case KeyType::RSA_DSA:
+                primaryAlgo = "rsa" + std::to_string(data.length);
+                subkeyAlgo  = "rsa" + std::to_string(data.length);
+                break;
+            case KeyType::DSA_ELGAMAL:
+                primaryAlgo = "dsa" + std::to_string(data.length);
+                subkeyAlgo  = "elg" + std::to_string(data.length);
+                break;
+            case KeyType::ECC_NIST_P256:
+                primaryAlgo = "nistp256";
+                subkeyAlgo  = "nistp256";
+                break;
+            case KeyType::ECC_NIST_P384:
+                primaryAlgo = "nistp384";
+                subkeyAlgo  = "nistp384";
+                break;
+            case KeyType::ECC_NIST_P521:
+                primaryAlgo = "nistp521";
+                subkeyAlgo  = "nistp521";
+                break;
+            case KeyType::ECC_BRAINPOOL_P256:
+                primaryAlgo = "brainpoolP256r1";
+                subkeyAlgo  = "brainpoolP256r1";
+                break;
+            default:
+                primaryAlgo = "default";
+                break;
+        }
+
+        unsigned int flags = GPGME_CREATE_NOEXPIRE;
+        if (data.password.empty())
+            flags |= GPGME_CREATE_NOPASSWD;
+
+        err = gpgme_op_createkey(ctx, userid.c_str(), primaryAlgo.c_str(), 0, 0, nullptr, flags);
         if (err != GPG_ERR_NO_ERROR) {
-            std::cerr << "error gpgme_data_new_from_mem: " << gpgme_strerror(err) << "\n";
+            std::cerr << "error gpgme_op_createkey: " << gpgme_strerror(err)
+                      << " [src=" << gpgme_strsource(err)
+                      << " code=" << gpgme_err_code(err) << "]\n";
             gpgme_release(ctx);
             return false;
         }
 
-        auto paramsStr = params.str();
-        auto cstr = paramsStr.c_str();
-        // Generate the key
-        err = gpgme_op_genkey(ctx,cstr, nullptr, nullptr);
-        gpgme_data_release(key_params);
-
-        if (err != GPG_ERR_NO_ERROR) {
-            std::cerr << "error gpgme_op_genkey: " << gpgme_strerror(err) << "\n";
-            gpgme_release(ctx);
-            return false;
-        }
-
-        // Optional: get generated key info
         gpgme_genkey_result_t result = gpgme_op_genkey_result(ctx);
-        if (result && result->fpr) {
-            std::cout << "Key generated with fingerprint: " << result->fpr << "\n";
+        if (result && result->fpr)
             outFingerprint = result->fpr;
+
+        // For key types that need a separate encryption subkey.
+        if (!subkeyAlgo.empty() && !outFingerprint.empty()) {
+            gpgme_key_t key = nullptr;
+            err = gpgme_get_key(ctx, outFingerprint.c_str(), &key, 1);
+            if (err == GPG_ERR_NO_ERROR && key) {
+                unsigned int subflags = GPGME_CREATE_NOEXPIRE | GPGME_CREATE_ENCR;
+                if (data.password.empty())
+                    subflags |= GPGME_CREATE_NOPASSWD;
+                err = gpgme_op_createsubkey(ctx, key, subkeyAlgo.c_str(), 0, 0, subflags);
+                if (err != GPG_ERR_NO_ERROR)
+                    std::cerr << "error gpgme_op_createsubkey: " << gpgme_strerror(err) << "\n";
+                gpgme_key_unref(key);
+            }
         }
 
         gpgme_release(ctx);
-        return true;
+        return !outFingerprint.empty();
     }
 
 

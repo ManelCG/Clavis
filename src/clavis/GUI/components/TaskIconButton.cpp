@@ -25,7 +25,7 @@ namespace Clavis::GUI {
 
         RegisterIcon(State::PROGRESS, progressIcon);
         RegisterIcon(State::SUCCESS, successIcon);
-        RegisterIcon(State::ERROR, failureIcon);
+        RegisterIcon(State::ERROR_STATE, failureIcon);
     }
 
     void TaskIconButton::SetTooltips(const std::string &defaultTooltip, const std::string &progressTooltip, const std::string &successTooltip, const std::string &failureTooltip) {
@@ -33,7 +33,7 @@ namespace Clavis::GUI {
 
         RegisterTooltip(State::PROGRESS, progressTooltip);
         RegisterTooltip(State::SUCCESS, successTooltip);
-        RegisterTooltip(State::ERROR, failureTooltip);
+        RegisterTooltip(State::ERROR_STATE, failureTooltip);
     }
 
     void TaskIconButton::SetTask(const std::function<bool()> &newTask) {
@@ -57,7 +57,7 @@ namespace Clavis::GUI {
             if (success)
                 currentState = State::SUCCESS;
             else
-                currentState = State::ERROR;
+                currentState = State::ERROR_STATE;
 
             setStateDispatcher.emit();
 

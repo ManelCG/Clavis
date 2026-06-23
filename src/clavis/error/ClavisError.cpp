@@ -58,6 +58,9 @@ namespace Clavis {
 		}
 
 		ClavisException::ClavisExceptionData ClavisException::GetLastException() {
+			if (ExceptionStack.empty())
+				RaiseClavisError("Tried to pop exception data, but exception stack is empty!");
+
 			auto data = ExceptionStack.top();
 			ExceptionStack.pop();
 			return data;

@@ -10,6 +10,9 @@
 #include <GUI/palettes/SimpleEntryPalette.h>
 #include <GUI/palettes/NewPasswordPalette.h>
 #include <GUI/palettes/SimpleYesNoQuestionPalette.h>
+#include <GUI/palettes/ExportPasswordStorePalette.h>
+#include <GUI/palettes/ImportPasswordStorePalette.h>
+#include <clav/ClavFile.h>
 
 #include <GUI/palettes/ExceptionPalette.h>
 #include <GUI/palettes/first_run/WelcomePalette.h>
@@ -33,6 +36,7 @@ namespace Clavis::GUI {
         palette->SetTitle(_(NEW_FOLDER_PALETTE_TITLE));
         palette->SetLabelText(_(NEW_FOLDER_PALETTE_LABEL_TITLE));
         palette->SetYesSuggested();
+        palette->SetIsEntryRequiredForYes(true);
 
         std::string folderName = "";
         if (!palette->Run([&folderName](SimpleEntryPalette *p, bool r) {
@@ -135,15 +139,13 @@ namespace Clavis::GUI {
         auto relpath = std::filesystem::relative(fullpath, passwordStore.GetRoot());
 
         if (element.IsFolder()) {
-            // Git wont remove empty folders
+            // Git won't remove empty folders; also fall back if git rm fails (untracked)
             if (!Git::IsGitRepo() || (System::DirectoryExists(fullpath) && System::ListContents(fullpath).empty()))
                 std::filesystem::remove_all(fullpath);
-            else
-                Git::RemoveFolder(relpath, name);
+            else if (!Git::RemoveFolder(relpath, name))
+                std::filesystem::remove_all(fullpath);
         } else {
-            if (Git::IsGitRepo())
-                Git::RemoveFile(relpath, name);
-            else
+            if (!Git::IsGitRepo() || !Git::RemoveFile(relpath, name))
                 std::filesystem::remove(fullpath);
         }
 
@@ -189,7 +191,7 @@ namespace Clavis::GUI {
     }
 
     bool Workflows::OpenFileDialog(FileOpenDialogAction action, std::string &outSelectedPath, Gtk::Widget *parent) {
-	#ifdef __LINUX__
+	#ifdef __UNIX__
         auto window = Extensions::GetParentWindow(parent);
         auto dialog = Gtk::FileDialog::create();
 
@@ -198,8 +200,12 @@ namespace Clavis::GUI {
             window->set_sensitive(false);
         }
 
-        if (! outSelectedPath.empty())
-            dialog->set_initial_name(outSelectedPath);
+        if (!outSelectedPath.empty()) {
+            if (action == FileOpenDialogAction::OPEN_FOLDER && System::DirectoryExists(outSelectedPath))
+                dialog->set_initial_folder(Gio::File::create_for_path(outSelectedPath));
+            else
+                dialog->set_initial_name(outSelectedPath);
+        }
 
         MainLoopHalter halter;
         bool response;
@@ -280,6 +286,10 @@ namespace Clavis::GUI {
         }
 
         case FileOpenDialogAction::SAVE_FILE: {
+            if (!outSelectedPath.empty()) {
+                auto wname = System::UTF8ToUnicode(outSelectedPath);
+                wcsncpy_s(filePath, MAX_PATH, wname.c_str(), _TRUNCATE);
+            }
             OPENFILENAMEW ofn = { 0 };
             ofn.lStructSize = sizeof(ofn);
             ofn.hwndOwner = nullptr;
@@ -371,6 +381,25 @@ namespace Clavis::GUI {
 
     }
 
+    bool Workflows::ExportGPGKeyDirectWorkflow(bool exportPrivate, Gtk::Window* parent) {
+        std::string gpgid;
+        if (!PasswordStore::TryGetGPGID(gpgid))
+            RaiseClavisError(_(ERROR_GPG_ID_FILE_NOT_FOUND, System::GetGPGIDPath().string()));
+
+        std::string path = exportPrivate ? "private_key.asc" : "public_key.asc";
+        if (!OpenFileDialog(FileOpenDialogAction::SAVE_FILE, path, parent))
+            return false;
+
+        std::vector<uint8_t> data;
+        if (!GPG::TryExportKey(gpgid, exportPrivate, data))
+            RaiseClavisError(_(ERROR_UNABLE_TO_EXPORT_KEY));
+
+        if (!System::TryWriteFile(std::filesystem::path(path), data))
+            RaiseClavisError(_(ERROR_COULD_NOT_WRITE_FILE, path));
+
+        return true;
+    }
+
     bool Workflows::ImportGPGWorkflow(Gtk::Window *parent, std::string& outFingerprint) {
         std::string path;
         if (!OpenFileDialog(FileOpenDialogAction::OPEN_FILE, path, parent))
@@ -402,6 +431,110 @@ namespace Clavis::GUI {
     }
 
 
+
+    void Workflows::ExportPasswordStoreWorkflow(PasswordStoreManager* passwordStoreManager, Gtk::Window* parent) {
+        const auto store      = passwordStoreManager->GetPasswordStore();
+        const auto exportName = store.GetRoot().filename().string();
+
+        auto palette = ExportPasswordStorePalette::Create(parent, [&exportName]() {
+            return new ExportPasswordStorePalette("", "export.clav");
+        });
+
+        std::filesystem::path   exportPath;
+        std::string             password;
+        Clav::EncryptionType    encMode = Clav::EncryptionType::None;
+
+        const bool confirmed = palette->Run([&](ExportPasswordStorePalette* p, bool r) {
+            if (!r) return;
+            exportPath = p->GetExportPath();
+            password   = p->GetPassword();
+            encMode    = p->GetEncryptionMode();
+        });
+
+        if (!confirmed)
+            return;
+
+        auto fileOut = Clav::ClavFile::Build(store, exportName, encMode, password);
+
+        if (!System::TryWriteFile(exportPath, fileOut))
+            RaiseClavisError(_(ERROR_COULD_NOT_WRITE_FILE, exportPath.string()));
+    }
+
+    void Workflows::ExportFolderWorkflow(PasswordStoreManager* passwordStoreManager, const PasswordStoreElements::PasswordStoreElement& folder) {
+        const auto store          = passwordStoreManager->GetPasswordStore();
+        const auto folderName     = folder.GetName();
+        const auto defaultFilename = folder.GetPath().filename().string() + ".clav";
+
+        auto palette = ExportPasswordStorePalette::Create(passwordStoreManager, [&folderName, &defaultFilename]() {
+            return new ExportPasswordStorePalette(folderName, defaultFilename);
+        });
+
+        std::filesystem::path   exportPath;
+        std::string             password;
+        Clav::EncryptionType    encMode = Clav::EncryptionType::None;
+
+        const bool confirmed = palette->Run([&](ExportPasswordStorePalette* p, bool r) {
+            if (!r) return;
+            exportPath = p->GetExportPath();
+            password   = p->GetPassword();
+            encMode    = p->GetEncryptionMode();
+        });
+
+        if (!confirmed)
+            return;
+
+        auto fileOut = Clav::ClavFile::Build(store, folder.GetPath(), folderName, encMode, password);
+
+        if (!System::TryWriteFile(exportPath, fileOut))
+            RaiseClavisError(_(ERROR_COULD_NOT_WRITE_FILE, exportPath.string()));
+    }
+
+    void Workflows::ImportPasswordStoreWorkflow(PasswordStoreManager* passwordStoreManager, Gtk::Window* parent) {
+        auto palette = ImportPasswordStorePalette::Create(parent, []() {
+            return new ImportPasswordStorePalette();
+        });
+
+        std::filesystem::path filePath;
+        std::string           password;
+
+        const bool confirmed = palette->Run([&](ImportPasswordStorePalette* p, bool r) {
+            if (!r) return;
+            filePath = p->GetFilePath();
+            password = p->GetPassword();
+        });
+
+        if (!confirmed)
+            return;
+
+        std::vector<uint8_t> fileData;
+        if (!System::TryReadFile(filePath, fileData))
+            RaiseClavisError(_(ERROR_IMPORT_FAILED));
+
+        Clav::ParsedClavFile parsed;
+        const auto result = Clav::ClavFile::TryRead(fileData, parsed, password);
+
+        if (result != Clav::ClavReadResult::Ok)
+            RaiseClavisError(_(ERROR_IMPORT_FAILED));
+
+        if (!parsed.publicKeyData.empty() && !Clav::ClavFile::CheckPublicKeyMatchesStore(parsed.publicKeyData))
+            RaiseClavisError(_(ERROR_IMPORT_GPG_KEY_MISMATCH));
+
+        std::string destPath = passwordStoreManager->GetPasswordStore().GetRoot().string();
+        if (!OpenFileDialog(FileOpenDialogAction::OPEN_FOLDER, destPath, parent))
+            return;
+
+        if (!Clav::ClavFile::Unpack(parsed, destPath))
+            RaiseClavisError(_(ERROR_IMPORT_FAILED));
+
+        if (Git::IsGitRepo()) {
+            std::vector<std::filesystem::path> importedPaths;
+            for (const auto& entry : parsed.entries)
+                importedPaths.push_back(std::filesystem::path(destPath) / entry.relPath);
+            Git::CommitImport(importedPaths, parsed.name);
+        }
+
+        passwordStoreManager->Refresh();
+    }
 
     bool Workflows::FirstRunWorkflow(const Glib::RefPtr<Gtk::Application> &app) {
         Glib::add_exception_handler([]() {

@@ -1,4 +1,8 @@
-#ifdef __LINUX__
+#if defined(__LINUX__) || defined(__MACOS__)
+#define __UNIX__
+#endif
+
+#ifdef __UNIX__
 #include <cstring>
 #endif
 
@@ -6,6 +10,8 @@
 
 #ifdef __WINDOWS__
 #define __RUNNING_PLATFORM__ "Windows"
+#elif defined __MACOS__
+#define __RUNNING_PLATFORM__ "MacOS"
 #elif defined __LINUX__
 #define __RUNNING_PLATFORM__ "Linux"
 #endif

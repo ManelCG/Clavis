@@ -4,7 +4,7 @@ namespace Clavis::GUI {
     StateIconButton::StateIconButton() {
         StyleContext = get_style_context();
 
-        RegisterState(State::ERROR, "button {background: #910101;}");
+        RegisterState(State::ERROR_STATE, "button {background: #910101;}");
         RegisterState(State::PROGRESS, "button {background: #00A5CD;}");
         RegisterState(State::SUCCESS, "button {background: #00BC06;}");
         RegisterState(State::WARNING, "button {background: #df9900;}");

@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <filesystem>
 
 #include <glibmm/ustring.h>
 
@@ -15,7 +16,14 @@
 
 
 namespace Clavis::Language {
-    Glib::ustring GetResourceString(_I18N_MAP_ strings, std::vector<std::string> arguments);
+    struct StrArg {
+        std::string value;
+        StrArg(std::string s) : value(std::move(s)) {}
+        StrArg(const char* s) : value(s) {}
+        StrArg(const std::filesystem::path& p) : value(p.string()) {}
+    };
+
+    Glib::ustring GetResourceString(_I18N_MAP_ strings, std::vector<StrArg> arguments);
 
     std::pair<std::string, std::string> GetLanguageData(LanguagesEnum language);
     std::string GetLanguageCode(LanguagesEnum language);
@@ -108,6 +116,12 @@ _(MAINMENU_EDIT_MENU_GPG_KEY_SETTINGS,
     __(ENG, "GPG key Settings"),
     __(ESP, "Configurar clave GPG"),
     __(VAL, "Configurar clau GPG")
+)
+
+_(MAINMENU_EDIT_MENU_SETTINGS,
+    __(ENG, "Settings"),
+    __(ESP, "Configuración"),
+    __(VAL, "Configuració")
 )
 
 #pragma endregion
@@ -417,6 +431,12 @@ _(FILTER_FILES_SEARCHBAR_PLACEHOLDER,
     __(VAL, "Filtrar arxius")
 )
 
+_(FILTER_FILES_SEARCHBAR_PLACEHOLDER_RECURSIVE,
+    __(ENG, "Recursive search"),
+    __(ESP, "Búsqueda recursiva"),
+    __(VAL, "Cerca recursiva")
+)
+
 _(PASSWORDSTORE_DECRYPTED_PASSWORD_LABEL,
     __(ENG, "Decrypted Password:"),
     __(ESP, "Contraseña Descifrada:"),
@@ -441,9 +461,21 @@ _(PASSWORD_STORE_MANAGER_CONTEXT_MENU_RENAME_ITEM_BUTTON,
     __(VAL, "Renombrar")
 )
 
+_(PASSWORD_STORE_MANAGER_CONTEXT_MENU_EXPORT_FOLDER_BUTTON,
+    __(ENG, "Export as .clav"),
+    __(ESP, "Exportar como .clav"),
+    __(VAL, "Exportar com a .clav")
+)
+
 #pragma endregion
 
 #pragma region Buttons
+_(MISC_SECONDS,
+    __(ENG, "Seconds:"),
+    __(ESP, "Segundos:"),
+    __(VAL, "Segons:")
+)
+
 _(MISC_SAVE_BUTTON,
     __(ENG, "Save"),
     __(ESP, "Guardar"),
@@ -692,7 +724,7 @@ _(ERROR_UNKNOWN_ENUM_VALUE,
     __(VAL, "Valor desconegut: {0}")
 )
 
-_(ERROR_FILE_NOT_FOUND,
+_(CLAVIS_ERROR_FILE_NOT_FOUND,
     __(ENG, "File not found: {0}"),
     __(ESP, "Archivo no encontrado: {0}"),
     __(VAL, "Arxiu no trobat: {0}")
@@ -799,6 +831,12 @@ _(GIT_MOVED_ELEMENT_COMMIT_MESSAGE,
     __(ENG, "Clavis: Moved '{0}' to '{1}'"),
     __(ESP, "Clavis: Movido '{0}' a '{1}'"),
     __(VAL, "Clavis: Mogut '{0}' a '{1}'")
+)
+
+_(GIT_IMPORTED_PASSWORD_STORE_COMMIT_MESSAGE,
+    __(ENG, "Clavis: Imported password store '{0}'"),
+    __(ESP, "Clavis: Importado repositorio de contraseñas '{0}'"),
+    __(VAL, "Clavis: Importat repositori de contrasenyes '{0}'")
 )
 
 _(ERROR_GIT_NOT_INITIALIZED,
@@ -982,6 +1020,58 @@ _(DO_EXPORT_PRIVATE_KEY_CHECKBUTTON,
     __(ESP, "Incluir clave privada"),
     __(VAL, "Incluïr clau privada")
 )
+
+// EXPORT PASSWORD STORE PALETTE
+_(EXPORT_PASSWORD_STORE_PALETTE_TITLE,
+    __(ENG, "Export Password Store"),
+    __(ESP, "Exportar Repositorio de Contraseñas"),
+    __(VAL, "Exportar Repositori de Contrasenyes")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_FOLDER_LABEL,
+    __(ENG, "Folder:"),
+    __(ESP, "Carpeta:"),
+    __(VAL, "Carpeta:")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_PATH_PLACEHOLDER,
+    __(ENG, "Output file path..."),
+    __(ESP, "Ruta del archivo de salida..."),
+    __(VAL, "Ruta del fitxer de eixida...")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_ENCRYPTION_LABEL,
+    __(ENG, "Encryption"),
+    __(ESP, "Cifrado"),
+    __(VAL, "Xifratge")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_NO_ENCRYPTION,
+    __(ENG, "No encryption"),
+    __(ESP, "Sin cifrado"),
+    __(VAL, "Sense xifratge")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_ENCRYPT_PASSWORD,
+    __(ENG, "Encrypt with password"),
+    __(ESP, "Cifrar con contraseña"),
+    __(VAL, "Xifrar amb contrasenya")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_ENCRYPT_GPG_KEY,
+    __(ENG, "Encrypt with GPG key"),
+    __(ESP, "Cifrar con clave GPG"),
+    __(VAL, "Xifrar amb clau GPG")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_PASSWORD_PLACEHOLDER,
+    __(ENG, "Encryption password..."),
+    __(ESP, "Contraseña de cifrado..."),
+    __(VAL, "Contrasenya de xifratge...")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_SHOW_PASSWORD,
+    __(ENG, "Show"),
+    __(ESP, "Mostrar"),
+    __(VAL, "Mostrar")
+)
+_(EXPORT_PASSWORD_STORE_PALETTE_HIDE_PASSWORD,
+    __(ENG, "Hide"),
+    __(ESP, "Ocultar"),
+    __(VAL, "Ocultar")
+)
 _(GPG_KEY_PALETTE_CREATE_NEW_KEY_BUTTON,
     __(ENG, "Create new key"),
     __(ESP, "Crear nueva clave"),
@@ -1117,13 +1207,262 @@ _(ERROR_COULD_NOT_READ_FILE,
     __(VAL, "No s'ha pogut escriure el fitxer: {0}")
 )
 
+_(ERROR_EXPORT_PATH_EMPTY,
+    __(ENG, "Export path cannot be empty."),
+    __(ESP, "La ruta de exportación no puede estar vacía."),
+    __(VAL, "La ruta d'exportació no pot estar buida.")
+)
+
+_(ERROR_EXPORT_FAILED,
+    __(ENG, "Failed to export password store."),
+    __(ESP, "Error al exportar el repositorio de contraseñas."),
+    __(VAL, "Error en exportar el repositori de contrasenyes.")
+)
+
+#pragma endregion
+
+#pragma region Import Password Store Palette
+
+_(IMPORT_PASSWORD_STORE_PALETTE_TITLE,
+    __(ENG, "Import Password Store"),
+    __(ESP, "Importar Repositorio de Contraseñas"),
+    __(VAL, "Importar Repositori de Contrasenyes")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_PATH_PLACEHOLDER,
+    __(ENG, "Path to .clav file..."),
+    __(ESP, "Ruta del archivo .clav..."),
+    __(VAL, "Ruta del fitxer .clav...")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_PASSWORD_PLACEHOLDER,
+    __(ENG, "Decryption password..."),
+    __(ESP, "Contraseña de descifrado..."),
+    __(VAL, "Contrasenya de desxifratge...")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_STATUS_NOT_A_CLAV,
+    __(ENG, "Not a valid .clav file"),
+    __(ESP, "No es un archivo .clav válido"),
+    __(VAL, "No és un fitxer .clav vàlid")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_STATUS_UNSUPPORTED_VERSION,
+    __(ENG, "Unsupported .clav file version"),
+    __(ESP, "Versión de archivo .clav no soportada"),
+    __(VAL, "Versió de fitxer .clav no suportada")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_STATUS_KEY_MISMATCH,
+    __(ENG, "The passwords in this file are encrypted for a different GPG key"),
+    __(ESP, "Las contraseñas de este archivo están cifradas para una clave GPG diferente"),
+    __(VAL, "Les contrasenyes d'aquest fitxer estan xifrades per a una clau GPG diferent")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_STATUS_CANNOT_DECRYPT,
+    __(ENG, "Cannot decrypt: the required GPG key is not available"),
+    __(ESP, "No se puede descifrar: la clave GPG necesaria no está disponible"),
+    __(VAL, "No es pot desxifrar: la clau GPG necessària no està disponible")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_STATUS_VALID_NO_ENCRYPTION,
+    __(ENG, "Valid .clav file (not encrypted)"),
+    __(ESP, "Archivo .clav válido (sin cifrado)"),
+    __(VAL, "Fitxer .clav vàlid (sense xifratge)")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_STATUS_VALID_GPG,
+    __(ENG, "Valid .clav file, encrypted with your GPG key"),
+    __(ESP, "Archivo .clav válido, cifrado con tu clave GPG"),
+    __(VAL, "Fitxer .clav vàlid, xifrat amb la teua clau GPG")
+)
+_(IMPORT_PASSWORD_STORE_PALETTE_STATUS_PASSWORD_ENCRYPTED,
+    __(ENG, "Password-encrypted. Enter the password to import."),
+    __(ESP, "Cifrado con contraseña. Introduce la contraseña para importar."),
+    __(VAL, "Xifrat amb contrasenya. Introduïx la contrasenya per a importar.")
+)
+_(ERROR_IMPORT_FAILED,
+    __(ENG, "Failed to import .clav file."),
+    __(ESP, "Error al importar el archivo .clav."),
+    __(VAL, "Error en importar el fitxer .clav.")
+)
+_(ERROR_IMPORT_WRONG_PASSWORD,
+    __(ENG, "Wrong password."),
+    __(ESP, "Contraseña incorrecta."),
+    __(VAL, "Contrasenya incorrecta.")
+)
+_(ERROR_IMPORT_GPG_KEY_MISMATCH,
+    __(ENG, "These passwords were encrypted for a different GPG key."),
+    __(ESP, "Estas contraseñas están cifradas para una clave GPG diferente."),
+    __(VAL, "Aquestes contrasenyes estan xifrades per a una clau GPG diferent.")
+)
+
+#pragma endregion
+
+#pragma region Settings Palette
+
+_(SETTINGS_PALETTE_TITLE,
+    __(ENG, "Settings"),
+    __(ESP, "Configuración"),
+    __(VAL, "Configuració")
+)
+
+_(SETTINGS_SECTION_GENERAL,
+    __(ENG, "General"),
+    __(ESP, "General"),
+    __(VAL, "General")
+)
+_(SETTINGS_SECTION_APPEARANCE,
+    __(ENG, "Appearance"),
+    __(ESP, "Apariencia"),
+    __(VAL, "Aparença")
+)
+_(SETTINGS_SECTION_PASSWORD_STORE,
+    __(ENG, "Password Store"),
+    __(ESP, "Repositorio de Contraseñas"),
+    __(VAL, "Repositori de Contrasenyes")
+)
+_(SETTINGS_SECTION_SECURITY,
+    __(ENG, "Security"),
+    __(ESP, "Seguridad"),
+    __(VAL, "Seguretat")
+)
+_(SETTINGS_SECTION_PASSWORD_BROWSER,
+    __(ENG, "Password Browser"),
+    __(ESP, "Explorador de Contraseñas"),
+    __(VAL, "Explorador de Contrasenyes")
+)
+_(SETTINGS_SECTION_PASSWORD_GENERATOR,
+    __(ENG, "Password Generator"),
+    __(ESP, "Generador de Contraseñas"),
+    __(VAL, "Generador de Contrasenyes")
+)
+_(SETTINGS_SECTION_DEVELOPER,
+    __(ENG, "Developer"),
+    __(ESP, "Desarrollador"),
+    __(VAL, "Desenvolupador")
+)
+
+_(SETTINGS_LANGUAGE_LABEL,
+    __(ENG, "Language"),
+    __(ESP, "Idioma"),
+    __(VAL, "Idioma")
+)
+_(SETTINGS_DO_USE_DARK_THEME_LABEL,
+    __(ENG, "Use dark theme"),
+    __(ESP, "Usar tema oscuro"),
+    __(VAL, "Usar tema fosc")
+)
+_(SETTINGS_WINDOW_DECORATIONS_LABEL,
+    __(ENG, "Window decorations"),
+    __(ESP, "Decoraciones de ventana"),
+    __(VAL, "Decoracions de finestra")
+)
+_(SETTINGS_WINDOW_DECORATIONS_CLAVIS_CSD,
+    __(ENG, "Clavis (custom title bar)"),
+    __(ESP, "Clavis (barra de título personalizada)"),
+    __(VAL, "Clavis (barra de títol personalitzada)")
+)
+_(SETTINGS_WINDOW_DECORATIONS_GTK_CSD,
+    __(ENG, "System (GTK default)"),
+    __(ESP, "Sistema (GTK por defecto)"),
+    __(VAL, "Sistema (GTK per defecte)")
+)
+_(SETTINGS_WINDOW_DECORATIONS_FORCE_NO_CSD,
+    __(ENG, "Server-side decorations"),
+    __(ESP, "Decoraciones del servidor"),
+    __(VAL, "Decoracions del servidor")
+)
+_(SETTINGS_FORCE_CLAVIS_STYLE_LABEL,
+    __(ENG, "Force Clavis menu style"),
+    __(ESP, "Forzar estilo de menú Clavis"),
+    __(VAL, "Forçar estil de menú Clavis")
+)
+_(SETTINGS_DISABLE_SHADOWS_LABEL,
+    __(ENG, "Disable window shadows"),
+    __(ESP, "Desactivar sombras de ventana"),
+    __(VAL, "Desactivar ombres de finestra")
+)
+_(SETTINGS_CLAVIS_FONT_LABEL,
+    __(ENG, "Font"),
+    __(ESP, "Fuente"),
+    __(VAL, "Font")
+)
+_(SETTINGS_CLAVIS_THEME_LABEL,
+    __(ENG, "Theme"),
+    __(ESP, "Tema"),
+    __(VAL, "Tema")
+)
+_(SETTINGS_PASSWORD_STORE_PATH_LABEL,
+    __(ENG, "Password store path"),
+    __(ESP, "Ruta del repositorio de contraseñas"),
+    __(VAL, "Ruta del repositori de contrasenyes")
+)
+_(SETTINGS_SHOW_HIDDEN_FILES_LABEL,
+    __(ENG, "Show hidden files"),
+    __(ESP, "Mostrar archivos ocultos"),
+    __(VAL, "Mostrar fitxers ocults")
+)
+_(SETTINGS_CLIPBOARD_CLEAR_SECONDS_LABEL,
+    __(ENG, "Clear clipboard after (seconds, 0 = never)"),
+    __(ESP, "Borrar portapapeles tras (segundos, 0 = nunca)"),
+    __(VAL, "Esborrar porta-retalls després de (segons, 0 = mai)")
+)
+_(SETTINGS_CLIPBOARD_CLEAR_ENABLED_LABEL,
+    __(ENG, "Clear clipboard after copy"),
+    __(ESP, "Borrar portapapeles al copiar"),
+    __(VAL, "Esborrar porta-retalls en copiar")
+)
+_(SETTINGS_CLEAR_PASSWORD_DISPLAY_LABEL,
+    __(ENG, "Clear decrypted password after display"),
+    __(ESP, "Borrar contraseña descifrada tras mostrarla"),
+    __(VAL, "Esborrar contrasenya desxifrada després de mostrar-la")
+)
+_(SETTINGS_CLIPBOARD_CLEAR_DELAY_LABEL,
+    __(ENG, "Delay (seconds)"),
+    __(ESP, "Retardo (segundos)"),
+    __(VAL, "Retard (segons)")
+)
+_(SETTINGS_FILTER_CASE_SENSITIVE_LABEL,
+    __(ENG, "Case-sensitive search"),
+    __(ESP, "Búsqueda sensible a mayúsculas"),
+    __(VAL, "Cerca sensible a majúscules")
+)
+_(SETTINGS_PASSWORD_GENERATOR_LENGTH_LABEL,
+    __(ENG, "Default password length"),
+    __(ESP, "Longitud de contraseña por defecto"),
+    __(VAL, "Longitud de contrasenya per defecte")
+)
+_(SETTINGS_PASSWORD_GENERATOR_LOWERCASE_LABEL,
+    __(ENG, "Use lowercase letters"),
+    __(ESP, "Usar letras minúsculas"),
+    __(VAL, "Usar lletres minúscules")
+)
+_(SETTINGS_PASSWORD_GENERATOR_UPPERCASE_LABEL,
+    __(ENG, "Use uppercase letters"),
+    __(ESP, "Usar letras mayúsculas"),
+    __(VAL, "Usar lletres majúscules")
+)
+_(SETTINGS_PASSWORD_GENERATOR_NUMERALS_LABEL,
+    __(ENG, "Use numerals"),
+    __(ESP, "Usar números"),
+    __(VAL, "Usar números")
+)
+_(SETTINGS_PASSWORD_GENERATOR_SYMBOLS_LABEL,
+    __(ENG, "Use symbols"),
+    __(ESP, "Usar símbolos"),
+    __(VAL, "Usar símbols")
+)
+_(SETTINGS_PASSWORD_GENERATOR_PRONOUNCEABLE_LABEL,
+    __(ENG, "Generate pronounceable passwords"),
+    __(ESP, "Generar contraseñas pronunciables"),
+    __(VAL, "Generar contrasenyes pronunciables")
+)
+_(SETTINGS_RUN_GTK_CSS_INSPECTOR_LABEL,
+    __(ENG, "Show GTK CSS inspector on startup"),
+    __(ESP, "Mostrar inspector CSS de GTK al inicio"),
+    __(VAL, "Mostrar inspector CSS de GTK a l'inici")
+)
+
 #pragma endregion
 
 #pragma region Macros and Cleanup
 #ifdef _
 #undef _
 #endif
-#define _(x, ...) Clavis::Language::GetResourceString(x, std::vector<std::string>{ __VA_ARGS__ })
+#define _(x, ...) Clavis::Language::GetResourceString(x, std::vector<Clavis::Language::StrArg>{ __VA_ARGS__ })
 
 // MACRO CLEANUP
 #ifdef TRANSLATE_CHECK

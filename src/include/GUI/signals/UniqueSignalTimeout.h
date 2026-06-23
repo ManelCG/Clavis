@@ -18,11 +18,15 @@ namespace Clavis::GUI {
 
         void Disconnect(const SignalCallerID id);
 
+        ~UniqueSignalTimeout();
+
     protected:
 
     private:
         std::mutex mutex;
 
         SignalCallerID lastCallerID;
+
+        std::atomic<bool> alive;
     };
 }

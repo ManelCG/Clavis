@@ -6,6 +6,7 @@
 
 #include <GUI/components/IconButton.h>
 #include <GUI/components/ToggleIconButton.h>
+#include <GUI/components/RequiredEntry.h>
 
 #include <GUI/signals/UniqueSignalTimeoutDispatcher.h>
 
@@ -16,21 +17,25 @@ namespace Clavis::GUI {
 
         void DisplayPassword(const Password& password);
         void DisplayError();
+        void DisplaySuccess();
+        void TryCopyPassword();
 
     protected:
 
     private:
         void SetPasswordVisibility();
+        void ClearDisplay();
 
         Password displayedPassword;
 
         Gtk::Box outputHbox;
-        Gtk::Entry outputTextBox;
+        RequiredEntry outputTextBox;
 
         IconButton copyButton;
         IconButton writeButton;
         ToggleIconButton showPasswordButton;
 
-        UniqueSignalTimeoutDispatcher styleSignalTimeout;
+        UniqueSignalTimeoutDispatcher clipboardClearTimeout;
+        UniqueSignalTimeoutDispatcher passwordClearTimeout;
     };
 }

@@ -1,12 +1,27 @@
 #pragma once
 
 #include <string>
+#include <cstddef>
 
 #include <filesystem>
 #include <tools/json.hpp>
 using json = nlohmann::json;
 
+#ifdef __WINDOWS__
+#include <windows.h>
+#else
+#include <string.h>
+#endif
+
 namespace Clavis::System {
+
+    inline void SecureZero(void* ptr, std::size_t size) {
+#ifdef __WINDOWS__
+        SecureZeroMemory(ptr, size);
+#else
+        explicit_bzero(ptr, size);
+#endif
+    }
     bool CopyToClipboard(const std::string& text);
 
     std::filesystem::path GetHomeFolder();
@@ -21,6 +36,7 @@ namespace Clavis::System {
 #endif
 
     std::filesystem::path GetGPGIDPath();
+    std::filesystem::path GetExecutableLocation();
 
     bool DirectoryExists(const std::filesystem::path& path);
     bool FileExists(const std::filesystem::path& path);

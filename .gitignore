@@ -9,3 +9,8 @@ cmake_install.cmake
 cmake-build-debug
 cmake-build-release
 
+aur-clavis/src/clavis/.git/
+aur-clavis-git/src/clavis/.git/
+macos/
+
+**/.DS_Store

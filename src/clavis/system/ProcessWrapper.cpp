@@ -2,7 +2,7 @@
 
 #ifdef __WINDOWS__
 #include <windows.h>
-#elif defined __LINUX__
+#elif defined __UNIX__
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
@@ -26,7 +26,7 @@ namespace Clavis::System {
 			HANDLE NamedPipe;
 			HANDLE PipeEnd;
 			std::shared_ptr<OVERLAPPED> Overlapped;
-#elif defined __LINUX__
+#elif defined __UNIX__
 			int PipeStdin[2];
 			int PipeStdout[2];
 			int PipeStderr[2];
@@ -36,7 +36,7 @@ namespace Clavis::System {
 #ifdef __WINDOWS__
 		HANDLE HProcess;
 		HANDLE HThread;
-#elif defined __LINUX__
+#elif defined __UNIX__
 		int ProcessPid;
 #endif
 
@@ -58,7 +58,7 @@ namespace Clavis::System {
 		}
 		return -1; // wait or exit code retrieval failed
 
-#elif defined __LINUX__
+#elif defined __UNIX__
 		if (ProcessData->isExitCodeKnown)
 			return ProcessData->exitCode;
 
@@ -142,27 +142,26 @@ namespace Clavis::System {
 		ProcessData->Pipe.Overlapped = std::shared_ptr<OVERLAPPED>((OVERLAPPED*)calloc(1, sizeof(OVERLAPPED)));	// Cast so that compiler doesn't cry.
 		ConnectNamedPipe(ProcessData->Pipe.NamedPipe, ProcessData->Pipe.Overlapped.get());
 
-		STARTUPINFO si = { sizeof(STARTUPINFO) };
+		STARTUPINFOW si = { sizeof(STARTUPINFOW) };
 		si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
 		si.wShowWindow = SW_HIDE;
 		si.hStdInput = ProcessData->Pipe.PipeEnd;
 
 		PROCESS_INFORMATION pi = { 0 };
 
+		std::wstring wcmd = L"\"" + System::UTF8ToUnicode(executable) + L"\"";
+		for (const auto& arg : args)
+			wcmd += L" \"" + System::UTF8ToUnicode(arg) + L"\"";
 
-		auto cmd = executable;
-		for (auto arg : args)
-			cmd += " " + arg;
+		auto wpath = workingDir.wstring();
 
-		auto wpath = workingDir.string();
-
-		auto success = CreateProcess(
+		auto success = CreateProcessW(
 			NULL,
-			(LPSTR)cmd.c_str(),
+			(LPWSTR)wcmd.c_str(),
 			NULL,
 			NULL,
 			TRUE,
-			CREATE_NEW_CONSOLE,
+			CREATE_NO_WINDOW,
 			NULL,
 			wpath.c_str(),
 			&si,
@@ -174,7 +173,7 @@ namespace Clavis::System {
 
 		ProcessData->HProcess = pi.hProcess;
 		ProcessData->HThread = pi.hThread;
-	#elif defined __LINUX__
+	#elif defined __UNIX__
 		if (pipe(ProcessData->Pipe.PipeStdin) == -1) RaiseClavisError(_(ERROR_CREATING_PIPE));
 		if (pipe(ProcessData->Pipe.PipeStdout) == -1) RaiseClavisError(_(ERROR_CREATING_PIPE));
 		if (pipe(ProcessData->Pipe.PipeStderr) == -1) RaiseClavisError(_(ERROR_CREATING_PIPE));
@@ -217,7 +216,7 @@ namespace Clavis::System {
 	void ProcessWrapper::Kill() {
 		#ifdef __WINDOWS__
 		TerminateProcess(ProcessData->HProcess, 1);
-		#elif defined __LINUX__
+		#elif defined __UNIX__
 		kill(ProcessData->ProcessPid, SIGTERM);
 		#endif
 	}
@@ -228,7 +227,7 @@ namespace Clavis::System {
 		CloseHandle(ProcessData->Pipe.NamedPipe);
 		CloseHandle(ProcessData->HProcess);
 		CloseHandle(ProcessData->HThread);
-#elif defined __LINUX__
+#elif defined __UNIX__
 		close(ProcessData->Pipe.PipeStdin[1]);
 		close(ProcessData->Pipe.PipeStdout[0]);
 		close(ProcessData->Pipe.PipeStderr[0]);
@@ -241,7 +240,7 @@ namespace Clavis::System {
 		if (!WriteFile(ProcessData->Pipe.NamedPipe, data, (DWORD)size, nullptr, ProcessData->Pipe.Overlapped.get()))
 			if (GetLastError() != ERROR_IO_PENDING)
 				return false;
-#elif defined __LINUX__
+#elif defined __UNIX__
 		if (write(ProcessData->Pipe.PipeStdin[1], data, size) == -1)
 			return false;
 #endif
@@ -249,7 +248,7 @@ namespace Clavis::System {
 		return true;
 	}
 
-#ifdef __LINUX__
+#ifdef __UNIX__
 	static std::string ReadFromFd(int fd) {
 		constexpr size_t BufferSize = 4096;
 		char buffer[BufferSize];
@@ -279,7 +278,7 @@ namespace Clavis::System {
 	std::string ProcessWrapper::GetOutput() const {
 #ifdef __WINDOWS__
 		RaiseClavisError(_(ERROR_NOT_IMPLEMENTED_ON_PLATFORM))
-#elif defined __LINUX__
+#elif defined __UNIX__
 		ProcessData->StdoutBuffer += ReadFromFd(ProcessData->Pipe.PipeStdout[0]);
 		return ProcessData->StdoutBuffer;
 #endif
@@ -288,7 +287,7 @@ namespace Clavis::System {
 	std::string ProcessWrapper::GetError() const {
 #ifdef __WINDOWS__
 		RaiseClavisError(_(ERROR_NOT_IMPLEMENTED_ON_PLATFORM))
-#elif defined __LINUX__
+#elif defined __UNIX__
 		ProcessData->StderrBuffer += ReadFromFd(ProcessData->Pipe.PipeStderr[0]);
 		return ProcessData->StderrBuffer;
 #endif
@@ -300,7 +299,7 @@ namespace Clavis::System {
 		DWORD code;
 		GetExitCodeProcess(ProcessData->HProcess, &code);
 		return code == STILL_ACTIVE;
-#elif defined __LINUX__
+#elif defined __UNIX__
 		waitpid(ProcessData->ProcessPid, nullptr, WNOHANG);	// Eliminate zombie
 		return kill(ProcessData->ProcessPid, 0) == 0; 		// Empty signal, success means PidFfmpeg is alive.
 #endif
@@ -310,7 +309,7 @@ namespace Clavis::System {
 #ifdef __WINDOWS__
 		// Wait indefinitely for the process to terminate
 		WaitForSingleObject(ProcessData->HProcess, INFINITE);
-#elif defined __LINUX__
+#elif defined __UNIX__
 		(void)GetExitCode();
 #endif
 	}
@@ -321,7 +320,7 @@ namespace Clavis::System {
 		case GIT:
 #ifdef __WINDOWS__
 			return "git.exe";
-#elif defined __LINUX__
+#elif defined __UNIX__
 			return "git";
 #endif
 

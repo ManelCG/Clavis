@@ -2,6 +2,7 @@
 
 #include <language/Language.h>
 #include <system/Extensions.h>
+#include <settings/Settings.h>
 
 #include "error/ClavisError.h"
 
@@ -44,22 +45,20 @@ namespace Clavis::GUI {
             SetPasswordVisibility();
         });
 
-        copyButton.signal_clicked().connect([this]() {
-            if (!displayedPassword.IsDecrypted()) {
-                DisplayError();
-                return;
-            }
+        clipboardClearTimeout.SetAction([this]() {
+            Gdk::Display::get_default()->get_clipboard()->set_text("");
+        });
 
-            System::CopyToClipboard(displayedPassword.GetPassword());
+        passwordClearTimeout.SetAction([this]() {
+            ClearDisplay();
+        });
+
+        copyButton.signal_clicked().connect([this]() {
+            TryCopyPassword();
         });
 
         writeButton.signal_clicked().connect([this]() {
             RaiseClavisError(_(ERROR_NOT_IMPLEMENTED));
-        });
-
-        styleSignalTimeout.SetMilliseconds(3000);
-        styleSignalTimeout.SetAction([this]() {
-            outputTextBox.remove_css_class("error");
         });
 
         append(outputHbox);
@@ -75,18 +74,50 @@ namespace Clavis::GUI {
 
         if (displayedPassword.IsDecrypted()) {
             outputTextBox.set_text(displayedPassword.GetPassword());
-            outputTextBox.remove_css_class("error");
+            DisplaySuccess();
+
+            const int clearSeconds = Settings::CLEAR_PASSWORD_DISPLAY_SECONDS.GetValue();
+            if (clearSeconds > 0) {
+                passwordClearTimeout.SetSeconds(clearSeconds);
+                passwordClearTimeout.StartTimeout();
+            }
         }
+    }
+
+    void PasswordStoreOutputDisplay::ClearDisplay() {
+        displayedPassword = Password();
+        outputTextBox.set_text("");
     }
 
     void PasswordStoreOutputDisplay::DisplayError() {
         displayedPassword = Password(); // Clear the previously displayed password from memory for safety
         outputTextBox.set_text("");
-        outputTextBox.add_css_class("error");
-
-        styleSignalTimeout.StartTimeout();
+        outputTextBox.DisplayError();
     }
 
+    void PasswordStoreOutputDisplay::DisplaySuccess() {
+        outputTextBox.DisplaySuccess();
+    }
+
+    void PasswordStoreOutputDisplay::TryCopyPassword() {
+        if (!displayedPassword.IsDecrypted()) {
+            outputTextBox.DisplayError();
+            return;
+        }
+
+        auto success = System::CopyToClipboard(displayedPassword.GetPassword());
+
+        if (success) {
+            DisplaySuccess();
+            const int clearSeconds = Settings::CLIPBOARD_CLEAR_SECONDS.GetValue();
+            if (clearSeconds > 0) {
+                clipboardClearTimeout.SetSeconds(clearSeconds);
+                clipboardClearTimeout.StartTimeout();
+            }
+        } else {
+            DisplayError();
+        }
+    }
 
 
 }

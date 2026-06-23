@@ -34,6 +34,11 @@ namespace Clavis::GUI {
 
         bool on_key_pressed(guint keyval, guint keycode, Gdk::ModifierType state);
 
+        void SetRecursiveSearch(bool active);
+
+        bool recursiveSearchActive = false;
+        Glib::RefPtr<Gtk::CssProvider> recursiveSearchCssProvider;
+
         Glib::Dispatcher refreshDispatcher;
 
         // The actual passwordStore that manages the files and passwords.

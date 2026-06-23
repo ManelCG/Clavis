@@ -2,6 +2,8 @@
 
 #include <GUI/palettes/DualChoicePalette.h>
 
+#include <GUI/components/RequiredEntry.h>
+
 #include <gtkmm.h>
 
 namespace Clavis::GUI {
@@ -13,6 +15,10 @@ namespace Clavis::GUI {
         void SetTitle(const std::string& title);
         void SetLabelText(const std::string& text);
 
+        void SetIsEntryRequired(bool isRequired);
+        void SetIsEntryRequiredForYes(bool isRequired);
+        void SetIsEntryRequiredForNo(bool isRequired);
+
     protected:
 
     private:
@@ -21,6 +27,11 @@ namespace Clavis::GUI {
         Gtk::Box mainHBox;
 
         Gtk::Label titleLabel;
-        Gtk::Entry entry;
+        RequiredEntry entry;
+
+        bool isEntryRequiredForYes = false;
+        bool isEntryRequiredForNo = false;
+
+        void DoGiveResponse(bool r) override;
     };
 }

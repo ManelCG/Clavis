@@ -1,6 +1,9 @@
 #pragma once
 
+#include <atomic>
+#include <memory>
 #include <mutex>
+#include <thread>
 
 #include <gtkmm.h>
 
@@ -17,6 +20,7 @@ namespace Clavis::GUI {
         };
 
         GitManagerToolbar();
+        ~GitManagerToolbar();
 
         void PerformGitAction(Action gitAction);
         void SetOnSync(const std::function<void()> &action);
@@ -49,6 +53,11 @@ namespace Clavis::GUI {
         std::map<Action, std::function<bool()>> gitActions;
 
         bool isGitActionRunning = false;
+
+        // Signals the background thread to skip GTK dispatcher calls if the widget is destroyed
+        // while a git operation is still in flight.
+        std::shared_ptr<std::atomic<bool>> aliveFlag = std::make_shared<std::atomic<bool>>(true);
+        std::thread gitThread;
 
         std::function<void()> onSync = [](){};
     };

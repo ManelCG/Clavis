@@ -262,6 +262,9 @@ namespace Clavis::Settings {
 
 			StringSetting::Kvp(PASSWORD_STORE_PATH, System::GetPasswordStoreDefaultFolder().string()),
 
+			IntSetting::Kvp(CLIPBOARD_CLEAR_SECONDS, 45),
+			IntSetting::Kvp(CLEAR_PASSWORD_DISPLAY_SECONDS, 45),
+
 			IntSetting::Kvp(PASSWORD_GENERATOR_DEFAULT_LENGTH, 25),
 			BoolSetting::Kvp(PASSWORD_GENERATOR_USE_LOWERCASE, true),
 			BoolSetting::Kvp(PASSWORD_GENERATOR_USE_UPPERCASE, true),
@@ -269,7 +272,7 @@ namespace Clavis::Settings {
 			BoolSetting::Kvp(PASSWORD_GENERATOR_USE_SYMBOLS, false),
 			BoolSetting::Kvp(PASSWORD_GENERATOR_PRONOUNCEABLE, false),
 
-			#ifdef __LINUX__
+			#ifdef __UNIX__
 			StringSetting::Kvp(WINDOW_DECORATIONS, WINDOW_DECORATIONS.GTK_CSD),
 			BoolSetting::Kvp(FORCE_CLAVIS_STYLE, false),
 			#elif defined __WINDOWS__

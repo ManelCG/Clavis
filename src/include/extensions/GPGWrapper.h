@@ -32,10 +32,14 @@ namespace Clavis {
             int length;
         };
 
+        static bool InitializeGPGME();
+
         static bool TryDecrypt(const std::filesystem::path& path, std::string& out);
         static bool TryDecrypt(const std::vector<uint8_t>& data, std::string& out);
 
         static bool TryEncrypt(const std::string& data, std::vector<uint8_t>& out);
+        static bool TryEncryptSymmetric(const std::string& passphrase, const std::vector<uint8_t>& plainData, std::vector<uint8_t>& out);
+        static bool TryDecryptSymmetric(const std::string& passphrase, const std::vector<uint8_t>& data, std::vector<uint8_t>& out);
 
         static bool TryGetKeyFingerprint(const std::string& gpgid, std::string& outFingerprint);
         static bool KeyExists(const std::string& gpgid);
@@ -44,9 +48,11 @@ namespace Clavis {
         static bool TryImportKey(const std::vector<uint8_t>& data, std::string& outFingerprint);
         static bool TryExportKey(const std::string& gpgid, bool exportPrivate, std::vector<uint8_t>& out);
 
-#ifdef __LINUX__
+#ifdef HAVE_GPGME_OP_SETOWNERTRUST
         static bool TryChangeKeyTrust(const std::string& fingerprint, int trustlevel);
 #endif
+
+        static std::filesystem::path GetGpgAgentConfPath();
 
         static std::vector<Key> GetAllKeys();
         static std::string KeyToString(const Key& key, bool escapeChars = false);

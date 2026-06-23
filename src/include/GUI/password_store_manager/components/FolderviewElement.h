@@ -14,6 +14,7 @@ namespace Clavis::GUI {
         void SetOnEditPassword(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
         void SetOnRenameItem(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
         void SetOnDeleteItem(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
+        void SetOnExportFolder(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
 
         PasswordStoreElements::PasswordStoreElement GetElement();
 
@@ -23,9 +24,10 @@ namespace Clavis::GUI {
         void SetupContextMenu();
         void ResolveIcon();
 
-        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> editPasswordCallback = [](const PasswordStoreElements::PasswordStoreElement& elem){};
-        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> renameItemCallback = [](const PasswordStoreElements::PasswordStoreElement& elem){};
-        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> deleteItemCallback = [](const PasswordStoreElements::PasswordStoreElement& elem){};
+        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> editPasswordCallback  = [](const PasswordStoreElements::PasswordStoreElement&){};
+        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> renameItemCallback   = [](const PasswordStoreElements::PasswordStoreElement&){};
+        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> deleteItemCallback   = [](const PasswordStoreElements::PasswordStoreElement&){};
+        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> exportFolderCallback = [](const PasswordStoreElements::PasswordStoreElement&){};
 
         Icons::IconDefinition icon;
 
@@ -37,6 +39,7 @@ namespace Clavis::GUI {
         PictureInsert contextMenuIcon;
         Gtk::Label contextMenuFilenameLabel;
         LabeledIconButton editPasswordButton;
+        LabeledIconButton exportFolderButton;
         LabeledIconButton renameItemButton;
         LabeledIconButton deleteItemButton;
         Gtk::Box contextMenuVBox;

@@ -57,6 +57,10 @@ namespace Clavis::GUI {
         return passwordEntry.get_text();
     }
 
+    void NewPasswordPalette::NewPasswordWidget::SetGeneratable(bool generatable) {
+        generatePasswordButton.set_sensitive(generatable);
+    }
+
     void NewPasswordPalette::NewPasswordWidget::SetFixedName(const std::string &name) {
         nameEntry.set_text(name);
         nameEntry.set_sensitive(false);
@@ -153,6 +157,12 @@ namespace Clavis::GUI {
         Settings::PASSWORD_GENERATOR_USE_NUMERALS.SetValue(settings.numerals);
         Settings::PASSWORD_GENERATOR_USE_SYMBOLS.SetValue(settings.symbols);
         Settings::PASSWORD_GENERATOR_PRONOUNCEABLE.SetValue(settings.pronounceable);
+
+        onSettingsChanged();
+    }
+
+    void NewPasswordPalette::PasswordGeneratorController::SetOnSettingsChanged(std::function<void()> callback) {
+        onSettingsChanged = callback;
     }
 
 
@@ -212,7 +222,40 @@ namespace Clavis::GUI {
 
         newPasswordWidget.SetSettingsProvider([this](){return passwordGeneratorController.GetSettings(); });
 
+        auto updateGenerateButton = [this]() {
+            auto s = passwordGeneratorController.GetSettings();
+            bool generatable = s.pronounceable
+                ? (s.lowercase || s.uppercase)
+                : (s.lowercase || s.uppercase || s.numerals || s.symbols);
+            newPasswordWidget.SetGeneratable(generatable);
+        };
+        passwordGeneratorController.SetOnSettingsChanged(updateGenerateButton);
+        updateGenerateButton();
+
     }
+
+    void NewPasswordPalette::DoGiveResponse(bool r) {
+        if (!r) {
+            DualChoicePalette::DoGiveResponse(false);
+            return;
+        }
+
+        auto success = true;
+
+        if (! newPasswordWidget.nameEntry.IsValid()) {
+            success = false;
+            newPasswordWidget.nameEntry.DisplayError();
+        }
+
+        if (!newPasswordWidget.passwordEntry.IsValid()) {
+            success = false;
+            newPasswordWidget.passwordEntry.DisplayError();
+        }
+
+        if (success)
+            DualChoicePalette::DoGiveResponse(true);
+    }
+
 
     Password NewPasswordPalette::GetPassword() const {
         auto password = Password::FromPassword(newPasswordWidget.GetPassword());

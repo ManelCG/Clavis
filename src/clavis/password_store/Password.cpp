@@ -84,16 +84,9 @@ namespace Clavis {
         return true;
     }
 
-    // Try to really clear the pw from memory
     Password::~Password() {
-        if (isDecrypted) {
-            for (size_t i = 0; i < password.size(); i++) {
-                password[i] = '\0';
-            }
-
-            password.clear();
-            password = "";
-        }
+        if (isDecrypted && !password.empty())
+            System::SecureZero(password.data(), password.size());
     }
 
 

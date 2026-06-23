@@ -37,6 +37,7 @@ namespace Clavis {
 
         [[nodiscard]] std::vector<PasswordStoreElements::PasswordStoreElement> GetElements() const;
         [[nodiscard]] std::vector<PasswordStoreElements::PasswordStoreElement> GetElements(std::string filter) const;
+        [[nodiscard]] std::vector<PasswordStoreElements::PasswordStoreElement> GetElementsRecursive(std::string filter) const;
 
     protected:
 
