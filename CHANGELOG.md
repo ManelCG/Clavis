@@ -1,3 +1,41 @@
+## [2.1.0-1] - 2026-06-23
+
+- Add release tooling: deploy.sh, AUR packaging, changelog
+- Add Windows and macOS support; i18n StrArg refactor
+- Settings window
+- Fix password security issues
+- Fix git errors
+- Export gpg keys
+- Recursive search style
+- git
+- Import clav workflow and bugfixes
+- Export clav workflow
+- Recursive search
+- Bug fixes and hotkeys
+- asd
+- Fixed timeout dispatcher use after free
+- MacOS dmg creation
+- MacOS .app bundle done
+- Style enhancements
+- Fix pinentry on MacOS
+- MacOS definitions
+- Merge branch 'develop' of github.com:ManelCG/Clavis into develop
+- nproc
+- Dep
+- Mac support
+- Merge branch 'develop' of github.com:ManelCG/Clavis into develop
+- Mac support
+- Fixed script
+- Make with target
+- Fix archlinux build
+- Fix
+- Empty commit for testing
+- Submodules
+- Better styleable entries!
+- Escape to close all palettes. Escape for no and Return for yes in dual choice palettes
+- QoL
+- Improved Ubuntu install
+
 # Changelog
 
 All notable changes to Clavis are documented in this file.
