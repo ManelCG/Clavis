@@ -25,6 +25,9 @@ namespace Clavis::GUI {
         Gtk::Label numPasswordsLabel;
         Gtk::Label numPasswordsValueLabel;
 
+        Gtk::Label numTwoFactorLabel;
+        Gtk::Label numTwoFactorValueLabel;
+
         Gtk::Label numFoldersLabel;
         Gtk::Label numFoldersValueLabel;
 

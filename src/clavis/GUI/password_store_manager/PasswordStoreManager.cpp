@@ -1,6 +1,7 @@
 #include <GUI/password_store_manager/PasswordStoreManager.h>
 
 #include <GUI/workflows/NewItemWorkflow.h>
+#include <extensions/GPGWrapper.h>
 #include <extensions/GUIExtensions.h>
 
 namespace Clavis::GUI {
@@ -71,6 +72,10 @@ namespace Clavis::GUI {
                     TryDecryptPassword(element);
                     break;
 
+                case PasswordStoreElements::PasswordStoreElementType::TWOFA_FILE:
+                    TryDecryptTwoFactor(element);
+                    break;
+
                 case PasswordStoreElements::PasswordStoreElementType::UNKNOWN:
                 case PasswordStoreElements::PasswordStoreElementType::UNDEFINED:
                 case PasswordStoreElements::PasswordStoreElementType::FILE_WITHOUT_EXTENSION:
@@ -91,12 +96,28 @@ namespace Clavis::GUI {
         folderview.SetOnExportFolder([this](const PasswordStoreElements::PasswordStoreElement& element) {
             Workflows::ExportFolderWorkflow(this, element);
         });
+        folderview.SetOnEditTwoFactor([this](const PasswordStoreElements::PasswordStoreElement& element) {
+            Workflows::EditTwoFactorWorkflow(this, element);
+        });
+        folderview.SetOnShowTwoFactorDetails([this](const PasswordStoreElements::PasswordStoreElement& element) {
+            Workflows::ShowTwoFactorDetailsWorkflow(this, element);
+        });
+        folderview.SetOnTransferTwoFactor([this](const PasswordStoreElements::PasswordStoreElement& element) {
+            Workflows::TransferTwoFactorWorkflow(this, element);
+        });
+
+        outputDisplay.SetOnAdvanceHotpCounter([this](const std::filesystem::path& path) {
+            Workflows::AdvanceHotpCounterWorkflow(this, path);
+        });
 
         tools.SetOnNewFolderButtonClick([this]() {
             Workflows::NewFolderWorkflow(this);
         });
         tools.SetOnNewPasswordButtonClick([this]() {
             Workflows::NewPasswordWorkflow(this);
+        });
+        tools.SetOnNewTwoFactorButtonClick([this]() {
+            Workflows::NewTwoFactorWorkflow(this);
         });
         tools.SetOnGoUpButtonClick([this]() {
             GoUp();
@@ -149,7 +170,7 @@ namespace Clavis::GUI {
         if (state == Gdk::ModifierType::CONTROL_MASK) {
             switch (keyval) {
                 case GDK_KEY_c:
-                    outputDisplay.TryCopyPassword();
+                    outputDisplay.TryCopyActive();
                     return true;
 
                 case GDK_KEY_f:
@@ -158,6 +179,11 @@ namespace Clavis::GUI {
 
                 case GDK_KEY_n:
                     Workflows::NewPasswordWorkflow(this);
+                    searchEntry.grab_focus();
+                    return true;
+
+                case GDK_KEY_t:
+                    Workflows::NewTwoFactorWorkflow(this);
                     searchEntry.grab_focus();
                     return true;
 
@@ -186,7 +212,7 @@ namespace Clavis::GUI {
         Password p;
 
         if (! passwordStore.TryDecryptPassword(elem, p)) {
-            outputDisplay.DisplayError();
+            outputDisplay.DisplayPasswordError();
             return false;
         }
 
@@ -194,13 +220,46 @@ namespace Clavis::GUI {
         return true;
     }
 
+    void PasswordStoreManager::LockVault() {
+        // Wipe the screen first. Flushing the agent's cache while a decrypted password or a live
+        // 2FA code is still displayed would make "locked" a half-truth.
+        outputDisplay.ClearAll();
+
+        if (!GPG::TryClearPassphraseCache())
+            RaiseClavisError(_(ERROR_COULD_NOT_LOCK_VAULT));
+    }
+
+    void PasswordStoreManager::DisplayTwoFactor(const TwoFactor::TwoFactorEntry &entry,
+                                                const std::filesystem::path &path) {
+        outputDisplay.DisplayTwoFactor(entry, path);
+    }
+
+    bool PasswordStoreManager::TryDecryptTwoFactor(const PasswordStoreElements::PasswordStoreElement &elem) {
+        TwoFactor::TwoFactorEntry entry;
+
+        if (! passwordStore.TryDecryptTwoFactor(elem, entry)) {
+            outputDisplay.DisplayTwoFactorError();
+            return false;
+        }
+
+        outputDisplay.DisplayTwoFactor(entry, elem.GetPath());
+        return true;
+    }
+
     void PasswordStoreManager::GoUp() {
+        // Navigating away drops whatever was on screen. Note this is deliberately not done in
+        // Refresh(): the search entry calls Refresh() on every keystroke, which would wipe the
+        // output the moment the user started typing.
+        outputDisplay.ClearAll();
+
         passwordStore.GoUp();
         searchEntry.set_text("");
         Refresh();
     }
 
     void PasswordStoreManager::Chdir(const PasswordStoreElements::PasswordStoreElement &elem) {
+        outputDisplay.ClearAll();
+
         passwordStore.Chdir(elem);
         searchEntry.set_text("");
         Refresh();

@@ -128,6 +128,12 @@ namespace Clavis::GUI {
         }
 
     protected:
+        // Lets a derived palette keep Return for whatever widget currently has focus -- an
+        // entry that adds a row to a list, say -- instead of submitting the dialog.
+        virtual bool ShouldSubmitOnReturn() const {
+            return true;
+        }
+
         virtual void DoGiveResponse(bool r) {
             response = r;
             isResponseGiven = true;
@@ -152,6 +158,11 @@ namespace Clavis::GUI {
             if (state == static_cast<Gdk::ModifierType>(0)) {
                 switch (keyval) {
                     case GDK_KEY_Return:
+                        // The controller is in the CAPTURE phase, so without this the dialog
+                        // would swallow Return before a focused entry could act on it.
+                        if (!ShouldSubmitOnReturn())
+                            return false;
+
                         __DoGiveResponseImpl(true);
                         return true;
 

@@ -22,6 +22,19 @@ namespace Clavis {
 			Set(data, w, h);
 		}
 
+		void PictureInsert::Set(std::shared_ptr<Image> im) {
+			// Gdk::Pixbuf::create_from_data does not copy or take ownership of the buffer, so the
+			// Image has to outlive the Pixbuf. Callers that build an image at runtime (the 2FA
+			// transfer QR code) must use this overload rather than Set(Image&), which would leave
+			// the Pixbuf pointing at freed memory as soon as the caller's Image went out of scope.
+			Im = im;
+
+			if (Im == nullptr)
+				return;
+
+			Set(*Im);
+		}
+
 		void PictureInsert::Set(uint8_t* data, size_t w, size_t h) {
 			Pixbuf = Gdk::Pixbuf::create_from_data(data, Gdk::Colorspace::RGB, true, 8, (int)w, (int)h, (int)w * 4);
 			set_pixbuf(Pixbuf);

@@ -23,6 +23,12 @@ namespace Clavis::GUI {
 
         void PerformGitAction(GitManagerToolbar::Action action);
 
+        // Re-renders the 2FA section, e.g. after an HOTP counter advance rewrote the entry.
+        void DisplayTwoFactor(const TwoFactor::TwoFactorEntry& entry, const std::filesystem::path& path);
+
+        // Clears anything decrypted on screen and flushes gpg-agent's key cache.
+        void LockVault();
+
 
     protected:
 
@@ -31,6 +37,7 @@ namespace Clavis::GUI {
         void Chdir(const PasswordStoreElements::PasswordStoreElement& elem);
 
         bool TryDecryptPassword(const PasswordStoreElements::PasswordStoreElement & elem);
+        bool TryDecryptTwoFactor(const PasswordStoreElements::PasswordStoreElement & elem);
 
         bool on_key_pressed(guint keyval, guint keycode, Gdk::ModifierType state);
 

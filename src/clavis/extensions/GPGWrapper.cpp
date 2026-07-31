@@ -192,7 +192,76 @@ namespace Clavis {
         return TryDecrypt(data, out);
     }
 
+    bool GPG::TryDecryptNoPrompt(const std::filesystem::path &path, std::string &out) {
+        if (!System::FileExists(path))
+            return false;
+
+        std::vector<uint8_t> data;
+        if (!System::TryReadFile(path, data))
+            return false;
+
+        return __TryDecryptData(data, out, false);
+    }
+
+    bool GPG::TryClearPassphraseCache() {
+        InitializeGPGME();
+
+        std::string executable = "gpg-connect-agent";
+        std::vector<std::string> args;
+        std::filesystem::path workingDir = ".";
+
+#ifdef __WINDOWS__
+        // There is no gpg-connect-agent on PATH in a bundled install, so it is looked up next to
+        // whichever gpg binary GPGME was configured with, mirroring how the agent is warm-started
+        // during initialisation.
+        gpgme_engine_info_t info = nullptr;
+        if (gpgme_get_engine_info(&info) == GPG_ERR_NO_ERROR) {
+            for (auto engine = info; engine != nullptr; engine = engine->next) {
+                if (engine->protocol != GPGME_PROTOCOL_OpenPGP || engine->file_name == nullptr)
+                    continue;
+
+                const auto gpgDir = std::filesystem::path(engine->file_name).parent_path();
+                const auto connectPath = gpgDir / "gpg-connect-agent.exe";
+
+                if (System::FileExists(connectPath)) {
+                    executable = connectPath.string();
+                    workingDir = gpgDir;
+
+                    if (engine->home_dir != nullptr) {
+                        args.emplace_back("--homedir");
+                        args.emplace_back(engine->home_dir);
+                    }
+                }
+
+                break;
+            }
+        }
+#endif
+
+        // reloadagent drops every cached passphrase without tearing the agent down, so anything
+        // else already talking to it keeps working.
+        args.emplace_back("reloadagent");
+        args.emplace_back("/bye");
+
+        try {
+            auto pw = System::ProcessWrapper();
+            pw.Init(executable, args, workingDir);
+            pw.Wait();
+
+            const int code = pw.GetExitCode();
+            pw.Cleanup();
+
+            return code == 0;
+        } catch (...) {
+            return false;
+        }
+    }
+
     bool GPG::TryDecrypt(const std::vector<uint8_t>& data, std::string& out) {
+        return __TryDecryptData(data, out, true);
+    }
+
+    bool GPG::__TryDecryptData(const std::vector<uint8_t>& data, std::string& out, bool allowPrompt) {
         gpgme_ctx_t ctx = nullptr;
         gpgme_data_t cipher = nullptr;
         gpgme_data_t plain = nullptr;
@@ -209,7 +278,7 @@ namespace Clavis {
 
         // Set the context to use ASCII armor if needed
         gpgme_set_armor(ctx, 0); // 0 for binary output, 1 for ASCII armor
-        gpgme_set_pinentry_mode(ctx, GPGME_PINENTRY_MODE_ASK);
+        gpgme_set_pinentry_mode(ctx, allowPrompt ? GPGME_PINENTRY_MODE_ASK : GPGME_PINENTRY_MODE_CANCEL);
 
         // Create data objects from the input data
         err = gpgme_data_new_from_mem(&cipher, reinterpret_cast<const char*>(data.data()), data.size(), 0);
@@ -243,7 +312,9 @@ namespace Clavis {
             System::SecureZero(buffer.data(), buffer.size());
         }
 
-        if (!success)
+        // A failure in no-prompt mode just means the store is locked, which is expected and not
+        // worth reporting.
+        if (!success && allowPrompt)
 			std::cerr << std::string("error gpgme_op_decrypt: ") + std::string(gpgme_strerror(err)) << "\n";
 
         // Clean up

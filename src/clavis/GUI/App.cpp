@@ -37,6 +37,20 @@ namespace Clavis::GUI {
                 color: inherit;
                 background-color: #ad4040;
             }
+
+            /* Dims a field that is displayed but cannot be typed into. Preferred over making
+               the widget insensitive, which would also stop the text being selected. */
+            .readonly-entry {
+                opacity: 0.6;
+            }
+
+            /* Applied only while an actual one-time code is on screen, never to placeholder
+               text -- a monospace hint next to the proportional ones looks like a glitch. */
+            .otp-code {
+                font-family: monospace;
+                font-size: 1.3em;
+                letter-spacing: 2px;
+            }
         )");
 
         auto display = Gdk::Display::get_default();

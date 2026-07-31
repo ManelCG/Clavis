@@ -149,9 +149,14 @@ namespace Clavis::Git {
     }
 
 
-    bool CommitNewFile(const std::filesystem::path& path, const std::string& name) {
+    bool CommitFile(const std::filesystem::path& path, const std::string& message) {
+        // `git add` stages modifications as well as new files, so this covers edits too.
         return PerformGitCommand({"add", path.string()}) &&
-               PerformGitCommand({"commit", "-m", FormatStringArgument(_(GIT_ADDED_PASSWORD_COMMIT_MESSAGE, name))});
+               PerformGitCommand({"commit", "-m", FormatStringArgument(message)});
+    }
+
+    bool CommitNewFile(const std::filesystem::path& path, const std::string& name) {
+        return CommitFile(path, _(GIT_ADDED_PASSWORD_COMMIT_MESSAGE, name));
     }
 
     void CommitImport(const std::vector<std::filesystem::path>& paths, const std::string& name) {
@@ -172,8 +177,17 @@ namespace Clavis::Git {
         return PerformGitCommand({"commit", "-m", FormatStringArgument(_(GIT_REMOVED_DIRECTORY_COMMIT_MESSAGE, name))});
     }
 
-    bool Move(const std::filesystem::path &from, const std::filesystem::path &to) {
-        return PerformGitCommand({"mv", from.string(), to.string()}) &&
+    bool Move(const std::filesystem::path &from, const std::filesystem::path &to, bool overwrite) {
+        // `git mv` refuses an existing destination unless forced, so without -f a confirmed
+        // overwrite would fail silently and look like nothing happened.
+        std::vector<std::string> args = {"mv"};
+        if (overwrite)
+            args.emplace_back("-f");
+
+        args.push_back(from.string());
+        args.push_back(to.string());
+
+        return PerformGitCommand(args) &&
                PerformGitCommand({"commit", "-m", FormatStringArgument(_(GIT_MOVED_ELEMENT_COMMIT_MESSAGE, from.string(), to.string()))});
     }
 }

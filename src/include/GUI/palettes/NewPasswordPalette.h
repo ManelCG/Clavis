@@ -26,6 +26,9 @@ namespace Clavis::GUI {
             void SetFixedName(const std::string& name);
             void SetGeneratable(bool generatable);
 
+            void SetInitialPassword(const std::string& password);
+            void SetStoreLockedHint();
+
             RequiredEntry nameEntry;
             RequiredEntry passwordEntry;
 
@@ -74,6 +77,11 @@ namespace Clavis::GUI {
         };
 
         NewPasswordPalette(const std::string& name);
+
+        // Used when editing while the store is already unlocked, so the user amends rather than
+        // retypes. When it could not be loaded, SetStoreLockedHint makes the consequence explicit.
+        void SetInitialPassword(const std::string& password);
+        void SetStoreLockedHint();
 
         std::string GetPasswordName() const;
         Password GetPassword() const;

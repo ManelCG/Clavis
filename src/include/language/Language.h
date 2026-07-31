@@ -96,6 +96,12 @@ _(MAINMENU_FILE_MENU_EXPORT_PRIVATE_GPG,
     __(VAL, "Exportar Clau GPG Privada")
 )
 
+_(MAINMENU_FILE_MENU_LOCK_VAULT,
+    __(ENG, "Lock vault"),
+    __(ESP, "Bloquear el almacén"),
+    __(VAL, "Bloquejar el magatzem")
+)
+
 _(MAINMENU_FILE_MENU_QUIT,
     __(ENG, "Quit"),
     __(ESP, "Salir"),
@@ -1454,6 +1460,413 @@ _(SETTINGS_RUN_GTK_CSS_INSPECTOR_LABEL,
     __(ENG, "Show GTK CSS inspector on startup"),
     __(ESP, "Mostrar inspector CSS de GTK al inicio"),
     __(VAL, "Mostrar inspector CSS de GTK a l'inici")
+)
+
+#pragma endregion
+
+#pragma region Two Factor Authentication
+
+_(PASSWORDSTORE_DECRYPTED_TWO_FACTOR_LABEL,
+    __(ENG, "Two-factor code"),
+    __(ESP, "Código de doble factor"),
+    __(VAL, "Codi de doble factor")
+)
+
+_(PASSWORDSTORE_DECRYPTION_FAILED_HINT,
+    __(ENG, "Decryption failed"),
+    __(ESP, "Fallo al descifrar"),
+    __(VAL, "Ha fallat el desxifrat")
+)
+
+_(PASSWORDSTORE_TWO_FACTOR_OUTPUT_HINT,
+    __(ENG, "Select a 2FA entry to generate a code"),
+    __(ESP, "Selecciona una entrada 2FA para generar un código"),
+    __(VAL, "Selecciona una entrada 2FA per a generar un codi")
+)
+
+_(PASSWORDSTORE_TWO_FACTOR_SECONDS_REMAINING,
+    __(ENG, "{0}s"),
+    __(ESP, "{0}s"),
+    __(VAL, "{0}s")
+)
+
+_(PASSWORDSTORE_TWO_FACTOR_COUNTER_LABEL,
+    __(ENG, "#{0}"),
+    __(ESP, "#{0}"),
+    __(VAL, "#{0}")
+)
+
+_(PASSWORDSTORE_TWO_FACTOR_NEXT_CODE_TOOLTIP,
+    __(ENG, "Generate the next code. This advances the counter and records a commit."),
+    __(ESP, "Generar el siguiente código. Esto avanza el contador y registra un commit."),
+    __(VAL, "Generar el codi següent. Això avança el comptador i registra un commit.")
+)
+
+_(PASSWORDSTORE_MANAGER_NEW_TWO_FACTOR_TOOLTIP,
+    __(ENG, "New 2FA"),
+    __(ESP, "Nuevo 2FA"),
+    __(VAL, "Nou 2FA")
+)
+
+_(PASSWORD_STORE_MANAGER_CONTEXT_MENU_EDIT_TWO_FACTOR_BUTTON,
+    __(ENG, "Edit 2FA"),
+    __(ESP, "Editar 2FA"),
+    __(VAL, "Editar 2FA")
+)
+
+_(PASSWORD_STORE_MANAGER_CONTEXT_MENU_SHOW_DETAILS_BUTTON,
+    __(ENG, "Show details"),
+    __(ESP, "Ver detalles"),
+    __(VAL, "Veure detalls")
+)
+
+_(PASSWORD_STORE_MANAGER_CONTEXT_MENU_TRANSFER_TWO_FACTOR_BUTTON,
+    __(ENG, "Transfer 2FA"),
+    __(ESP, "Transferir 2FA"),
+    __(VAL, "Transferir 2FA")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_TITLE,
+    __(ENG, "New 2FA"),
+    __(ESP, "Nuevo 2FA"),
+    __(VAL, "Nou 2FA")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_EDIT_TITLE,
+    __(ENG, "Edit 2FA"),
+    __(ESP, "Editar 2FA"),
+    __(VAL, "Editar 2FA")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_LABEL_TITLE,
+    __(ENG, "Add a two-factor code"),
+    __(ESP, "Añadir un código de doble factor"),
+    __(VAL, "Afegir un codi de doble factor")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_EDIT_LABEL_TITLE,
+    __(ENG, "Edit this two-factor code"),
+    __(ESP, "Editar este código de doble factor"),
+    __(VAL, "Editar aquest codi de doble factor")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_NAME_LABEL,
+    __(ENG, "Set the 2FA name:"),
+    __(ESP, "Nombre del 2FA:"),
+    __(VAL, "Nom del 2FA:")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_CURRENT_NAME_LABEL,
+    __(ENG, "Current 2FA name:"),
+    __(ESP, "Nombre actual del 2FA:"),
+    __(VAL, "Nom actual del 2FA:")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_URI_LABEL,
+    __(ENG, "Paste the secret/URI:"),
+    __(ESP, "Pega el secreto/URI:"),
+    __(VAL, "Apega el secret/URI:")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_PASTE_TOOLTIP,
+    __(ENG, "Paste from clipboard"),
+    __(ESP, "Pegar del portapapeles"),
+    __(VAL, "Apegar del porta-retalls")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_DETAILS_LABEL,
+    __(ENG, "Advanced Settings"),
+    __(ESP, "Ajustes avanzados"),
+    __(VAL, "Ajustos avançats")
+)
+
+// Separate from the plain issuer/account labels, which the read-only details window reuses.
+_(NEW_TWO_FACTOR_PALETTE_ISSUER_OPTIONAL_LABEL,
+    __(ENG, "Issuer (optional):"),
+    __(ESP, "Emisor (opcional):"),
+    __(VAL, "Emissor (opcional):")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_ACCOUNT_OPTIONAL_LABEL,
+    __(ENG, "Account (optional):"),
+    __(ESP, "Cuenta (opcional):"),
+    __(VAL, "Compte (opcional):")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_TYPE_LABEL,
+    __(ENG, "Type:"),
+    __(ESP, "Tipo:"),
+    __(VAL, "Tipus:")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_ISSUER_LABEL,
+    __(ENG, "Issuer:"),
+    __(ESP, "Emisor:"),
+    __(VAL, "Emissor:")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_ACCOUNT_LABEL,
+    __(ENG, "Account:"),
+    __(ESP, "Cuenta:"),
+    __(VAL, "Compte:")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_SECRET_LABEL,
+    __(ENG, "Secret (Base32):"),
+    __(ESP, "Secreto (Base32):"),
+    __(VAL, "Secret (Base32):")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_ALGORITHM_LABEL,
+    __(ENG, "Algorithm:"),
+    __(ESP, "Algoritmo:"),
+    __(VAL, "Algorisme:")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_DIGITS_LABEL,
+    __(ENG, "Digits:"),
+    __(ESP, "Dígitos:"),
+    __(VAL, "Dígits:")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_PERIOD_LABEL,
+    __(ENG, "Period (s):"),
+    __(ESP, "Periodo (s):"),
+    __(VAL, "Període (s):")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_COUNTER_LABEL,
+    __(ENG, "Counter:"),
+    __(ESP, "Contador:"),
+    __(VAL, "Comptador:")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_RECOVERY_LABEL,
+    __(ENG, "Recovery codes:"),
+    __(ESP, "Códigos de recuperación:"),
+    __(VAL, "Codis de recuperació:")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_RECOVERY_ADD_HINT,
+    __(ENG, "Add a recovery code, or paste a list"),
+    __(ESP, "Añade un código de recuperación, o pega una lista"),
+    __(VAL, "Afig un codi de recuperació, o apega una llista")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_RECOVERY_ADD_TOOLTIP,
+    __(ENG, "Add this recovery code"),
+    __(ESP, "Añadir este código de recuperación"),
+    __(VAL, "Afegir aquest codi de recuperació")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_RECOVERY_DELETE_TOOLTIP,
+    __(ENG, "Remove this recovery code"),
+    __(ESP, "Eliminar este código de recuperación"),
+    __(VAL, "Eliminar aquest codi de recuperació")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_NOTES_LABEL,
+    __(ENG, "Notes:"),
+    __(ESP, "Notas:"),
+    __(VAL, "Notes:")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_PREVIEW_LABEL,
+    __(ENG, "Current code: {0}"),
+    __(ESP, "Código actual: {0}"),
+    __(VAL, "Codi actual: {0}")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_COPY_CODE_TOOLTIP,
+    __(ENG, "Copy the current code"),
+    __(ESP, "Copiar el código actual"),
+    __(VAL, "Copiar el codi actual")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_PREVIEW_INVALID,
+    __(ENG, "Enter a valid secret to preview the code"),
+    __(ESP, "Introduce un secreto válido para previsualizar el código"),
+    __(VAL, "Introduïx un secret vàlid per a previsualitzar el codi")
+)
+
+_(NEW_TWO_FACTOR_PALETTE_ELEMENT_ALREADY_EXISTS_TEXT,
+    __(ENG, "A 2FA entry named '{0}' already exists. Overwrite it?"),
+    __(ESP, "Ya existe una entrada 2FA llamada '{0}'. ¿Sobrescribirla?"),
+    __(VAL, "Ja existix una entrada 2FA anomenada '{0}'. Voleu sobreescriure-la?")
+)
+
+_(TWO_FACTOR_DETAILS_PALETTE_TITLE,
+    __(ENG, "2FA details: {0}"),
+    __(ESP, "Detalles del 2FA: {0}"),
+    __(VAL, "Detalls del 2FA: {0}")
+)
+
+_(TWO_FACTOR_DETAILS_PALETTE_RECOVERY_LABEL,
+    __(ENG, "Recovery codes"),
+    __(ESP, "Códigos de recuperación"),
+    __(VAL, "Codis de recuperació")
+)
+
+_(TWO_FACTOR_DETAILS_PALETTE_NO_RECOVERY,
+    __(ENG, "No recovery codes stored for this entry."),
+    __(ESP, "No hay códigos de recuperación guardados para esta entrada."),
+    __(VAL, "No hi ha codis de recuperació guardats per a aquesta entrada.")
+)
+
+_(TWO_FACTOR_DETAILS_PALETTE_NOTES_LABEL,
+    __(ENG, "Notes"),
+    __(ESP, "Notas"),
+    __(VAL, "Notes")
+)
+
+_(TRANSFER_TWO_FACTOR_PALETTE_TITLE,
+    __(ENG, "Transfer 2FA: {0}"),
+    __(ESP, "Transferir 2FA: {0}"),
+    __(VAL, "Transferir 2FA: {0}")
+)
+
+_(TRANSFER_TWO_FACTOR_PALETTE_INSTRUCTIONS,
+    __(ENG, "Scan this code with another authenticator app to add the same 2FA there."),
+    __(ESP, "Escanea este código con otra aplicación de autenticación para añadir el mismo 2FA."),
+    __(VAL, "Escaneja aquest codi amb una altra aplicació d'autenticació per a afegir el mateix 2FA.")
+)
+
+_(TRANSFER_TWO_FACTOR_PALETTE_WARNING,
+    __(ENG, "This code contains your shared secret. Anyone who sees it can generate your codes."),
+    __(ESP, "Este código contiene tu secreto compartido. Cualquiera que lo vea puede generar tus códigos."),
+    __(VAL, "Aquest codi conté el teu secret compartit. Qualsevol que el veja pot generar els teus codis.")
+)
+
+_(TRANSFER_TWO_FACTOR_PALETTE_URI_LABEL,
+    __(ENG, "Or copy the URI:"),
+    __(ESP, "O copia la URI:"),
+    __(VAL, "O copia la URI:")
+)
+
+_(IMPORT_TWO_FACTOR_PALETTE_TITLE,
+    __(ENG, "Import 2FA codes"),
+    __(ESP, "Importar códigos 2FA"),
+    __(VAL, "Importar codis 2FA")
+)
+
+_(IMPORT_TWO_FACTOR_PALETTE_LABEL,
+    __(ENG, "Paste an otpauth-migration:// URI exported from another authenticator:"),
+    __(ESP, "Pega una URI otpauth-migration:// exportada desde otro autenticador:"),
+    __(VAL, "Apega una URI otpauth-migration:// exportada des d'un altre autenticador:")
+)
+
+_(IMPORT_TWO_FACTOR_PALETTE_PARSE_BUTTON,
+    __(ENG, "Read codes"),
+    __(ESP, "Leer códigos"),
+    __(VAL, "Llegir codis")
+)
+
+_(IMPORT_TWO_FACTOR_PALETTE_UNSUPPORTED,
+    __(ENG, "{0} account(s) use an algorithm Clavis cannot generate and were skipped."),
+    __(ESP, "{0} cuenta(s) usan un algoritmo que Clavis no puede generar y se han omitido."),
+    __(VAL, "{0} compte(s) usen un algorisme que Clavis no pot generar i s'han omés.")
+)
+
+_(IMPORT_TWO_FACTOR_PALETTE_SUMMARY,
+    __(ENG, "Found {0} account(s). Choose which ones to import:"),
+    __(ESP, "Se han encontrado {0} cuenta(s). Elige cuáles importar:"),
+    __(VAL, "S'han trobat {0} compte(s). Tria quines importar:")
+)
+
+_(MAINMENU_FILE_MENU_NEW_TWO_FACTOR,
+    __(ENG, "New 2FA"),
+    __(ESP, "Nuevo 2FA"),
+    __(VAL, "Nou 2FA")
+)
+
+_(MAINMENU_FILE_MENU_IMPORT_TWO_FACTOR,
+    __(ENG, "Import 2FA codes"),
+    __(ESP, "Importar códigos 2FA"),
+    __(VAL, "Importar codis 2FA")
+)
+
+_(GIT_ADDED_TWO_FACTOR_COMMIT_MESSAGE,
+    __(ENG, "Clavis: Added 2FA '{0}'"),
+    __(ESP, "Clavis: Añadido 2FA '{0}'"),
+    __(VAL, "Clavis: Afegit 2FA '{0}'")
+)
+
+_(GIT_EDITED_TWO_FACTOR_COMMIT_MESSAGE,
+    __(ENG, "Clavis: Edited 2FA '{0}'"),
+    __(ESP, "Clavis: Editado 2FA '{0}'"),
+    __(VAL, "Clavis: Editat 2FA '{0}'")
+)
+
+_(GIT_ADVANCED_HOTP_COUNTER_COMMIT_MESSAGE,
+    __(ENG, "Clavis: Advanced HOTP counter for '{0}'"),
+    __(ESP, "Clavis: Avanzado el contador HOTP de '{0}'"),
+    __(VAL, "Clavis: Avançat el comptador HOTP de '{0}'")
+)
+
+_(GIT_IMPORTED_TWO_FACTOR_COMMIT_MESSAGE,
+    __(ENG, "Clavis: Imported {0} 2FA code(s)"),
+    __(ESP, "Clavis: Importados {0} código(s) 2FA"),
+    __(VAL, "Clavis: Importats {0} codi(s) 2FA")
+)
+
+_(PASSWORD_STORE_DATA_PALETTE_NUM_TWO_FACTOR_LABEL,
+    __(ENG, "Number of 2FA codes:"),
+    __(ESP, "Número de códigos 2FA:"),
+    __(VAL, "Nombre de codis 2FA:")
+)
+
+_(NEW_PASSWORD_PALETTE_STORE_LOCKED_HINT,
+    __(ENG, "Store locked - existing password not loaded. Saving will replace it."),
+    __(ESP, "Almacén bloqueado - no se ha cargado la contraseña actual. Al guardar se reemplazará."),
+    __(VAL, "Magatzem bloquejat - no s'ha carregat la contrasenya actual. En guardar es reemplaçarà.")
+)
+
+_(ERROR_COULD_NOT_LOCK_VAULT,
+    __(ENG, "Could not clear the GPG key cache. The vault may still be unlocked."),
+    __(ESP, "No se ha podido vaciar la caché de claves GPG. El almacén puede seguir desbloqueado."),
+    __(VAL, "No s'ha pogut buidar la memòria cau de claus GPG. El magatzem pot continuar desbloquejat.")
+)
+
+_(ERROR_NOT_A_TWO_FACTOR,
+    __(ENG, "'{0}': Not a 2FA entry"),
+    __(ESP, "'{0}': No es una entrada 2FA"),
+    __(VAL, "'{0}': No és una entrada 2FA")
+)
+
+_(ERROR_INVALID_TWO_FACTOR_FILE,
+    __(ENG, "'{0}' is not a valid 2FA file. Its first line must be an otpauth:// URI."),
+    __(ESP, "'{0}' no es un archivo 2FA válido. Su primera línea debe ser una URI otpauth://."),
+    __(VAL, "'{0}' no és un fitxer 2FA vàlid. La seua primera línia ha de ser una URI otpauth://.")
+)
+
+_(ERROR_INVALID_OTPAUTH_URI,
+    __(ENG, "That is not a valid otpauth:// URI."),
+    __(ESP, "Esa no es una URI otpauth:// válida."),
+    __(VAL, "Eixa no és una URI otpauth:// vàlida.")
+)
+
+_(ERROR_INVALID_BASE32_SECRET,
+    __(ENG, "The secret is not valid Base32."),
+    __(ESP, "El secreto no es Base32 válido."),
+    __(VAL, "El secret no és Base32 vàlid.")
+)
+
+_(ERROR_QR_GENERATION_FAILED,
+    __(ENG, "Could not generate the QR code."),
+    __(ESP, "No se ha podido generar el código QR."),
+    __(VAL, "No s'ha pogut generar el codi QR.")
+)
+
+_(ERROR_MIGRATION_PARSE_FAILED,
+    __(ENG, "Could not read that migration URI."),
+    __(ESP, "No se ha podido leer esa URI de migración."),
+    __(VAL, "No s'ha pogut llegir eixa URI de migració.")
+)
+
+_(ERROR_SAVING_TWO_FACTOR,
+    __(ENG, "Could not save the 2FA entry '{0}'"),
+    __(ESP, "No se ha podido guardar la entrada 2FA '{0}'"),
+    __(VAL, "No s'ha pogut guardar l'entrada 2FA '{0}'")
 )
 
 #pragma endregion

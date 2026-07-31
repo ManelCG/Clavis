@@ -37,6 +37,16 @@ namespace Clavis {
         static bool TryDecrypt(const std::filesystem::path& path, std::string& out);
         static bool TryDecrypt(const std::vector<uint8_t>& data, std::string& out);
 
+        // Decrypts only if gpg-agent already holds the key, i.e. the store is "unlocked".
+        // Returns false instead of raising a passphrase prompt, so callers can offer a nicety
+        // when the key happens to be cached without ever forcing the user to authenticate.
+        // A false return is a normal outcome, not an error worth reporting.
+        static bool TryDecryptNoPrompt(const std::filesystem::path& path, std::string& out);
+
+        // Flushes gpg-agent's cached passphrases, so the next decryption asks again. This is
+        // what "locking" means here: Clavis holds no key material of its own, the agent does.
+        static bool TryClearPassphraseCache();
+
         static bool TryEncrypt(const std::string& data, std::vector<uint8_t>& out);
         static bool TryEncryptSymmetric(const std::string& passphrase, const std::vector<uint8_t>& plainData, std::vector<uint8_t>& out);
         static bool TryDecryptSymmetric(const std::string& passphrase, const std::vector<uint8_t>& data, std::vector<uint8_t>& out);
@@ -68,5 +78,9 @@ namespace Clavis {
 
     private:
         static std::string GetKeyParams(Key data);
+
+        // allowPrompt selects between GPGME_PINENTRY_MODE_ASK and _CANCEL. With _CANCEL, gpg
+        // returns an error rather than raising pinentry when the key is not cached.
+        static bool __TryDecryptData(const std::vector<uint8_t>& data, std::string& out, bool allowPrompt);
     };
 }

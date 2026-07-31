@@ -1,5 +1,7 @@
 #include <password_store/PasswordStoreElement.h>
+#include <extensions/StringHelper.h>
 #include <system/Extensions.h>
+#include <two_factor/TwoFactorDefinitions.h>
 
 #include "language/Language.h"
 
@@ -21,6 +23,8 @@ namespace Clavis::PasswordStoreElements {
 
                 if (ext == ".gpg")
                     type = PasswordStoreElementType::GPG_FILE;
+                else if (ext == TwoFactor::TWOFA_EXTENSION)
+                    type = PasswordStoreElementType::TWOFA_FILE;
                 else
                     type = PasswordStoreElementType::UNKNOWN;
             }
@@ -37,6 +41,8 @@ namespace Clavis::PasswordStoreElements {
                 return "REG";
             case PasswordStoreElementType::GPG_FILE:
                 return "GPG";
+            case PasswordStoreElementType::TWOFA_FILE:
+                return "2FA";
             default:
                 return "UNK";
         }
@@ -61,6 +67,21 @@ namespace Clavis::PasswordStoreElements {
         return GetPath().filename().string();
     }
 
+    std::string PasswordStoreElement::GetLabel() const {
+        const auto name = GetName();
+
+        std::string knownExtension;
+        if (type == PasswordStoreElementType::GPG_FILE)
+            knownExtension = ".gpg";
+        else if (type == PasswordStoreElementType::TWOFA_FILE)
+            knownExtension = TwoFactor::TWOFA_EXTENSION;
+
+        if (knownExtension.empty() || !StringHelper::EndsWith(name, knownExtension))
+            return name;
+
+        return name.substr(0, name.size() - knownExtension.size());
+    }
+
     void PasswordStoreElement::SetDisplayName(const std::string& name) {
         displayName = name;
     }
@@ -71,6 +92,14 @@ namespace Clavis::PasswordStoreElements {
 
     bool PasswordStoreElement::IsGPGFile() const {
         return type == PasswordStoreElementType::GPG_FILE;
+    }
+
+    bool PasswordStoreElement::IsTwoFactorFile() const {
+        return type == PasswordStoreElementType::TWOFA_FILE;
+    }
+
+    bool PasswordStoreElement::IsEncryptedFile() const {
+        return IsGPGFile() || IsTwoFactorFile();
     }
 
 
