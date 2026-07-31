@@ -1,3 +1,7 @@
+## [2.2.0-2] - 2026-07-31
+
+- deploy script fix
+
 ## [2.2.0-1] - 2026-07-31
 
 - Implemented a 2FA vault
