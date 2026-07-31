@@ -177,7 +177,7 @@ trap 'rm -f "$NOTES_FILE"' EXIT
   fi
 } > "$NOTES_FILE"
 
-"${EDITOR:-vi}" "$NOTES_FILE"
+"${EDITOR:-vim}" "$NOTES_FILE"
 
 # Drop comment lines and trailing blank lines.
 NOTES=$(grep -v '^#' "$NOTES_FILE" | sed -e 's/[[:space:]]*$//' | sed -e '/./,$!d' | tac | sed -e '/./,$!d' | tac)

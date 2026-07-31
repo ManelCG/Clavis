@@ -23,8 +23,8 @@ endif()
 # Define project
 set(PROJECTNAME "Clavis")
 set(PROJECTNAME_BIN "clavis")
-set(CLAVIS_VERSION "2.1.0")
-set(VERSION_PATCH "2")
+set(CLAVIS_VERSION "2.2.0")
+set(VERSION_PATCH "1")
 
 # Version depending files
 if (LINUX)
