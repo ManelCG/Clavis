@@ -24,6 +24,7 @@ REMOTE="origin"
 CMAKELISTS="CMakeLists.txt"
 CHANGELOG="CHANGELOG.md"
 AUR_SUBMODULES=("aur-clavis" "aur-clavis-git")
+AUR_BRANCH="master"
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -100,6 +101,23 @@ fi
 
 info "Ensuring AUR submodules are checked out..."
 git submodule update --init "${AUR_SUBMODULES[@]}"
+
+# `git submodule update` leaves each submodule on a detached HEAD, and step 4 below rewrites
+# their PKGBUILD via CMake's configure_file. Switching branches after that point fails --
+# checkout refuses to overwrite the regenerated file -- so the branch is selected here, before
+# anything has been generated.
+#
+# PKGBUILD and .SRCINFO are generated artifacts (configure_file / makepkg --printsrcinfo), so a
+# local modification is always stale output from an earlier run and is dropped rather than
+# preserved. Hand edits belong in bundled/assets/PKGBUILD-*.in, which is what generates them.
+for sub in "${AUR_SUBMODULES[@]}"; do
+  info "Checking out $AUR_BRANCH in $sub..."
+  (
+    cd "$sub"
+    git checkout -- PKGBUILD .SRCINFO 2>/dev/null || true
+    git checkout "$AUR_BRANCH"
+  ) || die "Could not check out $AUR_BRANCH in $sub."
+done
 
 # ---------------------------------------------------------------------------
 # 2. Read version + bump check
@@ -230,7 +248,8 @@ for sub in "${AUR_SUBMODULES[@]}"; do
   info "Publishing AUR package: $sub"
   (
     cd "$sub"
-    git checkout master
+    # Already on $AUR_BRANCH from the checkout above; switching here would fail now that
+    # PKGBUILD has been regenerated.
     makepkg --printsrcinfo > .SRCINFO
     if [ -z "$(git status --porcelain -- PKGBUILD .SRCINFO)" ]; then
       warn "No version change in $sub, skipping commit."
