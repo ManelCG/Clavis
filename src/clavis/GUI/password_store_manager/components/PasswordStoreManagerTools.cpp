@@ -9,7 +9,7 @@ namespace Clavis::GUI {
         newFolderButton(Icons::Actions::NewFolder),
         goUpButton(Icons::UpArrow),
         newPasswordButton(Icons::Plus),
-        newTwoFactorButton(Icons::TwoFactor),
+        newTwoFactorButton(Icons::NewTwoFactor),
         refreshButton(Icons::Actions::Refresh)
     {
         toolHBox.append(newFolderButton);
