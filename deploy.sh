@@ -259,8 +259,13 @@ for sub in "${AUR_SUBMODULES[@]}"; do
     git commit -m "$TAG"
     git push
   )
-  # Track which submodule pointers actually moved.
-  if [ -n "$(git status --porcelain -- "$sub")" ]; then
+  # Track which submodule pointers actually moved. Compared explicitly rather than through
+  # `git status`, which reports nothing for a submodule configured with `ignore = all` -- and
+  # that config is easy to set to quiet the build artifacts these repos accumulate. Relying on
+  # status here silently skipped the pointer-recording step below.
+  recorded_sha=$(git ls-tree HEAD -- "$sub" | awk '{print $3}')
+  current_sha=$(git -C "$sub" rev-parse HEAD)
+  if [ "$recorded_sha" != "$current_sha" ]; then
     AUR_UPDATED+=("$sub")
   fi
 done
@@ -268,7 +273,7 @@ done
 # Record moved AUR submodule pointers in the main repo (optional).
 if [ "${#AUR_UPDATED[@]}" -gt 0 ]; then
   if confirm "Record updated AUR submodule pointers (${AUR_UPDATED[*]}) in $RELEASE_BRANCH?"; then
-    git add "${AUR_UPDATED[@]}"
+    git add --ignore-submodules=none -- "${AUR_UPDATED[@]}" 2>/dev/null || git add -- "${AUR_UPDATED[@]}"
     git commit -m "Bump AUR submodules to $TAG"
     git push "$REMOTE" "$RELEASE_BRANCH"
   fi
