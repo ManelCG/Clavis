@@ -1,3 +1,8 @@
+## [2.2.0-1] - 2026-07-31
+
+- Implemented a 2FA vault
+- The 2FA vault is integrated seamlessly with the password store
+
 ## [2.1.0-2] - 2026-06-23
 
 Clavis 2.1.0
