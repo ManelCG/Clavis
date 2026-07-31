@@ -13,6 +13,7 @@ namespace Clavis::Icons {
 
 	constexpr IconDefinition Minus = IconDefinition("MinusIcon.png");
 	constexpr IconDefinition Plus = IconDefinition("PlusIcon.png");
+	constexpr IconDefinition TwoFactor = IconDefinition("2FA.png");
 	constexpr IconDefinition UpCaret = IconDefinition("UpCaretIcon.png");
 	constexpr IconDefinition UpArrow = IconDefinition("UpArrowIcon.png");
 	constexpr IconDefinition Check = IconDefinition("Check.png");

@@ -27,6 +27,10 @@ namespace Clavis::GUI {
         return entry.get_text();
     }
 
+    void SimpleEntryPalette::SetEntryText(const std::string& text) {
+        entry.set_text(text);
+    }
+
     void SimpleEntryPalette::SetTitle(const std::string &title) {
         set_title(title);
     }

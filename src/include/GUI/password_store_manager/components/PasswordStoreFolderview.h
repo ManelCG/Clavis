@@ -26,6 +26,10 @@ namespace Clavis::GUI {
         void SetOnDeleteItem(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
         void SetOnExportFolder(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
 
+        void SetOnEditTwoFactor(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
+        void SetOnShowTwoFactorDetails(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
+        void SetOnTransferTwoFactor(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
+
     protected:
 
     private:
@@ -46,5 +50,8 @@ namespace Clavis::GUI {
         std::function<void(const PasswordStoreElements::PasswordStoreElement&)> renameItemCallback   = [](const PasswordStoreElements::PasswordStoreElement&){};
         std::function<void(const PasswordStoreElements::PasswordStoreElement&)> deleteItemCallback   = [](const PasswordStoreElements::PasswordStoreElement&){};
         std::function<void(const PasswordStoreElements::PasswordStoreElement&)> exportFolderCallback = [](const PasswordStoreElements::PasswordStoreElement&){};
+        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> editTwoFactorCallback = [](const PasswordStoreElements::PasswordStoreElement&){};
+        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> showTwoFactorDetailsCallback = [](const PasswordStoreElements::PasswordStoreElement&){};
+        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> transferTwoFactorCallback = [](const PasswordStoreElements::PasswordStoreElement&){};
     };
 }

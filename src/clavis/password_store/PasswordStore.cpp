@@ -154,6 +154,34 @@ namespace Clavis {
         return true;
     }
 
+    bool PasswordStore::TryDecryptElement(const PasswordStoreElements::PasswordStoreElement &elem, Password& password) {
+        if (!elem.IsEncryptedFile())
+            RaiseClavisError(_(ERROR_NOT_A_PASSWORD, elem.GetName()));
+
+        auto pw = Password::FromFile(elem.GetPath());
+
+        if (!pw.TryDecrypt())
+            return false;
+
+        password = pw;
+        return true;
+    }
+
+    bool PasswordStore::TryDecryptTwoFactor(const PasswordStoreElements::PasswordStoreElement &elem,
+                                            TwoFactor::TwoFactorEntry& entry) {
+        if (!elem.IsTwoFactorFile())
+            RaiseClavisError(_(ERROR_NOT_A_TWO_FACTOR, elem.GetName()));
+
+        Password pw;
+        if (!TryDecryptElement(elem, pw))
+            return false;
+
+        if (!TwoFactor::TwoFactorEntry::TryFromFileContents(pw.GetPassword(), entry))
+            RaiseClavisError(_(ERROR_INVALID_TWO_FACTOR_FILE, elem.GetName()));
+
+        return true;
+    }
+
     std::filesystem::path PasswordStore::GetRoot() const {
         return root_path;
     }
@@ -217,6 +245,10 @@ namespace Clavis {
     }
     int PasswordStore::GetNumberOfPasswords() const {
         return System::GetNumberOfFiles(GetRoot(), ".gpg", {".git"});
+    }
+
+    int PasswordStore::GetNumberOfTwoFactorEntries() const {
+        return System::GetNumberOfFiles(GetRoot(), TwoFactor::TWOFA_EXTENSION, {".git"});
     }
 
     std::string PasswordStore::GetGPGID() {

@@ -7,6 +7,7 @@
 #include <password_store/PasswordStoreElement.h>
 
 #include <password_store/Password.h>
+#include <two_factor/TwoFactorEntry.h>
 
 namespace Clavis {
     class PasswordStore {
@@ -28,12 +29,20 @@ namespace Clavis {
         static bool TryGetGPGID(const std::filesystem::path& directory, std::string& outgpgid);
 
         int GetNumberOfPasswords() const;
+        int GetNumberOfTwoFactorEntries() const;
         int GetNumberOfFolders() const;
 
         [[nodiscard]] std::filesystem::path GetRoot() const;
         [[nodiscard]] std::filesystem::path GetPath(bool relative = false) const;
 
         bool TryDecryptPassword(const PasswordStoreElements::PasswordStoreElement& elem, Password& password);
+
+        // Decrypts any encrypted store element -- a .gpg password or a .2fa entry. The raw
+        // plaintext is returned; interpreting it is the caller's job.
+        bool TryDecryptElement(const PasswordStoreElements::PasswordStoreElement& elem, Password& password);
+
+        bool TryDecryptTwoFactor(const PasswordStoreElements::PasswordStoreElement& elem,
+                                 TwoFactor::TwoFactorEntry& entry);
 
         [[nodiscard]] std::vector<PasswordStoreElements::PasswordStoreElement> GetElements() const;
         [[nodiscard]] std::vector<PasswordStoreElements::PasswordStoreElement> GetElements(std::string filter) const;

@@ -35,8 +35,32 @@ namespace Clavis::GUI {
         static void ExportFolderWorkflow(PasswordStoreManager* passwordStoreManager, const PasswordStoreElements::PasswordStoreElement& folder);
         static void ImportPasswordStoreWorkflow(PasswordStoreManager* passwordStoreManager, Gtk::Window* parent);
 
+        static void NewTwoFactorWorkflow(PasswordStoreManager* passwordStoreManager);
+        static void EditTwoFactorWorkflow(PasswordStoreManager* passwordStoreManager, const PasswordStoreElements::PasswordStoreElement& element);
+        static void ShowTwoFactorDetailsWorkflow(PasswordStoreManager* passwordStoreManager, const PasswordStoreElements::PasswordStoreElement& element);
+        static void TransferTwoFactorWorkflow(PasswordStoreManager* passwordStoreManager, const PasswordStoreElements::PasswordStoreElement& element);
+        static void ImportTwoFactorMigrationWorkflow(PasswordStoreManager* passwordStoreManager, const std::string& initialUri = "");
+
+        // Generates the next HOTP code: re-reads the file, advances the counter, re-encrypts
+        // and commits. Never a side effect of merely selecting or copying an entry.
+        static void AdvanceHotpCounterWorkflow(PasswordStoreManager* passwordStoreManager, const std::filesystem::path& fullpath);
+
     private:
-        static void NewPasswordWorkflow_IMPL(PasswordStoreManager* passwordStoreManager, const std::string& name = "");
+        static void NewPasswordWorkflow_IMPL(PasswordStoreManager* passwordStoreManager, const std::string& name = "", const std::filesystem::path& elementPath = {});
+
+        static void NewTwoFactorWorkflow_IMPL(PasswordStoreManager* passwordStoreManager,
+                                              const std::string& defaultName,
+                                              const TwoFactor::TwoFactorEntry& initial);
+
+        static bool TryLoadTwoFactor(PasswordStoreManager* passwordStoreManager,
+                                     const PasswordStoreElements::PasswordStoreElement& element,
+                                     TwoFactor::TwoFactorEntry& out);
+
+        static bool SaveTwoFactor(PasswordStoreManager* passwordStoreManager,
+                                  const std::filesystem::path& fullpath,
+                                  const TwoFactor::TwoFactorEntry& entry,
+                                  const std::string& name,
+                                  bool isEditing);
     };
 
 }

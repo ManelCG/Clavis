@@ -62,6 +62,11 @@ namespace Clavis::GUI {
                 button->SetOnEditPassword(editPasswordCallback);
             if (element.IsFolder())
                 button->SetOnExportFolder(exportFolderCallback);
+            if (element.IsTwoFactorFile()) {
+                button->SetOnEditTwoFactor(editTwoFactorCallback);
+                button->SetOnShowTwoFactorDetails(showTwoFactorDetailsCallback);
+                button->SetOnTransferTwoFactor(transferTwoFactorCallback);
+            }
 
             mainVBox.append(*button);
 
@@ -133,6 +138,15 @@ namespace Clavis::GUI {
     }
     void Folderview::SetOnExportFolder(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
         exportFolderCallback = lambda;
+    }
+    void Folderview::SetOnEditTwoFactor(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
+        editTwoFactorCallback = lambda;
+    }
+    void Folderview::SetOnShowTwoFactorDetails(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
+        showTwoFactorDetailsCallback = lambda;
+    }
+    void Folderview::SetOnTransferTwoFactor(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
+        transferTwoFactorCallback = lambda;
     }
 
 

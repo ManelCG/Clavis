@@ -18,18 +18,24 @@ namespace Clavis::GUI {
 
       numPasswordsLabel.set_text(_(PASSWORD_STORE_DATA_PALETTE_NUM_PASSWORDS_LABEL));
       numPasswordsLabel.set_halign(Gtk::Align::END);
+      numTwoFactorLabel.set_text(_(PASSWORD_STORE_DATA_PALETTE_NUM_TWO_FACTOR_LABEL));
+      numTwoFactorLabel.set_halign(Gtk::Align::END);
       numFoldersLabel.set_text(_(PASSWORD_STORE_DATA_PALETTE_NUM_FOLDERS_LABEL));
       numFoldersLabel.set_halign(Gtk::Align::END);
 
       tableLabelsVBox.append(numPasswordsLabel);
+      tableLabelsVBox.append(numTwoFactorLabel);
       tableLabelsVBox.append(numFoldersLabel);
 
       numPasswordsValueLabel.set_text(std::to_string(store.GetNumberOfPasswords()));
+      numTwoFactorValueLabel.set_text(std::to_string(store.GetNumberOfTwoFactorEntries()));
       numFoldersValueLabel.set_text(std::to_string(store.GetNumberOfFolders()));
       numPasswordsValueLabel.set_halign(Gtk::Align::START);
+      numTwoFactorValueLabel.set_halign(Gtk::Align::START);
       numFoldersValueLabel.set_halign(Gtk::Align::START);
 
       tableValuesVBox.append(numPasswordsValueLabel);
+      tableValuesVBox.append(numTwoFactorValueLabel);
       tableValuesVBox.append(numFoldersValueLabel);
 
       mainVBox.append(passwordStoreDirectoryLabel);

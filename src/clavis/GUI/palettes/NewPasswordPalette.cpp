@@ -57,6 +57,14 @@ namespace Clavis::GUI {
         return passwordEntry.get_text();
     }
 
+    void NewPasswordPalette::NewPasswordWidget::SetInitialPassword(const std::string& password) {
+        passwordEntry.set_text(password);
+    }
+
+    void NewPasswordPalette::NewPasswordWidget::SetStoreLockedHint() {
+        passwordEntry.set_placeholder_text(_(NEW_PASSWORD_PALETTE_STORE_LOCKED_HINT));
+    }
+
     void NewPasswordPalette::NewPasswordWidget::SetGeneratable(bool generatable) {
         generatePasswordButton.set_sensitive(generatable);
     }
@@ -232,6 +240,14 @@ namespace Clavis::GUI {
         passwordGeneratorController.SetOnSettingsChanged(updateGenerateButton);
         updateGenerateButton();
 
+    }
+
+    void NewPasswordPalette::SetInitialPassword(const std::string& password) {
+        newPasswordWidget.SetInitialPassword(password);
+    }
+
+    void NewPasswordPalette::SetStoreLockedHint() {
+        newPasswordWidget.SetStoreLockedHint();
     }
 
     void NewPasswordPalette::DoGiveResponse(bool r) {

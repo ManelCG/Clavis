@@ -148,15 +148,17 @@ namespace Clavis::Clav {
         else
             WriteU32(payload, 0);
 
-        // Collect .gpg files under searchRoot; paths are relative to searchRoot
+        // Collect every encrypted store file under searchRoot; paths are relative to searchRoot.
+        // Both .gpg passwords and .2fa entries are included -- exporting only .gpg would silently
+        // drop every 2FA entry from the archive.
         auto allFiles = System::ListContents(searchRoot, true, {".git"});
-        std::vector<std::filesystem::path> gpgFiles;
+        std::vector<std::filesystem::path> storeFiles;
         for (const auto& f : allFiles)
-            if (f.extension() == ".gpg")
-                gpgFiles.push_back(f);
+            if (f.extension() == ".gpg" || f.extension() == TwoFactor::TWOFA_EXTENSION)
+                storeFiles.push_back(f);
 
-        WriteU32(payload, static_cast<uint32_t>(gpgFiles.size()));
-        for (const auto& f : gpgFiles) {
+        WriteU32(payload, static_cast<uint32_t>(storeFiles.size()));
+        for (const auto& f : storeFiles) {
             WriteString(payload, std::filesystem::relative(f, searchRoot).string());
             std::vector<uint8_t> fileData;
             System::TryReadFile(f, fileData);

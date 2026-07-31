@@ -1,5 +1,7 @@
 #include <GUI/password_store_manager/components/PasswordStoreManagerTools.h>
 
+#include <language/Language.h>
+
 namespace Clavis::GUI {
     PasswordStoreManagerTools::PasswordStoreManagerTools() :
         Gtk::Box(Gtk::Orientation::VERTICAL),
@@ -7,11 +9,16 @@ namespace Clavis::GUI {
         newFolderButton(Icons::Actions::NewFolder),
         goUpButton(Icons::UpArrow),
         newPasswordButton(Icons::Plus),
+        newTwoFactorButton(Icons::TwoFactor),
         refreshButton(Icons::Actions::Refresh)
     {
         toolHBox.append(newFolderButton);
         toolHBox.append(goUpButton);
         toolHBox.append(newPasswordButton);
+
+        newTwoFactorButton.set_tooltip_text(_(PASSWORDSTORE_MANAGER_NEW_TWO_FACTOR_TOOLTIP));
+        toolHBox.append(newTwoFactorButton);
+
         toolHBox.append(refreshButton);
 
         labelScrollBox.set_child(pathLabel);
@@ -61,6 +68,11 @@ namespace Clavis::GUI {
     void PasswordStoreManagerTools::SetOnNewPasswordButtonClick(const std::function<void()> &callback) {
         onNewPasswordButtonClick = callback;
         newPasswordButton.signal_clicked().connect(onNewPasswordButtonClick);
+    }
+
+    void PasswordStoreManagerTools::SetOnNewTwoFactorButtonClick(const std::function<void()> &callback) {
+        onNewTwoFactorButtonClick = callback;
+        newTwoFactorButton.signal_clicked().connect(onNewTwoFactorButtonClick);
     }
     void PasswordStoreManagerTools::SetOnRefreshButtonClick(const std::function<void()> &callback) {
         onRefreshButtonClick = callback;

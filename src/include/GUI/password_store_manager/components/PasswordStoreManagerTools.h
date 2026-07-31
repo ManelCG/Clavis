@@ -13,6 +13,7 @@ namespace Clavis::GUI {
         void SetOnNewFolderButtonClick(const std::function<void()> &callback);
         void SetOnGoUpButtonClick(const std::function<void()> &callback);
         void SetOnNewPasswordButtonClick(const std::function<void()> &callback);
+        void SetOnNewTwoFactorButtonClick(const std::function<void()> &callback);
         void SetOnRefreshButtonClick(const std::function<void()> &callback);
 
         void SetOnGitSync(const std::function<void()> &callback);
@@ -30,6 +31,7 @@ namespace Clavis::GUI {
         IconButton newFolderButton;
         IconButton goUpButton;
         IconButton newPasswordButton;
+        IconButton newTwoFactorButton;
         IconButton refreshButton;
 
         Gtk::ScrolledWindow labelScrollBox;
@@ -42,6 +44,7 @@ namespace Clavis::GUI {
         std::function<void()> onNewFolderButtonClick;
         std::function<void()> onGoUpButtonClick;
         std::function<void()> onNewPasswordButtonClick;
+        std::function<void()> onNewTwoFactorButtonClick;
         std::function<void()> onRefreshButtonClick;
 
         std::function<void()> onGitSync;

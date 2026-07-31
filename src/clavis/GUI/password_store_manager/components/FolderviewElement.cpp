@@ -8,7 +8,7 @@ namespace Clavis::GUI {
     {
         ResolveIcon();
 
-        SetLabel(element.GetName());
+        SetLabel(element.GetLabel());
 
         SetIcon(icon);
         SetupContextMenu();
@@ -27,6 +27,11 @@ namespace Clavis::GUI {
 
         if (element.IsGPGFile()) {
             icon = Icons::Actions::Password;
+            return;
+        }
+
+        if (element.IsTwoFactorFile()) {
+            icon = Icons::TwoFactor;
             return;
         }
 
@@ -50,7 +55,7 @@ namespace Clavis::GUI {
         titleHBox.set_margin_end(5);
 
         contextMenuIcon.SetIcon(icon);
-        contextMenuFilenameLabel.set_text(element.GetName());
+        contextMenuFilenameLabel.set_text(element.GetLabel());
         contextMenuFilenameLabel.set_margin_start(5);
 
         contextMenuVBox.append(titleHBox);
@@ -65,6 +70,32 @@ namespace Clavis::GUI {
             editPasswordButton.signal_clicked().connect([this]() {
                 contextMenu.hide();
                 editPasswordCallback(element);
+            });
+        }
+
+        if (element.IsTwoFactorFile()) {
+            contextMenuVBox.append(editTwoFactorButton);
+            editTwoFactorButton.SetIcon(Icons::Actions::Draw);
+            editTwoFactorButton.SetLabel(_(PASSWORD_STORE_MANAGER_CONTEXT_MENU_EDIT_TWO_FACTOR_BUTTON));
+            editTwoFactorButton.signal_clicked().connect([this]() {
+                contextMenu.hide();
+                editTwoFactorCallback(element);
+            });
+
+            contextMenuVBox.append(showTwoFactorDetailsButton);
+            showTwoFactorDetailsButton.SetIcon(Icons::Actions::Search);
+            showTwoFactorDetailsButton.SetLabel(_(PASSWORD_STORE_MANAGER_CONTEXT_MENU_SHOW_DETAILS_BUTTON));
+            showTwoFactorDetailsButton.signal_clicked().connect([this]() {
+                contextMenu.hide();
+                showTwoFactorDetailsCallback(element);
+            });
+
+            contextMenuVBox.append(transferTwoFactorButton);
+            transferTwoFactorButton.SetIcon(Icons::Actions::Export);
+            transferTwoFactorButton.SetLabel(_(PASSWORD_STORE_MANAGER_CONTEXT_MENU_TRANSFER_TWO_FACTOR_BUTTON));
+            transferTwoFactorButton.signal_clicked().connect([this]() {
+                contextMenu.hide();
+                transferTwoFactorCallback(element);
             });
         }
 
@@ -108,6 +139,15 @@ namespace Clavis::GUI {
     }
     void FolderviewElement::SetOnExportFolder(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
         exportFolderCallback = lambda;
+    }
+    void FolderviewElement::SetOnEditTwoFactor(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
+        editTwoFactorCallback = lambda;
+    }
+    void FolderviewElement::SetOnShowTwoFactorDetails(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
+        showTwoFactorDetailsCallback = lambda;
+    }
+    void FolderviewElement::SetOnTransferTwoFactor(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
+        transferTwoFactorCallback = lambda;
     }
     void FolderviewElement::SetOnEditPassword(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
         editPasswordCallback = lambda;

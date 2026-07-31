@@ -3,6 +3,7 @@
 #include <error/ClavisError.h>
 #include <extensions/GPGWrapper.h>
 #include <extensions/GitWrapper.h>
+#include <extensions/StringHelper.h>
 #include <system/Extensions.h>
 
 #include <GUI/lib/MainLoopHalter.h>
@@ -57,7 +58,7 @@ namespace Clavis::GUI {
         // Don't commit empty folders
         passwordStoreManager->Refresh();
     }
-    void Workflows::NewPasswordWorkflow_IMPL(PasswordStoreManager *passwordStoreManager, const std::string& defaultName) {
+    void Workflows::NewPasswordWorkflow_IMPL(PasswordStoreManager *passwordStoreManager, const std::string& defaultName, const std::filesystem::path& elementPath) {
         Password password;
 
         bool isEditing = !defaultName.empty();
@@ -66,10 +67,28 @@ namespace Clavis::GUI {
         if (dotPos != std::string::npos)
             name = name.substr(0, dotPos);
 
+        // When editing, offer the existing password so the user can amend it -- but only if the
+        // store is already unlocked. This must never raise a passphrase prompt just to open the
+        // dialog, so a locked store simply leaves the field empty, exactly as before.
+        std::string existingPassword;
+        bool loadedExisting = false;
+        if (isEditing) {
+            loadedExisting = GPG::TryDecryptNoPrompt(elementPath, existingPassword);
+            if (loadedExisting)
+                existingPassword = StringHelper::TrimTrailingNewlines(existingPassword);
+        }
+
         if (!NewPasswordPalette::Spawn(
             passwordStoreManager,
-            [&name]() {
-                return new NewPasswordPalette(name);
+            [&name, &existingPassword, &loadedExisting, isEditing]() {
+                auto palette = new NewPasswordPalette(name);
+
+                if (isEditing && loadedExisting)
+                    palette->SetInitialPassword(existingPassword);
+                else if (isEditing)
+                    palette->SetStoreLockedHint();
+
+                return palette;
             },
             [&password, &name](NewPasswordPalette *p, bool r) {
                 if (r) {
@@ -79,6 +98,9 @@ namespace Clavis::GUI {
             }
         ))
             return;
+
+        if (!existingPassword.empty())
+            System::SecureZero(existingPassword.data(), existingPassword.size());
 
         auto passwordStore = passwordStoreManager->GetPasswordStore();
 
@@ -114,7 +136,7 @@ namespace Clavis::GUI {
     }
 
     void Workflows::EditPasswordWorkflow(PasswordStoreManager *passwordStoreManager, const PasswordStoreElements::PasswordStoreElement &element) {
-        NewPasswordWorkflow_IMPL(passwordStoreManager, element.GetName());
+        NewPasswordWorkflow_IMPL(passwordStoreManager, element.GetName(), element.GetPath());
     }
 
     void Workflows::DeleteElementWorkflow(PasswordStoreManager *passwordStoreManager, const PasswordStoreElements::PasswordStoreElement &element) {
@@ -163,6 +185,11 @@ namespace Clavis::GUI {
         auto palette = SimpleEntryPalette::Create(passwordStoreManager);
         palette->SetTitle(_(RENAME_ELEMENT_PALETTE_TITLE));
         palette->SetLabelText(_(RENAME_ELEMENT_PALETTE_LABEL_TITLE, element.GetName()));
+
+        // The bare filename, not GetName(): for results found through recursive search GetName()
+        // is the store-relative path, which would be re-appended to the element's own directory.
+        palette->SetEntryText(element.GetPath().filename().string());
+        palette->SetIsEntryRequiredForYes(true);
         palette->SetYesSuggested();
 
         std::string newPath = "";
@@ -173,11 +200,48 @@ namespace Clavis::GUI {
             return;
 
         auto passwordStore = passwordStoreManager->GetPasswordStore();
-        auto newFullPath = passwordStore.GetPath() / newPath;
+
+        // Preserve the original file extension. Renaming "github.gpg" to "gitlab" must produce
+        // "gitlab.gpg", not an extensionless file the store can no longer classify or decrypt.
+        // Folders are exempt: a directory called "My.Backups" has extension() == ".Backups".
+        if (!element.IsFolder()) {
+            const auto oldExtension = element.GetPath().extension().string();
+
+            if (!oldExtension.empty() && !StringHelper::EndsWith(newPath, oldExtension))
+                newPath += oldExtension;
+        }
+
         auto oldFullPath = element.GetPath();
 
-        if (System::FileExists(newFullPath) || System::DirectoryExists(newFullPath))
-            RaiseClavisError(_(ERROR_DIRECTORY_ALREADY_EXISTS, newPath));
+        // Renaming happens in the element's own directory, not the directory currently being
+        // browsed. Those differ for results found through recursive search, where using the
+        // browsed directory would quietly move the entry out of its folder instead of renaming
+        // it where it sits.
+        auto newFullPath = oldFullPath.parent_path() / newPath;
+
+        // Renaming something to the name it already has is a no-op, not an error. The dialog
+        // prefills the current name, so confirming it unchanged is an easy and harmless thing
+        // to do.
+        if (oldFullPath.lexically_normal() == newFullPath.lexically_normal())
+            return;
+
+        // Same confirmation the new-password flow uses when a name is taken. Confirming replaces
+        // the existing entry, which cannot be undone.
+        bool isOverwriting = false;
+        if (System::FileExists(newFullPath) || System::DirectoryExists(newFullPath)) {
+            auto confirmPalette = SimpleYesNoQuestionPalette::Create(passwordStoreManager);
+
+            confirmPalette->SetTitle(_(NEW_PASSWORD_PALETTE_ELEMENT_ALREADY_EXISTS_TITLE));
+            confirmPalette->AddText(_(NEW_PASSWORD_PALETTE_ELEMENT_ALREADY_EXISTS_TEXT, newPath));
+            confirmPalette->SetYesDestructive();
+            confirmPalette->SetYesText(_(MISC_OVERWRITE_BUTTON));
+            confirmPalette->SetNoText(_(MISC_CANCEL_BUTTON));
+
+            if (!confirmPalette->Run())
+                return;
+
+            isOverwriting = true;
+        }
 
         auto oldRelPath = std::filesystem::relative(oldFullPath, passwordStore.GetRoot());
         auto newRelPath = std::filesystem::relative(newFullPath, passwordStore.GetRoot());
@@ -185,7 +249,7 @@ namespace Clavis::GUI {
         if (!Git::IsGitRepo() || (element.IsFolder() && System::DirectoryIsEmpty(oldFullPath)))
             std::filesystem::rename(oldFullPath, newFullPath);
         else
-            Git::Move(oldRelPath, newRelPath);
+            Git::Move(oldRelPath, newRelPath, isOverwriting);
 
         passwordStoreManager->Refresh();
     }

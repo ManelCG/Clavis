@@ -72,14 +72,19 @@ namespace Clavis::GUI {
                 MenuBar::MenuSection({
                     MenuBar::MenuItem(_(MAINMENU_FILE_MENU_NEW_FOLDER), "new_folder"),
                     MenuBar::MenuItem(_(MAINMENU_FILE_MENU_NEW_PASSWORD),  "new_password"),
+                    MenuBar::MenuItem(_(MAINMENU_FILE_MENU_NEW_TWO_FACTOR), "new_two_factor"),
                 }),
                 MenuBar::MenuSection({
+                    MenuBar::MenuItem(_(MAINMENU_FILE_MENU_IMPORT_TWO_FACTOR), "import_two_factor"),
                     MenuBar::MenuItem(_(MAINMENU_FILE_MENU_IMPORT_PASSWORD_STORE), "import_password_store"),
                     MenuBar::MenuItem(_(MAINMENU_FILE_MENU_EXPORT_PASSWORD_STORE), "export_password_store"),
                 }),
                 MenuBar::MenuSection({
                     MenuBar::MenuItem(_(MAINMENU_FILE_MENU_EXPORT_PUBLIC_GPG),  "export_public_gpg"),
                     MenuBar::MenuItem(_(MAINMENU_FILE_MENU_EXPORT_PRIVATE_GPG), "export_private_gpg")
+                }),
+                MenuBar::MenuSection({
+                    MenuBar::MenuItem(_(MAINMENU_FILE_MENU_LOCK_VAULT), "lock_vault"),
                 }),
                 MenuBar::MenuSection({
                     MenuBar::MenuItem(_(MAINMENU_FILE_MENU_QUIT), "quit"),
@@ -111,9 +116,12 @@ namespace Clavis::GUI {
         def->AddAction("password_store_data", [this]() {Extensions::SpawnWindow<PasswordStoreDataPalette>([this](){return new PasswordStoreDataPalette(passwordStoreManager.GetPasswordStore());}, this);});
         def->AddAction("new_folder", [this]() {Workflows::NewFolderWorkflow(&passwordStoreManager);});
         def->AddAction("new_password", [this]() {Workflows::NewPasswordWorkflow(&passwordStoreManager);});
+        def->AddAction("new_two_factor", [this]() {Workflows::NewTwoFactorWorkflow(&passwordStoreManager);});
+        def->AddAction("import_two_factor", [this]() {Workflows::ImportTwoFactorMigrationWorkflow(&passwordStoreManager);});
         def->AddAction("import_password_store", [this]() {Workflows::ImportPasswordStoreWorkflow(&passwordStoreManager, this);});
         def->AddAction("export_password_store", [this]() {Workflows::ExportPasswordStoreWorkflow(&passwordStoreManager, this);});
         def->AddAction("export_public_gpg",  [this]() {Workflows::ExportGPGKeyDirectWorkflow(false, this);});
+        def->AddAction("lock_vault", [this]() {passwordStoreManager.LockVault();});
         def->AddAction("export_private_gpg", [this]() {Workflows::ExportGPGKeyDirectWorkflow(true,  this);});
         def->AddAction("quit", [this](){close();});
 
