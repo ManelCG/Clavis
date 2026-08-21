@@ -15,7 +15,11 @@ namespace Clavis::GUI {
 
         void SetOnElementClicked(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
 
-        void DisplayElements(const std::vector<PasswordStoreElements::PasswordStoreElement>& elements);
+        // `insideWorkspace` is a property of the view, not of the elements: the same password
+        // element is drawn differently depending on whether it was reached through the tree or
+        // through a workspace.
+        void DisplayElements(const std::vector<PasswordStoreElements::PasswordStoreElement>& elements,
+                             bool insideWorkspace = false);
 
         void ScrollUp();
         void ScrollDown();
@@ -29,6 +33,11 @@ namespace Clavis::GUI {
         void SetOnEditTwoFactor(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
         void SetOnShowTwoFactorDetails(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
         void SetOnTransferTwoFactor(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
+
+        void SetOnAddToWorkspace(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
+        void SetOnEditWorkspace(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
+        void SetOnRenameInWorkspace(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
+        void SetOnRemoveFromWorkspace(const std::function<void(const PasswordStoreElements::PasswordStoreElement&)> &lambda);
 
     protected:
 
@@ -53,5 +62,9 @@ namespace Clavis::GUI {
         std::function<void(const PasswordStoreElements::PasswordStoreElement&)> editTwoFactorCallback = [](const PasswordStoreElements::PasswordStoreElement&){};
         std::function<void(const PasswordStoreElements::PasswordStoreElement&)> showTwoFactorDetailsCallback = [](const PasswordStoreElements::PasswordStoreElement&){};
         std::function<void(const PasswordStoreElements::PasswordStoreElement&)> transferTwoFactorCallback = [](const PasswordStoreElements::PasswordStoreElement&){};
+        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> addToWorkspaceCallback = [](const PasswordStoreElements::PasswordStoreElement&){};
+        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> editWorkspaceCallback = [](const PasswordStoreElements::PasswordStoreElement&){};
+        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> renameInWorkspaceCallback = [](const PasswordStoreElements::PasswordStoreElement&){};
+        std::function<void(const PasswordStoreElements::PasswordStoreElement&)> removeFromWorkspaceCallback = [](const PasswordStoreElements::PasswordStoreElement&){};
     };
 }

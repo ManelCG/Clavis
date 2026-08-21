@@ -123,6 +123,11 @@ namespace Clavis::GUI {
     }
 
     void Workflows::NewTwoFactorWorkflow(PasswordStoreManager* passwordStoreManager) {
+        // See NewFolderWorkflow: nothing new is created while browsing a workspace. Editing an
+        // existing entry from inside one is unaffected.
+        if (passwordStoreManager->IsInWorkspace())
+            return;
+
         NewTwoFactorWorkflow_IMPL(passwordStoreManager, "", TwoFactor::TwoFactorEntry());
     }
 

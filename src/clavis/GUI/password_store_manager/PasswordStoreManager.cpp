@@ -1,8 +1,11 @@
 #include <GUI/password_store_manager/PasswordStoreManager.h>
 
+#include <algorithm>
+
 #include <GUI/workflows/NewItemWorkflow.h>
 #include <extensions/GPGWrapper.h>
 #include <extensions/GUIExtensions.h>
+#include <extensions/StringHelper.h>
 
 namespace Clavis::GUI {
     PasswordStoreManager::PasswordStoreManager() :
@@ -51,6 +54,9 @@ namespace Clavis::GUI {
         add_controller(key_controller);  // Attach to the entry
 
         refreshDispatcher.connect([this]() {
+            // A pull can bring in someone else's workspace changes, so the database has to be
+            // re-read before the view is rebuilt from it.
+            ReloadWorkspaces();
             Refresh();
         });
     }
@@ -59,11 +65,47 @@ namespace Clavis::GUI {
         return passwordStore;
     }
 
+    Workspaces::WorkspaceDB& PasswordStoreManager::GetWorkspaceDB() {
+        return workspaceDB;
+    }
+
+    void PasswordStoreManager::ReloadWorkspaces() {
+        workspaceDB = Workspaces::WorkspaceDB::Load(passwordStore.GetRoot());
+    }
+
+    bool PasswordStoreManager::IsInWorkspace() const {
+        return activeWorkspace.has_value();
+    }
+
+    std::filesystem::path PasswordStoreManager::GetActiveWorkspaceDir() const {
+        return activeWorkspace.has_value() ? activeWorkspace->first : std::filesystem::path{};
+    }
+
+    std::string PasswordStoreManager::GetActiveWorkspaceName() const {
+        return activeWorkspace.has_value() ? activeWorkspace->second : std::string{};
+    }
+
+    void PasswordStoreManager::LeaveWorkspace() {
+        activeWorkspace.reset();
+    }
+
     void PasswordStoreManager::Initialize() {
         passwordStore = PasswordStore::Initialize();
+        ReloadWorkspaces();
 
         folderview.SetOnElementClicked([this](const PasswordStoreElements::PasswordStoreElement& element) {
+            // A workspace entry pointing at a file that is gone cannot be opened; offer to take it
+            // out of the workspace instead of failing to decrypt nothing.
+            if (element.IsMissing()) {
+                Workflows::MissingWorkspaceElementWorkflow(this, element);
+                return;
+            }
+
             switch (element.GetType()) {
+                case PasswordStoreElements::PasswordStoreElementType::WORKSPACE:
+                    EnterWorkspace(element);
+                    break;
+
                 case PasswordStoreElements::PasswordStoreElementType::FOLDER:
                     Chdir(element);
                     break;
@@ -85,13 +127,19 @@ namespace Clavis::GUI {
         });
 
         folderview.SetOnDeleteItem([this](const PasswordStoreElements::PasswordStoreElement& element) {
-            Workflows::DeleteElementWorkflow(this, element);
+            if (element.IsWorkspace())
+                Workflows::DeleteWorkspaceWorkflow(this, element);
+            else
+                Workflows::DeleteElementWorkflow(this, element);
         });
         folderview.SetOnEditPassword([this](const PasswordStoreElements::PasswordStoreElement& element) {
             Workflows::EditPasswordWorkflow(this, element);
         });
         folderview.SetOnRenameItem([this](const PasswordStoreElements::PasswordStoreElement& element) {
-            Workflows::RenameElementWorkflow(this, element);
+            if (element.IsWorkspace())
+                Workflows::RenameWorkspaceWorkflow(this, element);
+            else
+                Workflows::RenameElementWorkflow(this, element);
         });
         folderview.SetOnExportFolder([this](const PasswordStoreElements::PasswordStoreElement& element) {
             Workflows::ExportFolderWorkflow(this, element);
@@ -104,6 +152,18 @@ namespace Clavis::GUI {
         });
         folderview.SetOnTransferTwoFactor([this](const PasswordStoreElements::PasswordStoreElement& element) {
             Workflows::TransferTwoFactorWorkflow(this, element);
+        });
+        folderview.SetOnAddToWorkspace([this](const PasswordStoreElements::PasswordStoreElement& element) {
+            Workflows::AddToWorkspaceWorkflow(this, element);
+        });
+        folderview.SetOnEditWorkspace([this](const PasswordStoreElements::PasswordStoreElement& element) {
+            Workflows::EditWorkspaceWorkflow(this, element);
+        });
+        folderview.SetOnRenameInWorkspace([this](const PasswordStoreElements::PasswordStoreElement& element) {
+            Workflows::RenameInWorkspaceWorkflow(this, element);
+        });
+        folderview.SetOnRemoveFromWorkspace([this](const PasswordStoreElements::PasswordStoreElement& element) {
+            Workflows::RemoveFromWorkspaceWorkflow(this, element);
         });
 
         outputDisplay.SetOnAdvanceHotpCounter([this](const std::filesystem::path& path) {
@@ -118,6 +178,9 @@ namespace Clavis::GUI {
         });
         tools.SetOnNewTwoFactorButtonClick([this]() {
             Workflows::NewTwoFactorWorkflow(this);
+        });
+        tools.SetOnNewWorkspaceButtonClick([this]() {
+            Workflows::NewWorkspaceWorkflow(this);
         });
         tools.SetOnGoUpButtonClick([this]() {
             GoUp();
@@ -252,7 +315,13 @@ namespace Clavis::GUI {
         // output the moment the user started typing.
         outputDisplay.ClearAll();
 
-        passwordStore.GoUp();
+        // A workspace is entered from the folder it lives in, so leaving one lands back there
+        // rather than moving up a real directory.
+        if (activeWorkspace.has_value())
+            activeWorkspace.reset();
+        else
+            passwordStore.GoUp();
+
         searchEntry.set_text("");
         Refresh();
     }
@@ -265,18 +334,164 @@ namespace Clavis::GUI {
         Refresh();
     }
 
-    void PasswordStoreManager::Refresh() {
-        auto filter = searchEntry.get_text();
+    void PasswordStoreManager::EnterWorkspace(const PasswordStoreElements::PasswordStoreElement &elem) {
+        outputDisplay.ClearAll();
 
+        // The element's path is virtual: storeRoot / <workspace dir> / <workspace name>. Taking it
+        // apart is how the workspace is identified again, and it is also what makes entering one
+        // from a recursive search result work -- the path carries the real location either way.
+        const auto rel = std::filesystem::relative(elem.GetPath(), passwordStore.GetRoot());
+
+        activeWorkspace = std::make_pair(
+            Workspaces::NormalizeRelative(rel.parent_path()),
+            rel.filename().string());
+
+        searchEntry.set_text("");
+        Refresh();
+    }
+
+    // A workspace is suppressed from a recursive result when one of the directories above it
+    // already matched the filter, unless its own name matches independently.
+    static bool IsSuppressedByMatchedAncestor(const std::filesystem::path& relPath,
+                                              const std::string& ownName,
+                                              const std::string& filter,
+                                              bool caseSensitive) {
+        auto name = caseSensitive ? ownName : StringHelper::ToLower(ownName);
+        if (name.find(filter) != std::string::npos)
+            return false;
+
+        for (auto ancestor = relPath.parent_path(); !ancestor.empty(); ancestor = ancestor.parent_path()) {
+            auto key = ancestor.generic_string();
+            if (!caseSensitive)
+                key = StringHelper::ToLower(key);
+
+            if (key.find(filter) != std::string::npos)
+                return true;
+        }
+
+        return false;
+    }
+
+    std::vector<PasswordStoreElements::PasswordStoreElement>
+    PasswordStoreManager::CollectWorkspaceElements(const std::string& filter) const {
+        const auto root = passwordStore.GetRoot();
+        const bool caseSensitive = Settings::FILTER_CASE_SENSITIVE.GetValue();
+
+        auto normalizedFilter = filter;
+        if (!caseSensitive)
+            normalizedFilter = StringHelper::ToLower(normalizedFilter);
+
+        std::vector<PasswordStoreElements::PasswordStoreElement> ret;
+
+        // Recursive search reaches across the whole store, so it matches on the workspace's
+        // store-relative location. A plain listing only shows the ones that live right here.
+        const bool isRecursive = recursiveSearchActive && !normalizedFilter.empty();
+        const auto currentDir = Workspaces::ToStorageString(passwordStore.GetPath(true));
+
+        for (const auto& workspace : workspaceDB.GetAll()) {
+            const auto dir = Workspaces::ToStorageString(workspace.path);
+
+            if (!isRecursive && dir != currentDir)
+                continue;
+
+            const auto relPath = dir.empty()
+                ? std::filesystem::path(workspace.name)
+                : std::filesystem::path(dir) / workspace.name;
+
+            auto matchKey = isRecursive ? relPath.generic_string() : workspace.name;
+            if (!caseSensitive)
+                matchKey = StringHelper::ToLower(matchKey);
+
+            if (!normalizedFilter.empty() && matchKey.find(normalizedFilter) == std::string::npos)
+                continue;
+
+            // Same rule the recursive listing applies to files: when a folder already matched, its
+            // contents are not repeated underneath it unless they match on their own name. Without
+            // this, searching for a folder would list the folder and everything inside it twice
+            // over.
+            if (isRecursive && IsSuppressedByMatchedAncestor(relPath, workspace.name, normalizedFilter, caseSensitive))
+                continue;
+
+            auto elem = PasswordStoreElements::PasswordStoreElement::MakeWorkspace(root / relPath);
+
+            // Recursive results are labelled by where they live, exactly as filesystem results
+            // are, so a name that appears in several folders stays distinguishable.
+            if (isRecursive)
+                elem.SetDisplayName(relPath.generic_string());
+
+            ret.push_back(elem);
+        }
+
+        std::sort(ret.begin(), ret.end(), [](const auto& a, const auto& b) {
+            return a.GetName() < b.GetName();
+        });
+
+        return ret;
+    }
+
+    void PasswordStoreManager::Refresh() {
+        auto filter = std::string(searchEntry.get_text());
+
+        if (activeWorkspace.has_value()) {
+            Workspaces::Workspace workspace;
+
+            // The workspace can vanish under us -- a git pull, or another window editing it. Fall
+            // back to the folder it lived in rather than showing an empty view with no way out.
+            if (!workspaceDB.TryGet(activeWorkspace->first, activeWorkspace->second, workspace)) {
+                activeWorkspace.reset();
+                Refresh();
+                return;
+            }
+
+            auto elements = Workspaces::BuildElements(workspace, passwordStore.GetRoot());
+
+            if (!filter.empty()) {
+                const bool caseSensitive = Settings::FILTER_CASE_SENSITIVE.GetValue();
+                auto needle = caseSensitive ? filter : StringHelper::ToLower(filter);
+
+                std::vector<PasswordStoreElements::PasswordStoreElement> filtered;
+                for (const auto& elem : elements) {
+                    auto name = elem.GetName();
+                    if (!caseSensitive)
+                        name = StringHelper::ToLower(name);
+
+                    if (name.find(needle) != std::string::npos)
+                        filtered.push_back(elem);
+                }
+
+                elements = filtered;
+            }
+
+            folderview.DisplayElements(elements, true);
+
+            searchEntry.grab_focus();
+            tools.SetGoUpButtonActive(true);
+            tools.SetCreationButtonsActive(false);
+            // Not the folder it is filed under: a workspace is a place of its own, and where it
+            // happens to live is not what you want to read while you are inside it.
+            tools.SetPathLabel(_(WORKSPACE_PATH_LABEL, workspace.name));
+            return;
+        }
+
+        // Workspaces sort ahead of every real element, so they are prepended and the existing
+        // type-grouping separator logic gives them their own group for free.
+        auto elements = CollectWorkspaceElements(filter);
+
+        std::vector<PasswordStoreElements::PasswordStoreElement> storeElements;
         if (recursiveSearchActive && !filter.empty())
-            folderview.DisplayElements(passwordStore.GetElementsRecursive(std::string(filter)));
+            storeElements = passwordStore.GetElementsRecursive(filter);
         else if (filter.empty())
-            folderview.DisplayElements(passwordStore.GetElements());
+            storeElements = passwordStore.GetElements();
         else
-            folderview.DisplayElements(passwordStore.GetElements(filter));
+            storeElements = passwordStore.GetElements(filter);
+
+        elements.insert(elements.end(), storeElements.begin(), storeElements.end());
+
+        folderview.DisplayElements(elements);
 
         searchEntry.grab_focus();
         tools.SetGoUpButtonActive(!passwordStore.IsAtRoot());
+        tools.SetCreationButtonsActive(true);
         tools.SetPath(passwordStore.GetPath(true));
     }
 

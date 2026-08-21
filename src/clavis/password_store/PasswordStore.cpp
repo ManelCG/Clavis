@@ -2,6 +2,7 @@
 #include <set>
 
 #include <password_store/PasswordStore.h>
+#include <password_store/Workspaces.h>
 #include <system/Extensions.h>
 #include <extensions/StringHelper.h>
 
@@ -30,6 +31,14 @@ namespace Clavis {
         return ps;
     }
 
+    // The workspaces database is Clavis' own bookkeeping, not a store entry. Unlike ordinary
+    // dotfiles it stays hidden even when "show hidden files" is on, because there is nothing a
+    // user can usefully do with it from the folderview.
+    bool PasswordStore::IsWorkspacesFile(const std::filesystem::path& path) const {
+        return path.filename() == Workspaces::WORKSPACES_FILENAME &&
+               path.parent_path() == root_path;
+    }
+
     std::vector<PasswordStoreElements::PasswordStoreElement> PasswordStore::GetElements() const {
         auto contents = System::ListContents(store_path);
 
@@ -38,6 +47,9 @@ namespace Clavis {
         std::vector<PasswordStoreElements::PasswordStoreElement> ret;
 
         for (const auto& file : contents) {
+            if (IsWorkspacesFile(file))
+                continue;
+
             auto elem =  PasswordStoreElements::PasswordStoreElement(file);
 
             if (!show_hidden_files && elem.IsHiddenFile())
@@ -85,6 +97,9 @@ namespace Clavis {
         std::vector<MatchedItem> matches;
 
         for (const auto& filePath : contents) {
+            if (IsWorkspacesFile(filePath))
+                continue;
+
             auto elem = PasswordStoreElements::PasswordStoreElement(filePath);
 
             if (!show_hidden_files && elem.IsHiddenFile())

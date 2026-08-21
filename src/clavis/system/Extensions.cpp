@@ -1,4 +1,5 @@
 #include <system/Extensions.h>
+#include <password_store/Workspaces.h>
 
 #include <error/ClavisError.h>
 #include <settings/Settings.h>
@@ -151,6 +152,10 @@ namespace Clavis::System {
 
 	std::filesystem::path GetGPGIDPath() {
 		return GetPasswordStoreFolder() / ".gpg-id";
+	}
+
+	std::filesystem::path GetWorkspacesFilePath() {
+		return GetPasswordStoreFolder() / Workspaces::WORKSPACES_FILENAME;
 	}
 
 

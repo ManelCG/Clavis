@@ -17,7 +17,8 @@ namespace Clavis::GUI {
         focusedItem = 0;
     }
 
-    void Folderview::DisplayElements(const std::vector<PasswordStoreElements::PasswordStoreElement> &elements) {
+    void Folderview::DisplayElements(const std::vector<PasswordStoreElements::PasswordStoreElement> &elements,
+                                     bool insideWorkspace) {
         Clear();
 
         bool startedDrawing = false;
@@ -36,11 +37,16 @@ namespace Clavis::GUI {
             currentType = element.GetType();
             startedDrawing = true;
 
-            auto button = Gtk::make_managed<FolderviewElement>(element);
+            auto button = Gtk::make_managed<FolderviewElement>(element, insideWorkspace);
 
             button->signal_clicked().connect([this, button, i]() {
-                if (const auto element = button->GetElement(); element.IsFolder()) {
-                    onElementClicked(element);
+                const auto clicked = button->GetElement();
+
+                // Folders and workspaces navigate, and a missing entry opens a prompt instead of
+                // decrypting. None of those need the delay below, which only exists so the focus
+                // highlight paints before GPG blocks the main loop.
+                if (clicked.IsFolder() || clicked.IsWorkspace() || clicked.IsMissing()) {
+                    onElementClicked(clicked);
                     return;
                 }
 
@@ -56,16 +62,30 @@ namespace Clavis::GUI {
                 );
             });
 
-            button->SetOnDeleteItem(deleteItemCallback);
-            button->SetOnRenameItem(renameItemCallback);
-            if (element.IsGPGFile())
-                button->SetOnEditPassword(editPasswordCallback);
-            if (element.IsFolder())
-                button->SetOnExportFolder(exportFolderCallback);
-            if (element.IsTwoFactorFile()) {
-                button->SetOnEditTwoFactor(editTwoFactorCallback);
-                button->SetOnShowTwoFactorDetails(showTwoFactorDetailsCallback);
-                button->SetOnTransferTwoFactor(transferTwoFactorCallback);
+            if (element.IsWorkspace()) {
+                button->SetOnEditWorkspace(editWorkspaceCallback);
+                button->SetOnRenameItem(renameItemCallback);
+                button->SetOnDeleteItem(deleteItemCallback);
+            } else {
+                button->SetOnDeleteItem(deleteItemCallback);
+
+                if (insideWorkspace) {
+                    button->SetOnRenameInWorkspace(renameInWorkspaceCallback);
+                    button->SetOnRemoveFromWorkspace(removeFromWorkspaceCallback);
+                } else {
+                    button->SetOnRenameItem(renameItemCallback);
+                    button->SetOnAddToWorkspace(addToWorkspaceCallback);
+                }
+
+                if (element.IsGPGFile())
+                    button->SetOnEditPassword(editPasswordCallback);
+                if (element.IsFolder())
+                    button->SetOnExportFolder(exportFolderCallback);
+                if (element.IsTwoFactorFile()) {
+                    button->SetOnEditTwoFactor(editTwoFactorCallback);
+                    button->SetOnShowTwoFactorDetails(showTwoFactorDetailsCallback);
+                    button->SetOnTransferTwoFactor(transferTwoFactorCallback);
+                }
             }
 
             mainVBox.append(*button);
@@ -147,6 +167,18 @@ namespace Clavis::GUI {
     }
     void Folderview::SetOnTransferTwoFactor(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
         transferTwoFactorCallback = lambda;
+    }
+    void Folderview::SetOnAddToWorkspace(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
+        addToWorkspaceCallback = lambda;
+    }
+    void Folderview::SetOnEditWorkspace(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
+        editWorkspaceCallback = lambda;
+    }
+    void Folderview::SetOnRenameInWorkspace(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
+        renameInWorkspaceCallback = lambda;
+    }
+    void Folderview::SetOnRemoveFromWorkspace(const std::function<void(const PasswordStoreElements::PasswordStoreElement &)> &lambda) {
+        removeFromWorkspaceCallback = lambda;
     }
 
 

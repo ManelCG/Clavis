@@ -18,23 +18,41 @@ namespace Clavis::PasswordStoreElements {
             // It is a file
             if (!path.has_parent_path())
                 type = PasswordStoreElementType::FOLDER;
-            else {
-                auto ext =  path.extension().string();
-
-                if (ext == ".gpg")
-                    type = PasswordStoreElementType::GPG_FILE;
-                else if (ext == TwoFactor::TWOFA_EXTENSION)
-                    type = PasswordStoreElementType::TWOFA_FILE;
-                else
-                    type = PasswordStoreElementType::UNKNOWN;
-            }
+            else
+                type = ClassifyByExtension(path);
         }
+    }
+
+    PasswordStoreElement::PasswordStoreElement(std::filesystem::path _p, PasswordStoreElementType _type)
+        : path(std::move(_p)), type(_type) {}
+
+    PasswordStoreElementType PasswordStoreElement::ClassifyByExtension(const std::filesystem::path& p) {
+        const auto ext = p.extension().string();
+
+        if (ext == ".gpg")
+            return PasswordStoreElementType::GPG_FILE;
+        if (ext == TwoFactor::TWOFA_EXTENSION)
+            return PasswordStoreElementType::TWOFA_FILE;
+
+        return PasswordStoreElementType::UNKNOWN;
+    }
+
+    PasswordStoreElement PasswordStoreElement::MakeWorkspace(const std::filesystem::path& virtualPath) {
+        return PasswordStoreElement(virtualPath, PasswordStoreElementType::WORKSPACE);
+    }
+
+    PasswordStoreElement PasswordStoreElement::MakeMissing(const std::filesystem::path& target) {
+        auto elem = PasswordStoreElement(target, ClassifyByExtension(target));
+        elem.missing = true;
+        return elem;
     }
 
     std::string PasswordStoreElementTypeToString(const PasswordStoreElementType &type) {
         switch (type) {
             case PasswordStoreElementType::UNDEFINED:
                 return "UDF";
+            case PasswordStoreElementType::WORKSPACE:
+                return "WSP";
             case PasswordStoreElementType::FOLDER:
                 return "DIR";
             case PasswordStoreElementType::FILE_WITHOUT_EXTENSION:
@@ -88,6 +106,14 @@ namespace Clavis::PasswordStoreElements {
 
     bool PasswordStoreElement::IsFolder() const {
         return type == PasswordStoreElementType::FOLDER;
+    }
+
+    bool PasswordStoreElement::IsWorkspace() const {
+        return type == PasswordStoreElementType::WORKSPACE;
+    }
+
+    bool PasswordStoreElement::IsMissing() const {
+        return missing;
     }
 
     bool PasswordStoreElement::IsGPGFile() const {

@@ -3,8 +3,10 @@
 #include <gtkmm.h>
 
 #include <filesystem>
+#include <optional>
 
 #include <password_store/PasswordStore.h>
+#include <password_store/Workspaces.h>
 
 #include <GUI/password_store_manager/components/PasswordStoreFolderview.h>
 #include <GUI/password_store_manager/components/PasswordStoreManagerTools.h>
@@ -17,6 +19,21 @@ namespace Clavis::GUI {
         PasswordStoreManager();
 
         PasswordStore GetPasswordStore() const;
+
+        // By reference: workflows mutate the database in place and then Save() it, so handing out
+        // a copy would silently discard their changes.
+        Workspaces::WorkspaceDB& GetWorkspaceDB();
+        void ReloadWorkspaces();
+
+        // The workspace currently being browsed, as {store-relative directory, name}. Empty when
+        // browsing the real tree.
+        [[nodiscard]] bool IsInWorkspace() const;
+        [[nodiscard]] std::filesystem::path GetActiveWorkspaceDir() const;
+        [[nodiscard]] std::string GetActiveWorkspaceName() const;
+
+        // Leaves the workspace being browsed, if any. Used after an edit renames or moves it, so
+        // the view never points at a workspace that no longer exists under that name.
+        void LeaveWorkspace();
 
         void Initialize();
         void Refresh();
@@ -35,6 +52,12 @@ namespace Clavis::GUI {
     private:
         void GoUp();
         void Chdir(const PasswordStoreElements::PasswordStoreElement& elem);
+        void EnterWorkspace(const PasswordStoreElements::PasswordStoreElement& elem);
+
+        // Workspaces are merged into the listing by the manager rather than by PasswordStore:
+        // they have no presence on disk, and the store deliberately knows nothing about them.
+        [[nodiscard]] std::vector<PasswordStoreElements::PasswordStoreElement>
+            CollectWorkspaceElements(const std::string& filter) const;
 
         bool TryDecryptPassword(const PasswordStoreElements::PasswordStoreElement & elem);
         bool TryDecryptTwoFactor(const PasswordStoreElements::PasswordStoreElement & elem);
@@ -51,6 +74,9 @@ namespace Clavis::GUI {
         // The actual passwordStore that manages the files and passwords.
         // This class is a GUI wrapper of this.
         PasswordStore passwordStore;
+
+        Workspaces::WorkspaceDB workspaceDB;
+        std::optional<std::pair<std::filesystem::path, std::string>> activeWorkspace;
 
         Gtk::SearchEntry searchEntry;
 

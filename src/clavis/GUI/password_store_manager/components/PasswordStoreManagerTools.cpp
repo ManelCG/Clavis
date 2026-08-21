@@ -10,6 +10,7 @@ namespace Clavis::GUI {
         goUpButton(Icons::UpArrow),
         newPasswordButton(Icons::Plus),
         newTwoFactorButton(Icons::NewTwoFactor),
+        newWorkspaceButton(Icons::Actions::Build),
         refreshButton(Icons::Actions::Refresh)
     {
         toolHBox.append(newFolderButton);
@@ -18,6 +19,9 @@ namespace Clavis::GUI {
 
         newTwoFactorButton.set_tooltip_text(_(PASSWORDSTORE_MANAGER_NEW_TWO_FACTOR_TOOLTIP));
         toolHBox.append(newTwoFactorButton);
+
+        newWorkspaceButton.set_tooltip_text(_(PASSWORDSTORE_MANAGER_NEW_WORKSPACE_TOOLTIP));
+        toolHBox.append(newWorkspaceButton);
 
         toolHBox.append(refreshButton);
 
@@ -39,6 +43,7 @@ namespace Clavis::GUI {
         newFolderButton.set_margin_end(1);
         goUpButton.set_margin_end(1);
         newPasswordButton.set_margin_end(1);
+        newTwoFactorButton.set_margin_end(1);
 
         append(toolHBox);
         append(labelScrollBox);
@@ -51,9 +56,20 @@ namespace Clavis::GUI {
             pathLabel.set_text("");
     }
 
+    void PasswordStoreManagerTools::SetPathLabel(const std::string& text) {
+        pathLabel.set_text(text);
+    }
+
 
     void PasswordStoreManagerTools::SetGoUpButtonActive(bool active) {
         goUpButton.set_sensitive(active);
+    }
+
+    void PasswordStoreManagerTools::SetCreationButtonsActive(bool active) {
+        newFolderButton.set_sensitive(active);
+        newPasswordButton.set_sensitive(active);
+        newTwoFactorButton.set_sensitive(active);
+        newWorkspaceButton.set_sensitive(active);
     }
 
 
@@ -73,6 +89,10 @@ namespace Clavis::GUI {
     void PasswordStoreManagerTools::SetOnNewTwoFactorButtonClick(const std::function<void()> &callback) {
         onNewTwoFactorButtonClick = callback;
         newTwoFactorButton.signal_clicked().connect(onNewTwoFactorButtonClick);
+    }
+    void PasswordStoreManagerTools::SetOnNewWorkspaceButtonClick(const std::function<void()> &callback) {
+        onNewWorkspaceButtonClick = callback;
+        newWorkspaceButton.signal_clicked().connect(onNewWorkspaceButtonClick);
     }
     void PasswordStoreManagerTools::SetOnRefreshButtonClick(const std::function<void()> &callback) {
         onRefreshButtonClick = callback;

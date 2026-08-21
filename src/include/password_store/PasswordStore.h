@@ -55,6 +55,8 @@ namespace Clavis {
 
         static bool __TryGetGPGID(const std::filesystem::path& file, std::string& out);
 
+        bool IsWorkspacesFile(const std::filesystem::path& path) const;
+
         static std::vector<PasswordStoreElements::PasswordStoreElement> SortElements(const std::vector<PasswordStoreElements::PasswordStoreElement>& elements);
 
         std::filesystem::path root_path;

@@ -13,6 +13,10 @@ namespace Clavis::GUI {
 
         std::string GetEntryText() const;
         void SetEntryText(const std::string& text);
+
+        // Shown greyed out while the field is empty. Used where an empty answer is meaningful --
+        // confirming without typing keeps the suggested value rather than being rejected.
+        void SetEntryPlaceholder(const std::string& text);
         void SetTitle(const std::string& title);
         void SetLabelText(const std::string& text);
 

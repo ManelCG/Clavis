@@ -33,6 +33,12 @@
 
 namespace Clavis::GUI {
     void Workflows::NewFolderWorkflow(PasswordStoreManager *passwordStoreManager) {
+        // Creating anything needs a directory in view, and a workspace is not one. The toolbar
+        // buttons are greyed out there, but the menu bar and the keyboard shortcuts reach this
+        // same function, so the rule belongs here rather than at each entry point.
+        if (passwordStoreManager->IsInWorkspace())
+            return;
+
         auto palette = SimpleEntryPalette::Create(passwordStoreManager);
         palette->SetTitle(_(NEW_FOLDER_PALETTE_TITLE));
         palette->SetLabelText(_(NEW_FOLDER_PALETTE_LABEL_TITLE));
@@ -132,6 +138,12 @@ namespace Clavis::GUI {
     }
 
     void Workflows::NewPasswordWorkflow(PasswordStoreManager *passwordStoreManager) {
+        // See NewFolderWorkflow: a workspace is not a directory to create things in. Editing an
+        // existing password is still fine there, which is why this guards the creating entry
+        // point rather than the shared implementation.
+        if (passwordStoreManager->IsInWorkspace())
+            return;
+
         NewPasswordWorkflow_IMPL(passwordStoreManager, "");
     }
 
@@ -145,6 +157,9 @@ namespace Clavis::GUI {
         auto name = element.GetName();
         auto fullpath = element.GetPath();
 
+        auto passwordStore = passwordStoreManager->GetPasswordStore();
+        auto relpath = std::filesystem::relative(fullpath, passwordStore.GetRoot());
+
         auto title = _(MISC_DELETE_ELEMENT_PROMPT, element.GetName());
 
         palette->SetTitle(title);
@@ -154,11 +169,22 @@ namespace Clavis::GUI {
         palette->AddText(title);
         palette->AddText(_(MISC_DELETE_ELEMENT_PROMPT_LABEL));
 
+        // Deleting something a workspace points at silently breaks that workspace, so say which
+        // ones are affected before the user commits to it, not after.
+        const auto affectedWorkspaces = passwordStoreManager->GetWorkspaceDB().FindWorkspacesContaining(relpath);
+
+        std::string affectedWorkspacesList;
+        for (const auto& workspaceName : affectedWorkspaces) {
+            if (!affectedWorkspacesList.empty())
+                affectedWorkspacesList += ", ";
+            affectedWorkspacesList += workspaceName;
+        }
+
+        if (!affectedWorkspaces.empty())
+            palette->AddText(_(WORKSPACE_DELETE_WARNING, element.GetLabel(), affectedWorkspacesList));
+
         if (! palette->Run())
             return;
-
-        auto passwordStore = passwordStoreManager->GetPasswordStore();
-        auto relpath = std::filesystem::relative(fullpath, passwordStore.GetRoot());
 
         if (element.IsFolder()) {
             // Git won't remove empty folders; also fall back if git rm fails (untracked)
@@ -177,6 +203,11 @@ namespace Clavis::GUI {
             System::mkdir_p(parentPath);
         }
 
+        // The user was warned above and went ahead, so the entries pointing at what is now gone
+        // come out of every workspace rather than being left behind as broken rows.
+        if (passwordStoreManager->GetWorkspaceDB().RemoveElementEverywhere(relpath))
+            passwordStoreManager->GetWorkspaceDB().Save(
+                _(GIT_WORKSPACE_PRUNED_COMMIT_MESSAGE, relpath.generic_string(), affectedWorkspacesList));
 
         passwordStoreManager->Refresh();
     }
@@ -250,6 +281,12 @@ namespace Clavis::GUI {
             std::filesystem::rename(oldFullPath, newFullPath);
         else
             Git::Move(oldRelPath, newRelPath, isOverwriting);
+
+        // Workspaces point at paths, so anything that moves has to be followed or the workspace
+        // silently breaks. Renaming a folder drags the entries inside it along too.
+        if (passwordStoreManager->GetWorkspaceDB().RetargetElement(oldRelPath, newRelPath))
+            passwordStoreManager->GetWorkspaceDB().Save(_(GIT_WORKSPACE_RETARGETED_COMMIT_MESSAGE,
+                oldRelPath.generic_string(), newRelPath.generic_string()));
 
         passwordStoreManager->Refresh();
     }

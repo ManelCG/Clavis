@@ -41,11 +41,32 @@ namespace Clavis::GUI {
         static void TransferTwoFactorWorkflow(PasswordStoreManager* passwordStoreManager, const PasswordStoreElements::PasswordStoreElement& element);
         static void ImportTwoFactorMigrationWorkflow(PasswordStoreManager* passwordStoreManager, const std::string& initialUri = "");
 
+        static void NewWorkspaceWorkflow(PasswordStoreManager* passwordStoreManager);
+        static void EditWorkspaceWorkflow(PasswordStoreManager* passwordStoreManager, const PasswordStoreElements::PasswordStoreElement& element);
+        static void RenameWorkspaceWorkflow(PasswordStoreManager* passwordStoreManager, const PasswordStoreElements::PasswordStoreElement& element);
+        static void DeleteWorkspaceWorkflow(PasswordStoreManager* passwordStoreManager, const PasswordStoreElements::PasswordStoreElement& element);
+
+        static void AddToWorkspaceWorkflow(PasswordStoreManager* passwordStoreManager, const PasswordStoreElements::PasswordStoreElement& element);
+        static void RemoveFromWorkspaceWorkflow(PasswordStoreManager* passwordStoreManager, const PasswordStoreElements::PasswordStoreElement& element);
+        static void RenameInWorkspaceWorkflow(PasswordStoreManager* passwordStoreManager, const PasswordStoreElements::PasswordStoreElement& element);
+
+        // A workspace entry whose file is gone: the only thing left to offer is taking it out.
+        static void MissingWorkspaceElementWorkflow(PasswordStoreManager* passwordStoreManager, const PasswordStoreElements::PasswordStoreElement& element);
+
         // Generates the next HOTP code: re-reads the file, advances the counter, re-encrypts
         // and commits. Never a side effect of merely selecting or copying an entry.
         static void AdvanceHotpCounterWorkflow(PasswordStoreManager* passwordStoreManager, const std::filesystem::path& fullpath);
 
     private:
+        // Writes the workspaces database back to disk under a message describing what changed,
+        // reporting rather than swallowing a failure.
+        static void SaveWorkspaces(PasswordStoreManager* passwordStoreManager, const std::string& commitMessage);
+
+        // Identifies the workspace an element stands for, from the virtual path it carries.
+        static bool TryResolveWorkspace(PasswordStoreManager* passwordStoreManager,
+                                        const PasswordStoreElements::PasswordStoreElement& element,
+                                        std::filesystem::path& outDir, std::string& outName);
+
         static void NewPasswordWorkflow_IMPL(PasswordStoreManager* passwordStoreManager, const std::string& name = "", const std::filesystem::path& elementPath = {});
 
         static void NewTwoFactorWorkflow_IMPL(PasswordStoreManager* passwordStoreManager,

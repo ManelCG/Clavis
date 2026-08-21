@@ -1871,6 +1871,245 @@ _(ERROR_SAVING_TWO_FACTOR,
 
 #pragma endregion
 
+#pragma region Workspaces
+
+_(PASSWORDSTORE_MANAGER_NEW_WORKSPACE_TOOLTIP,
+    __(ENG, "New Workspace"),
+    __(ESP, "Nuevo Espacio de Trabajo"),
+    __(VAL, "Nou Espai de Treball")
+)
+
+_(WORKSPACE_PALETTE_NEW_TITLE,
+    __(ENG, "New Workspace"),
+    __(ESP, "Nuevo Espacio de Trabajo"),
+    __(VAL, "Nou Espai de Treball")
+)
+
+_(WORKSPACE_PALETTE_EDIT_TITLE,
+    __(ENG, "Edit Workspace"),
+    __(ESP, "Editar Espacio de Trabajo"),
+    __(VAL, "Editar Espai de Treball")
+)
+
+_(WORKSPACE_PALETTE_NAME_LABEL,
+    __(ENG, "Workspace name:"),
+    __(ESP, "Nombre del espacio de trabajo:"),
+    __(VAL, "Nom de l'espai de treball:")
+)
+
+_(WORKSPACE_PALETTE_EMPTY_HINT,
+    __(ENG, "This Workspace is empty. Right-click any password and choose \"Add to Workspace\" to fill it."),
+    __(ESP, "Este espacio de trabajo está vacío. Haz clic derecho en cualquier contraseña y elige \"Añadir al Espacio de Trabajo\" para llenarlo."),
+    __(VAL, "Aquest espai de treball està buit. Fes clic dret en qualsevol contrasenya i tria \"Afegir a l'Espai de Treball\" per a omplir-lo.")
+)
+
+_(WORKSPACE_PICKER_TITLE,
+    __(ENG, "Add to Workspace"),
+    __(ESP, "Añadir al Espacio de Trabajo"),
+    __(VAL, "Afegir a l'Espai de Treball")
+)
+
+_(WORKSPACE_PICKER_LABEL,
+    __(ENG, "Add {0} to which Workspace?"),
+    __(ESP, "¿A qué espacio de trabajo añadir {0}?"),
+    __(VAL, "A quin espai de treball afegir {0}?")
+)
+
+_(WORKSPACE_PICKER_EMPTY,
+    __(ENG, "There are no Workspaces yet. Create one first with the Workspace button."),
+    __(ESP, "Todavía no hay espacios de trabajo. Crea uno primero con el botón de Espacio de Trabajo."),
+    __(VAL, "Encara no hi ha espais de treball. Crea'n un primer amb el botó d'Espai de Treball.")
+)
+
+_(WORKSPACE_ADD_NAME_PROMPT_TITLE,
+    __(ENG, "Name in Workspace"),
+    __(ESP, "Nombre en el Espacio de Trabajo"),
+    __(VAL, "Nom en l'Espai de Treball")
+)
+
+_(WORKSPACE_ADD_NAME_PROMPT_LABEL,
+    __(ENG, "Name for {0} inside this Workspace:"),
+    __(ESP, "Nombre de {0} dentro de este espacio de trabajo:"),
+    __(VAL, "Nom de {0} dins d'aquest espai de treball:")
+)
+
+_(WORKSPACE_CONTEXT_MENU_ADD_TO_WORKSPACE,
+    __(ENG, "Add to Workspace"),
+    __(ESP, "Añadir al Espacio de Trabajo"),
+    __(VAL, "Afegir a l'Espai de Treball")
+)
+
+_(WORKSPACE_CONTEXT_MENU_EDIT_WORKSPACE,
+    __(ENG, "Edit Workspace"),
+    __(ESP, "Editar Espacio de Trabajo"),
+    __(VAL, "Editar Espai de Treball")
+)
+
+_(WORKSPACE_CONTEXT_MENU_RENAME_IN_WORKSPACE,
+    __(ENG, "Rename in Workspace"),
+    __(ESP, "Renombrar en el Espacio de Trabajo"),
+    __(VAL, "Renombrar en l'Espai de Treball")
+)
+
+_(WORKSPACE_CONTEXT_MENU_REMOVE_FROM_WORKSPACE,
+    __(ENG, "Remove from Workspace"),
+    __(ESP, "Quitar del Espacio de Trabajo"),
+    __(VAL, "Llevar de l'Espai de Treball")
+)
+
+_(WORKSPACE_RENAME_TITLE,
+    __(ENG, "Rename Workspace"),
+    __(ESP, "Renombrar Espacio de Trabajo"),
+    __(VAL, "Renombrar Espai de Treball")
+)
+
+_(WORKSPACE_RENAME_LABEL,
+    __(ENG, "Rename {0} to (a path moves it):"),
+    __(ESP, "Renombrar {0} a (una ruta lo mueve):"),
+    __(VAL, "Renombrar {0} a (una ruta el mou):")
+)
+
+_(WORKSPACE_RENAME_ENTRY_TITLE,
+    __(ENG, "Rename in Workspace"),
+    __(ESP, "Renombrar en el Espacio de Trabajo"),
+    __(VAL, "Renombrar en l'Espai de Treball")
+)
+
+_(WORKSPACE_RENAME_ENTRY_LABEL,
+    __(ENG, "Name of {0} inside this Workspace:"),
+    __(ESP, "Nombre de {0} dentro de este espacio de trabajo:"),
+    __(VAL, "Nom de {0} dins d'aquest espai de treball:")
+)
+
+_(WORKSPACE_DELETE_PROMPT,
+    __(ENG, "Delete Workspace {0}?"),
+    __(ESP, "¿Borrar el espacio de trabajo {0}?"),
+    __(VAL, "Esborrar l'espai de treball {0}?")
+)
+
+_(WORKSPACE_DELETE_PROMPT_LABEL,
+    __(ENG, "The Workspace will be removed. None of the passwords it points to are deleted."),
+    __(ESP, "El espacio de trabajo será eliminado. Ninguna de las contraseñas a las que apunta se borrará."),
+    __(VAL, "L'espai de treball serà eliminat. Cap de les contrasenyes a les quals apunta s'esborrarà.")
+)
+
+_(WORKSPACE_ELEMENT_MISSING_TOOLTIP,
+    __(ENG, "Element missing from disk"),
+    __(ESP, "El elemento no existe en el disco"),
+    __(VAL, "L'element no existeix al disc")
+)
+
+_(WORKSPACE_ELEMENT_MISSING_PROMPT,
+    __(ENG, "The element {0} is missing from disk. Delete from Workspace?"),
+    __(ESP, "El elemento {0} no existe en el disco. ¿Borrarlo del espacio de trabajo?"),
+    __(VAL, "L'element {0} no existeix al disc. Esborrar-lo de l'espai de treball?")
+)
+
+_(WORKSPACE_DELETE_WARNING,
+    __(ENG, "{0} exists in Workspaces: {1}."),
+    __(ESP, "{0} existe en los espacios de trabajo: {1}."),
+    __(VAL, "{0} existeix en els espais de treball: {1}.")
+)
+
+_(ERROR_WORKSPACE_ALREADY_EXISTS,
+    __(ENG, "A Workspace named '{0}' already exists here"),
+    __(ESP, "Ya existe un espacio de trabajo llamado '{0}' aquí"),
+    __(VAL, "Ja existeix un espai de treball anomenat '{0}' ací")
+)
+
+_(ERROR_WORKSPACE_TARGET_ALREADY_PRESENT,
+    __(ENG, "{0} is already in the Workspace '{1}'"),
+    __(ESP, "{0} ya está en el espacio de trabajo '{1}'"),
+    __(VAL, "{0} ja està en l'espai de treball '{1}'")
+)
+
+_(ERROR_WORKSPACE_INVALID_PATH,
+    __(ENG, "'{0}' is not a valid location inside the Password Store"),
+    __(ESP, "'{0}' no es una ubicación válida dentro del Repositorio de Contraseñas"),
+    __(VAL, "'{0}' no és una ubicació vàlida dins del Repositori de Contrasenyes")
+)
+
+_(ERROR_WORKSPACE_NOT_FOUND,
+    __(ENG, "The Workspace '{0}' no longer exists"),
+    __(ESP, "El espacio de trabajo '{0}' ya no existe"),
+    __(VAL, "L'espai de treball '{0}' ja no existeix")
+)
+
+_(ERROR_UNABLE_TO_SAVE_WORKSPACES,
+    __(ENG, "Unable to save the Workspaces file"),
+    __(ESP, "No se pudo guardar el archivo de espacios de trabajo"),
+    __(VAL, "No s'ha pogut guardar el fitxer d'espais de treball")
+)
+
+_(WORKSPACE_PATH_LABEL,
+    __(ENG, "{0} Workspace"),
+    __(ESP, "Espacio de Trabajo {0}"),
+    __(VAL, "Espai de Treball {0}")
+)
+
+_(GIT_WORKSPACE_CREATED_COMMIT_MESSAGE,
+    __(ENG, "Clavis: Created Workspace '{0}'"),
+    __(ESP, "Clavis: Creado el espacio de trabajo '{0}'"),
+    __(VAL, "Clavis: Creat l'espai de treball '{0}'")
+)
+
+_(GIT_WORKSPACE_UPDATED_COMMIT_MESSAGE,
+    __(ENG, "Clavis: Updated the contents of Workspace '{0}'"),
+    __(ESP, "Clavis: Actualizado el contenido del espacio de trabajo '{0}'"),
+    __(VAL, "Clavis: Actualitzat el contingut de l'espai de treball '{0}'")
+)
+
+_(GIT_WORKSPACE_RENAMED_COMMIT_MESSAGE,
+    __(ENG, "Clavis: Renamed Workspace '{0}' to '{1}'"),
+    __(ESP, "Clavis: Renombrado el espacio de trabajo '{0}' a '{1}'"),
+    __(VAL, "Clavis: Renombrat l'espai de treball '{0}' a '{1}'")
+)
+
+_(GIT_WORKSPACE_MOVED_COMMIT_MESSAGE,
+    __(ENG, "Clavis: Moved Workspace '{0}' to '{1}'"),
+    __(ESP, "Clavis: Movido el espacio de trabajo '{0}' a '{1}'"),
+    __(VAL, "Clavis: Mogut l'espai de treball '{0}' a '{1}'")
+)
+
+_(GIT_WORKSPACE_DELETED_COMMIT_MESSAGE,
+    __(ENG, "Clavis: Deleted Workspace '{0}'"),
+    __(ESP, "Clavis: Borrado el espacio de trabajo '{0}'"),
+    __(VAL, "Clavis: Esborrat l'espai de treball '{0}'")
+)
+
+_(GIT_WORKSPACE_ENTRY_ADDED_COMMIT_MESSAGE,
+    __(ENG, "Clavis: Added '{0}' as '{1}' to Workspace '{2}'"),
+    __(ESP, "Clavis: Añadido '{0}' como '{1}' al espacio de trabajo '{2}'"),
+    __(VAL, "Clavis: Afegit '{0}' com a '{1}' a l'espai de treball '{2}'")
+)
+
+_(GIT_WORKSPACE_ENTRY_REMOVED_COMMIT_MESSAGE,
+    __(ENG, "Clavis: Removed '{0}' from Workspace '{1}'"),
+    __(ESP, "Clavis: Quitado '{0}' del espacio de trabajo '{1}'"),
+    __(VAL, "Clavis: Llevat '{0}' de l'espai de treball '{1}'")
+)
+
+_(GIT_WORKSPACE_ENTRY_RENAMED_COMMIT_MESSAGE,
+    __(ENG, "Clavis: Renamed '{0}' to '{1}' in Workspace '{2}'"),
+    __(ESP, "Clavis: Renombrado '{0}' a '{1}' en el espacio de trabajo '{2}'"),
+    __(VAL, "Clavis: Renombrat '{0}' a '{1}' en l'espai de treball '{2}'")
+)
+
+_(GIT_WORKSPACE_RETARGETED_COMMIT_MESSAGE,
+    __(ENG, "Clavis: Updated Workspaces after moving '{0}' to '{1}'"),
+    __(ESP, "Clavis: Actualizados los espacios de trabajo tras mover '{0}' a '{1}'"),
+    __(VAL, "Clavis: Actualitzats els espais de treball després de moure '{0}' a '{1}'")
+)
+
+_(GIT_WORKSPACE_PRUNED_COMMIT_MESSAGE,
+    __(ENG, "Clavis: Removed the deleted '{0}' from Workspaces: {1}"),
+    __(ESP, "Clavis: Quitado '{0}', ya borrado, de los espacios de trabajo: {1}"),
+    __(VAL, "Clavis: Llevat '{0}', ja esborrat, dels espais de treball: {1}")
+)
+
+#pragma endregion
+
+
 #pragma region Macros and Cleanup
 #ifdef _
 #undef _
