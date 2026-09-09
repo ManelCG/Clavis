@@ -10,6 +10,10 @@ using json = nlohmann::json;
 #ifdef __WINDOWS__
 #include <windows.h>
 #else
+#ifdef __MACOS__
+// Ask <string.h> for the C11 Annex K bounds-checked interfaces (memset_s).
+#define __STDC_WANT_LIB_EXT1__ 1
+#endif
 #include <string.h>
 #endif
 
@@ -18,6 +22,10 @@ namespace Clavis::System {
     inline void SecureZero(void* ptr, std::size_t size) {
 #ifdef __WINDOWS__
         SecureZeroMemory(ptr, size);
+#elif defined(__MACOS__)
+        // macOS has no explicit_bzero(); memset_s() is the C11 Annex K equivalent
+        // that the compiler is not allowed to optimise away.
+        memset_s(ptr, size, 0, size);
 #else
         explicit_bzero(ptr, size);
 #endif
